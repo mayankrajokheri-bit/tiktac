@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Level 1 — The Locked Gate | Reality Quest AI</title>
+  <meta name="description" content="Level 1: The Locked Gate. Find the 3 hidden clues around GMN College entrance to decipher the occult lock combination: 13 — 7 — 3.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/survivors.css">
+  <script src="js/survivors.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --blood-red: #c0392b;
+      --neon-red: #ff2222;
+      --gold-brass: #f1c40f;
+      --cyan-spectral: #00cec9;
+      --bg-dark: #05080e;
+      --font-horror: 'Creepster', cursive;
+      --font-ui: 'Oswald', sans-serif;
+      --font-title: 'Bebas Neue', sans-serif;
+      --font-body: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: var(--font-body);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+      touch-action: none;
+    }
+
+    /* GMN College Gate Atmosphere */
+    #gate-viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('assets/level1_gate.png');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      transition: filter 0.5s ease;
+    }
+
+    /* Ambient Mist & Vignette */
+    #mist-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, transparent 35%, rgba(3, 6, 10, 0.85) 90%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Screen Shake & Flicker FX */
+    .screen-shake {
+      animation: violentShake 0.4s ease-in-out infinite;
+    }
+
+    @keyframes violentShake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-8px, 6px) rotate(-1deg); }
+      40% { transform: translate(8px, -6px) rotate(1deg); }
+      60% { transform: translate(-6px, -4px) rotate(-1deg); }
+      80% { transform: translate(6px, 6px) rotate(1deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    .lights-flicker-red {
+      animation: flickerRed 0.1s infinite alternate;
+    }
+
+    @keyframes flickerRed {
+      0% { filter: brightness(1) contrast(1.2); background-color: transparent; }
+      50% { filter: brightness(0.2) contrast(2); background-color: rgba(255, 0, 0, 0.4); }
+      100% { filter: brightness(1.5) contrast(1.5); background-color: rgba(180, 0, 0, 0.2); }
+    }
+
+    /* Red Eyes Glowing in Corridor */
+    #corridor-red-eyes {
+      position: absolute;
+      left: 70.5%;
+      top: 55.5%;
+      width: 32px;
+      height: 12px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 5;
+      pointer-events: none;
+      animation: eyesGlow 2.5s infinite ease-in-out;
+    }
+
+    .red-eye {
+      width: 8px;
+      height: 6px;
+      background: #ff0000;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #ff0000, 0 0 24px #ff3838;
+    }
+
+    @keyframes eyesGlow {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.9); }
+      75% { opacity: 1; transform: scale(1.1); box-shadow: 0 0 18px #ff0000; }
+    }
+
+    /* ==========================================================================
+       TOP HUD & OBJECTIVE TRACKER
+       ========================================================================== */
+    #hud-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: linear-gradient(180deg, rgba(3, 5, 8, 0.95) 0%, rgba(3, 5, 8, 0.6) 80%, transparent 100%);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .level-badge-l1 {
+      background: linear-gradient(135deg, #c0392b, #2c3e50);
+      padding: 5px 14px;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 4px;
+      letter-spacing: 2px;
+      border: 1px solid rgba(192, 57, 43, 0.5);
+    }
+
+    .level-title-l1 {
+      font-family: var(--font-horror);
+      font-size: 2rem;
+      color: #e74c3c;
+      text-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+      letter-spacing: 2px;
+    }
+
+    .hud-controls-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .help-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #f1c40f;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .help-btn:hover { background: #f1c40f; color: #000; }
+
+    /* MISSION OBJECTIVE PANEL (TOP-LEFT) */
+    #mission-panel {
+      position: fixed;
+      top: 70px;
+      left: 20px;
+      width: 320px;
+      background: rgba(8, 12, 18, 0.92);
+      border: 1.5px solid rgba(192, 57, 43, 0.6);
+      border-radius: 10px;
+      padding: 14px 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(192, 57, 43, 0.3);
+      z-index: 100;
+      pointer-events: auto;
+    }
+
+    .mission-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+    }
+
+    .mission-header-title {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ff6b6b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mission-badge {
+      font-family: var(--font-title);
+      font-size: 12px;
+      background: #c0392b;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+
+    .mission-main-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .mission-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #cbd5e1;
+      padding: 5px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      transition: all 0.2s;
+    }
+
+    .checklist-item.done {
+      color: #2ed573;
+      background: rgba(46, 213, 115, 0.12);
+      border-left: 3px solid #2ed573;
+    }
+
+    .clue-code-tag {
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+      background: #1e272e;
+      color: #f1c40f;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+
+    /* ==========================================================================
+       INTERACTIVE MAP CLUE STATIONS & PINS
+       ========================================================================== */
+    .gate-pin-station {
+      position: absolute;
+      z-index: 20;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s, filter 0.2s;
+    }
+
+    .gate-pin-station:hover {
+      transform: scale(1.12);
+      filter: drop-shadow(0 0 14px #ff4757);
+    }
+
+    .gate-pin-orb {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(15, 5, 5, 0.88);
+      border: 2px solid #ff4757;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 15px rgba(255, 71, 87, 0.7);
+      animation: pinFloat 1.8s infinite alternate ease-in-out;
+      position: relative;
+    }
+
+    .gate-pin-orb::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(255, 71, 87, 0.6);
+      animation: pinSpin 6s linear infinite;
+    }
+
+    @keyframes pinSpin { 100% { transform: rotate(360deg); } }
+
+    @keyframes pinFloat {
+      0% { transform: translateY(0) scale(1); box-shadow: 0 0 12px #ff4757; }
+      100% { transform: translateY(-6px) scale(1.1); box-shadow: 0 0 25px #ff2222, 0 0 45px rgba(255, 34, 34, 0.5); }
+    }
+
+    .gate-pin-label {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #fff;
+      background: rgba(10, 5, 10, 0.9);
+      border: 1px solid rgba(255, 71, 87, 0.6);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Positions on the College Gate photo */
+    #station-notice { left: 18%; top: 46%; }
+    #station-clock { left: 41%; top: 38%; }
+    #station-shadow { left: 71%; top: 54%; }
+    #station-padlock { left: 48%; top: 58%; }
+
+    #station-padlock .gate-pin-orb {
+      border-color: #f1c40f;
+      box-shadow: 0 0 20px #f1c40f;
+      background: rgba(30, 20, 5, 0.9);
+    }
+    #station-padlock .gate-pin-orb::after { border-color: #f39c12; }
+    #station-padlock .gate-pin-label { border-color: #f1c40f; color: #f1c40f; }
+
+    /* ==========================================================================
+       ENTITIES LAYER (PLAYER AARAV)
+       ========================================================================== */
+    #entities-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .gate-player {
+      position: absolute;
+      width: 48px;
+      height: 72px;
+      transform: translate(-50%, -100%);
+      will-change: left, top;
+    }
+
+    .player-tag {
+      position: absolute;
+      top: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      color: #74b9ff;
+      white-space: nowrap;
+      text-shadow: 0 0 6px #000;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(52, 152, 219, 0.5);
+    }
+
+    .interact-bubble {
+      position: absolute;
+      top: -55px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #c0392b, #8e44ad);
+      color: #fff;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #ff7675;
+      box-shadow: 0 0 15px rgba(255, 118, 117, 0.7);
+      animation: bubbleBounce 0.7s infinite alternate;
+      white-space: nowrap;
+      display: none;
+    }
+
+    @keyframes bubbleBounce {
+      from { transform: translateX(-50%) translateY(0); }
+      to { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    .char-head {
+      width: 18px;
+      height: 18px;
+      background: #f1c27d;
+      border-radius: 50%;
+      margin: 0 auto 2px;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+    }
+
+    .char-torso {
+      width: 24px;
+      height: 30px;
+      background: #2980b9;
+      border-radius: 5px;
+      margin: 0 auto;
+      border: 1px solid rgba(0, 0, 0, 0.3);
+    }
+
+    .char-legs {
+      display: flex;
+      justify-content: space-around;
+      width: 20px;
+      margin: 0 auto;
+    }
+
+    .char-leg {
+      width: 6px;
+      height: 18px;
+      background: #1e272e;
+      border-radius: 2px;
+    }
+
+    /* ==========================================================================
+       BOTTOM ACTION DOCK & PROMPTS
+       ========================================================================== */
+    #bottom-action-dock {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 14px;
+      z-index: 100;
+      pointer-events: auto;
+    }
+
+    .action-btn-main {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 2px solid #ff7675;
+      padding: 14px 34px;
+      border-radius: 30px;
+      font-family: var(--font-title);
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(192, 57, 43, 0.8);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-btn-main:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
+    .action-btn-main:active { transform: scale(0.95); }
+
+    .action-btn-gold {
+      background: linear-gradient(135deg, #f1c40f, #d35400);
+      border-color: #ffeaa7;
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 0 35px rgba(241, 196, 15, 0.8);
+    }
+
+    /* ==========================================================================
+       POPUP MODALS (NOTICE, CLOCK, SHADOW LOCKER, GATE PADLOCK)
+       ========================================================================== */
+    .overlay-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 4, 8, 0.94);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 250;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    }
+
+    .overlay-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #0d1117;
+      border: 2px solid #c0392b;
+      border-radius: 14px;
+      padding: 30px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(192, 57, 43, 0.6);
+      position: relative;
+    }
+
+    .modal-card.gold-border {
+      border-color: #f1c40f;
+      box-shadow: 0 0 50px rgba(241, 196, 15, 0.5);
+    }
+
+    .modal-icon-header {
+      font-size: 46px;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-family: var(--font-horror);
+      font-size: 2.3rem;
+      letter-spacing: 2px;
+      color: #ff4757;
+      margin-bottom: 10px;
+    }
+
+    .modal-body-text {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .clue-reveal-box {
+      background: rgba(192, 57, 43, 0.2);
+      border: 1.5px solid #ff4757;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      color: #ff9f43;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .clue-reveal-box strong {
+      font-family: monospace;
+      font-size: 1.4rem;
+      color: #fff;
+      background: #c0392b;
+      padding: 2px 10px;
+      border-radius: 4px;
+      box-shadow: 0 0 10px #ff4757;
+    }
+
+    /* GATE PADLOCK TUMBLER INPUTS */
+    .padlock-tumblers {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .tumbler-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tumbler-btn {
+      width: 44px;
+      height: 32px;
+      background: #2c3e50;
+      color: #f1c40f;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .tumbler-btn:hover { background: #34495e; }
+    .tumbler-btn:active { transform: scale(0.92); }
+
+    .tumbler-display {
+      width: 68px;
+      height: 68px;
+      background: #0a0d14;
+      border: 2px solid #f1c40f;
+      border-radius: 8px;
+      color: #f1c40f;
+      font-family: monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 15px rgba(241, 196, 15, 0.4);
+    }
+
+    .tumbler-separator {
+      font-size: 2.2rem;
+      color: #e74c3c;
+      font-weight: 700;
+    }
+
+    /* JUMPSCARE OVERLAY SCREEN (WRONG COMBINATION) */
+    #jumpscare-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 400;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      mix-blend-mode: hard-light;
+    }
+
+    .jumpscare-monster {
+      font-size: 150px;
+      animation: monsterRoar 0.1s infinite alternate;
+      filter: drop-shadow(0 0 50px #ff0000);
+    }
+
+    @keyframes monsterRoar {
+      0% { transform: scale(1) rotate(-5deg); filter: drop-shadow(0 0 40px #ff0000); }
+      100% { transform: scale(1.25) rotate(5deg); filter: drop-shadow(0 0 90px #ff2222) brightness(2); }
+    }
+
+    /* CINEMATIC CUTSCENE (GATE OPENS) */
+    #cinematic-blackout {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .cinematic-line {
+      font-family: var(--font-horror);
+      font-size: 3rem;
+      color: #e056fd;
+      letter-spacing: 3px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 1.2s ease;
+      margin-bottom: 24px;
+      text-shadow: 0 0 25px rgba(224, 86, 253, 0.7);
+    }
+
+    .cinematic-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    #mission-briefing-card {
+      background: rgba(14, 18, 26, 0.95);
+      border: 2px solid #c0392b;
+      border-radius: 14px;
+      padding: 34px;
+      max-width: 580px;
+      width: 100%;
+      box-shadow: 0 0 60px rgba(192, 57, 43, 0.8);
+      display: none;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    /* Start Banner */
+    #start-l1-banner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(5, 8, 14, 0.97);
+      border: 2px solid #c0392b;
+      box-shadow: 0 0 70px rgba(192, 57, 43, 0.8);
+      padding: 34px 50px;
+      border-radius: 14px;
+      text-align: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    #start-l1-banner.show { opacity: 1; }
+
+    /* Toast Notification */
+    #toast-msg {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(10, 14, 22, 0.96);
+      border: 1.5px solid #c0392b;
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      box-shadow: 0 0 30px rgba(192, 57, 43, 0.7);
+      z-index: 160;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    #toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Controls Legend */
+    #controls-hint {
+      position: fixed;
+      bottom: 15px;
+      left: 20px;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #64748b;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 6px 14px;
+      border-radius: 6px;
+      z-index: 90;
+      pointer-events: none;
+    }
+
+    /* Mobile Controls Cluster */
+    #mobile-controls {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      display: none;
+      z-index: 120;
+    }
+
+    @media (max-width: 768px) {
+      #mobile-controls { display: flex; gap: 10px; }
+      #mission-panel { width: 280px; top: 65px; left: 10px; padding: 10px 12px; }
+      .modal-card { padding: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="gate-viewport">
+    <div id="mist-overlay"></div>
+
+    <!-- Glowing Red Eyes in dark right corridor -->
+    <div id="corridor-red-eyes">
+      <div class="red-eye"></div>
+      <div class="red-eye"></div>
+    </div>
+
+    <!-- 1. Notice Board Station -->
+    <div class="gate-pin-station" id="station-notice" onclick="inspectNotice()">
+      <div class="gate-pin-orb">📋</div>
+      <div class="gate-pin-label">1. NOTICE BOARD</div>
+    </div>
+
+    <!-- 2. Stopped Clock Station -->
+    <div class="gate-pin-station" id="station-clock" onclick="inspectClock()">
+      <div class="gate-pin-orb">🕰️</div>
+      <div class="gate-pin-label">2. BLOOD-STAINED CLOCK</div>
+    </div>
+
+    <!-- 3. Shadow Corridor Station -->
+    <div class="gate-pin-station" id="station-shadow" onclick="inspectShadow()">
+      <div class="gate-pin-orb">👁️</div>
+      <div class="gate-pin-label">3. THE SHADOW / LOCKER</div>
+    </div>
+
+    <!-- 4. Main Entrance Gate Padlock -->
+    <div class="gate-pin-station" id="station-padlock" onclick="openPadlockModal()">
+      <div class="gate-pin-orb" style="border-color:#f1c40f; box-shadow:0 0 20px #f1c40f;">🔐</div>
+      <div class="gate-pin-label" style="border-color:#f1c40f; color:#f1c40f;">GATE PADLOCK [PRESS E]</div>
+    </div>
+
+    <!-- Entities Layer -->
+    <div id="entities-layer">
+      <!-- Player Sprite -->
+      <div class="gate-player" id="player-sprite">
+        <div class="interact-bubble" id="player-bubble">[E] INTERACT</div>
+        <div class="player-tag" id="player-tag">YOU (AARAV)</div>
+        <div class="char-head survivor-avatar avatar-aarav" id="gate-player-avatar" style="width:24px; height:24px; margin:0 auto 2px; box-shadow:none;"></div>
+        <div class="char-torso"></div>
+        <div class="char-legs">
+          <div class="char-leg"></div>
+          <div class="char-leg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD Top -->
+  <div id="hud-top">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <a href="index.html" title="Return to The Apocalypse Menu">
+        <img src="assets/game_logo.png" alt="The Apocalypse Logo" style="height:38px; width:38px; object-fit:cover; border-radius:8px; border:1.5px solid #f39c12; box-shadow:0 0 14px rgba(243,156,18,0.7); cursor:pointer; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+      </a>
+      <div class="level-badge-l1">LEVEL 1</div>
+      <div class="level-title-l1">THE LOCKED GATE</div>
+      <div id="hud-survivor-badge" style="background:rgba(243,156,18,0.15); border:1px solid #f39c12; padding:3px 12px; border-radius:20px; font-family:var(--font-ui); font-size:11px; font-weight:700; color:#f1c40f; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+        <div id="gate-hud-avatar" class="survivor-avatar avatar-aarav" style="width:24px; height:24px; box-shadow:none;"></div>
+        <span>👤 OPERATIVE: <strong id="hud-survivor-name" style="color:#fff;">AARAV</strong></span>
+        <span>🎓 <strong id="hud-survivor-major" style="color:#00ff9d;">ROBOTICS ENG</strong></span>
+        <button onclick="openSquadRosterModal()" style="background:#e74c3c; border:none; color:#fff; border-radius:10px; padding:2px 8px; font-size:10px; cursor:pointer; font-weight:bold; letter-spacing:0.5px;">SQUAD (10)</button>
+      </div>
+    </div>
+
+    <div class="hud-controls-group">
+      <button class="help-btn" onclick="openHelpModal()">❓ HOW TO PLAY</button>
+    </div>
+  </div>
+
+  <!-- MISSION OBJECTIVES PANEL (TOP LEFT) -->
+  <div id="mission-panel">
+    <div class="mission-header">
+      <div class="mission-header-title"><span>🔍</span> GATE RECONNAISSANCE</div>
+      <div class="mission-badge" id="clue-progress-badge">0 / 3 CLUES</div>
+    </div>
+    <div class="mission-main-text" id="mission-goal-title">
+      Investigate 3 clues to decipher the Gate combination.
+    </div>
+    <div class="mission-checklist">
+      <div class="checklist-item" id="chk-notice">
+        <span>📋 1. Notice Board (Minute Code)</span>
+        <span class="clue-code-tag" id="code-tag-1">?</span>
+      </div>
+      <div class="checklist-item" id="chk-clock">
+        <span>🕰️ 2. Stopped Clock (Hour Code)</span>
+        <span class="clue-code-tag" id="code-tag-2">?</span>
+      </div>
+      <div class="checklist-item" id="chk-shadow">
+        <span>👻 3. Shadow Locker (Toll Code)</span>
+        <span class="clue-code-tag" id="code-tag-3">?</span>
+      </div>
+    </div>
+    <div style="margin-top:10px; font-size:11px; color:#aaa; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px;">
+      Gate Combination Formula: <strong>[Notice] — [Clock] — [Shadow]</strong>
+    </div>
+  </div>
+
+  <!-- Bottom Quick Actions -->
+  <div id="bottom-action-dock">
+    <button class="action-btn-main action-btn-gold" onclick="openPadlockModal()">
+      🔐 OPEN GATE PADLOCK [SPACE]
+    </button>
+  </div>
+
+  <!-- Start Banner -->
+  <div id="start-l1-banner">
+    <h1 style="font-family:var(--font-horror); font-size:3rem; color:#ff4757; margin-bottom:8px;">“3 CLUES. 1 GATE.”</h1>
+    <h3 style="font-family:var(--font-ui); font-size:1.4rem; color:#bbb; letter-spacing:2px; margin-bottom:12px;">GMN COLLEGE AMBALA CANTT</h3>
+    <p style="font-size:1.05rem; color:#f1c40f; font-weight:600;">Investigate the 3 stations or use [WASD] to explore the dark courtyard!</p>
+  </div>
+
+  <!-- MODAL 1: Notice Board -->
+  <div class="overlay-modal" id="modal-notice">
+    <div class="modal-card">
+      <div class="modal-icon-header">📋</div>
+      <h2 class="modal-title">COLLEGE NOTICE BOARD</h2>
+      <p class="modal-body-text">
+        Torn announcements flutter in the cold midnight wind. Amidst blood spatters, an urgent red emergency evacuation order stands out:<br><br>
+        <em>“ATTENTION ALL FACULTY & STUDENTS: Evacuate campus immediately! The occult breach in the auditorium has compromised the boundary. <strong>The last bell rang at 7:13 PM.</strong> Do not linger past the bell!”</em>
+      </p>
+      <div class="clue-reveal-box">
+        💡 CODE PART 1 (Bell Minute): <strong>13</strong>
+      </div>
+      <button class="action-btn-main" onclick="closeModal('modal-notice')" style="margin: 0 auto; padding: 10px 30px; font-size: 1.2rem;">
+        MEMORIZE CODE (13)
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Stopped Clock -->
+  <div class="overlay-modal" id="modal-clock">
+    <div class="modal-card">
+      <div class="modal-icon-header">🕰️</div>
+      <h2 class="modal-title">BLOOD-STAINED WALL CLOCK</h2>
+      <p class="modal-body-text">
+        An antique brass clock hangs crookedly from the stone pillar. Its pendulum is bent, glass cracked, and needles permanently frozen at <strong>7:13</strong>.<br><br>
+        Carved into the brass bezel behind the dried blood is an inscription:<br>
+        <em>“What stopped here must be remembered. The frozen hour seals the darkness.”</em>
+      </p>
+      <div class="clue-reveal-box">
+        💡 CODE PART 2 (Stopped Hour): <strong>7</strong>
+      </div>
+      <button class="action-btn-main" onclick="closeModal('modal-clock')" style="margin: 0 auto; padding: 10px 30px; font-size: 1.2rem;">
+        MEMORIZE CODE (7)
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: The Shadow / Locker -->
+  <div class="overlay-modal" id="modal-shadow">
+    <div class="modal-card">
+      <div class="modal-icon-header">👁️👻</div>
+      <h2 class="modal-title">THE SHADOW IN THE CORRIDOR</h2>
+      <p class="modal-body-text">
+        As you step towards the dark archway, the glowing red eyes vanish into the shadows with a chilling whisper:<br>
+        <em>“Only those who remember the beginning may enter...”</em><br><br>
+        Behind the dark door frame stands an old rusted classroom locker scratched with occult tally marks: <strong>|||</strong><br>
+        <em>“Three death knells tolled before the gates were bound.”</em>
+      </p>
+      <div class="clue-reveal-box">
+        💡 CODE PART 3 (Tolls of Shadow): <strong>3</strong>
+      </div>
+      <button class="action-btn-main" onclick="closeModal('modal-shadow')" style="margin: 0 auto; padding: 10px 30px; font-size: 1.2rem;">
+        MEMORIZE CODE (3)
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 4: Final Gate Padlock -->
+  <div class="overlay-modal" id="modal-padlock">
+    <div class="modal-card gold-border">
+      <div class="modal-icon-header">🔐</div>
+      <h2 class="modal-title" style="color:#f1c40f;">OCCULT GATE PADLOCK</h2>
+      <p class="modal-body-text" style="font-size:0.95rem; margin-bottom:16px;">
+        Rotate the 3 tumblers to enter the 3-digit combination:
+      </p>
+
+      <!-- 3 Tumblers -->
+      <div class="padlock-tumblers">
+        <!-- Tumbler 1 -->
+        <div class="tumbler-column">
+          <span style="font-size:11px; color:#ff6b6b; margin-bottom:4px; font-weight:700;">CLUE 1 (NOTICE)</span>
+          <button class="tumbler-btn" onclick="adjustTumbler(1, 1)">▲</button>
+          <div class="tumbler-display" id="tumbler-val-1">00</div>
+          <button class="tumbler-btn" onclick="adjustTumbler(1, -1)">▼</button>
+          <span style="font-size:11px; color:#f1c40f; margin-top:4px;">MINUTE (0-24)</span>
+        </div>
+
+        <div class="tumbler-separator">—</div>
+
+        <!-- Tumbler 2 -->
+        <div class="tumbler-column">
+          <span style="font-size:11px; color:#ff6b6b; margin-bottom:4px; font-weight:700;">CLUE 2 (CLOCK)</span>
+          <button class="tumbler-btn" onclick="adjustTumbler(2, 1)">▲</button>
+          <div class="tumbler-display" id="tumbler-val-2">0</div>
+          <button class="tumbler-btn" onclick="adjustTumbler(2, -1)">▼</button>
+          <span style="font-size:11px; color:#f1c40f; margin-top:4px;">HOUR (0-12)</span>
+        </div>
+
+        <div class="tumbler-separator">—</div>
+
+        <!-- Tumbler 3 -->
+        <div class="tumbler-column">
+          <span style="font-size:11px; color:#ff6b6b; margin-bottom:4px; font-weight:700;">CLUE 3 (SHADOW)</span>
+          <button class="tumbler-btn" onclick="adjustTumbler(3, 1)">▲</button>
+          <div class="tumbler-display" id="tumbler-val-3">0</div>
+          <button class="tumbler-btn" onclick="adjustTumbler(3, -1)">▼</button>
+          <span style="font-size:11px; color:#f1c40f; margin-top:4px;">KNELLS (0-9)</span>
+        </div>
+      </div>
+
+      <div style="margin-top:14px; padding:10px; background:rgba(0,0,0,0.4); border-radius:6px; font-size:12px; color:#aaa;">
+        Discovered Clues: Notice = <strong id="hint-1" style="color:#2ed573;">?</strong> | Clock = <strong id="hint-2" style="color:#2ed573;">?</strong> | Shadow = <strong id="hint-3" style="color:#2ed573;">?</strong>
+      </div>
+
+      <div style="display:flex; gap:14px; justify-content:center; margin-top:20px; flex-wrap:wrap;">
+        <button class="action-btn-main action-btn-gold" onclick="verifyGateCombination()" style="padding:12px 34px; font-size:1.2rem;">
+          🔓 UNLOCK GATE
+        </button>
+        <button class="action-btn-main" onclick="closeModal('modal-padlock')" style="background:#2c3e50; border-color:#7f8c8d; padding:12px 24px; font-size:1.1rem;">
+          CLOSE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: Help / How to Play -->
+  <div class="overlay-modal" id="modal-help">
+    <div class="modal-card" style="max-width:540px;">
+      <div class="modal-icon-header">📜</div>
+      <h2 class="modal-title" style="color:#f1c40f;">HOW TO PLAY LEVEL 1</h2>
+      <div style="text-align:left; font-size:0.95rem; color:#cbd5e1; line-height:1.6; margin-bottom:20px;">
+        <p style="margin-bottom:8px;"><strong>1. 📋 Notice Board:</strong> Inspect the notice board to discover the evacuation bell minute (13).</p>
+        <p style="margin-bottom:8px;"><strong>2. 🕰️ Stopped Clock:</strong> Check the clock frozen at 7:13 to discover the hour (7).</p>
+        <p style="margin-bottom:8px;"><strong>3. 👻 Dark Corridor:</strong> Approach the corridor archway to hear the death knells (3).</p>
+        <p style="margin-bottom:8px;"><strong>4. 🔐 Gate Padlock:</strong> Enter code <strong>13 — 7 — 3</strong> into the tumblers to unlock the gate!</p>
+      </div>
+      <button class="action-btn-main" onclick="closeModal('modal-help')" style="margin: 0 auto; padding: 10px 30px; font-size: 1.1rem;">
+        BACK TO GATE
+      </button>
+    </div>
+  </div>
+
+  <!-- JUMPSCARE SCREEN FOR WRONG COMBINATION -->
+  <div id="jumpscare-overlay">
+    <div class="jumpscare-monster">👺💀</div>
+    <h1 style="font-family:var(--font-horror); font-size:4.5rem; color:#ff0000; text-shadow:0 0 40px #f00; margin-top:10px;">
+      WRONG COMBINATION!
+    </h1>
+    <p style="font-family:var(--font-ui); font-size:1.8rem; color:#fff; letter-spacing:4px;">
+      THE DARKNESS REJECTS YOU!
+    </p>
+  </div>
+
+  <!-- CINEMATIC CUTSCENE WHEN GATE OPENS -->
+  <div id="cinematic-blackout">
+    <div class="cinematic-line" id="cine-line-1">“Welcome to GMN College.”</div>
+    <div class="cinematic-line" id="cine-line-2">“You came looking for answers…”</div>
+    <div class="cinematic-line" id="cine-line-3">“…but the college remembers everyone who enters.”</div>
+
+    <!-- Official Mission Briefing -->
+    <div id="mission-briefing-card">
+      <div style="font-size:42px; margin-bottom:8px;">🩸🏛️⚔️</div>
+      <h2 style="font-family:var(--font-horror); font-size:2.8rem; color:#e74c3c; margin-bottom:10px;">
+        THE 7 DEADLY CHAMBERS AWAIT
+      </h2>
+      <p style="font-size:1rem; color:#cbd5e1; line-height:1.6; margin-bottom:24px;">
+        The iron gate swings open into the campus courtyard. 10 survivors have entered the grounds... but an ancient curse requires blood.
+        Prepare your fists and master the martial combat of <strong>Level 2: The Fight Arena</strong>!
+      </p>
+      <button class="action-btn-main action-btn-gold" onclick="window.location.href='level2.html'" style="margin: 0 auto; font-size:1.4rem; padding:14px 40px;">
+        ENTER LEVEL 2: THE FIGHT ARENA →
+      </button>
+    </div>
+  </div>
+
+  <!-- Controls Hint -->
+  <div id="controls-hint">
+    [WASD / ARROWS] Move Aarav &nbsp;|&nbsp; [E] Interact &nbsp;|&nbsp; Click any Pin to Investigate
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-msg"></div>
+
+  <!-- JavaScript -->
+  <script>
+    /* ==========================================================================
+       SYNTHESIZED SOUND EFFECTS (Web Audio API)
+       ========================================================================== */
+    const Sfx = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      },
+      playTone(freq, type, dur, gainVal = 0.25) {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          g.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+          osc.connect(g);
+          g.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + dur);
+        } catch (e) {}
+      },
+      paperRustle() {
+        this.playTone(300, 'triangle', 0.15, 0.2);
+        setTimeout(() => this.playTone(500, 'sine', 0.25, 0.25), 100);
+      },
+      clockTick() {
+        this.playTone(800, 'square', 0.05, 0.15);
+      },
+      whisper() {
+        this.playTone(120, 'sawtooth', 0.8, 0.3);
+        setTimeout(() => this.playTone(90, 'sine', 1.2, 0.25), 200);
+      },
+      lockClick() {
+        this.playTone(600, 'square', 0.08, 0.3);
+      },
+      successGate() {
+        this.playTone(350, 'triangle', 0.4, 0.3);
+        setTimeout(() => this.playTone(523.25, 'sine', 0.5, 0.35), 200);
+        setTimeout(() => this.playTone(659.25, 'sine', 0.8, 0.4), 400);
+      },
+      jumpscare() {
+        this.playTone(60, 'sawtooth', 1.5, 0.5);
+        this.playTone(180, 'square', 1.2, 0.4);
+      }
+    };
+
+    /* ==========================================================================
+       GAME STATE & PUZZLE
+       ========================================================================== */
+    const state = {
+      clues: {
+        notice: false,
+        clock: false,
+        shadow: false
+      },
+      clueCount: 0,
+      tumblers: [0, 0, 0], // Target: [13, 7, 3]
+      gateUnlocked: false
+    };
+
+    const player = {
+      x: window.innerWidth * 0.32,
+      y: window.innerHeight * 0.78,
+      speed: 4.8
+    };
+
+    const keys = {};
+
+    function showToast(msg, dur = 3200) {
+      const t = document.getElementById('toast-msg');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function openHelpModal() {
+      document.getElementById('modal-help').classList.add('active');
+    }
+
+    /* ==========================================================================
+       STATION INSPECTIONS
+       ========================================================================== */
+    function updateBadge() {
+      const b = document.getElementById('clue-progress-badge');
+      if (b) b.textContent = `${state.clueCount} / 3 CLUES`;
+      if (state.clues.notice) {
+        const el = document.getElementById('chk-notice');
+        if (el) el.classList.add('done');
+        const t = document.getElementById('code-tag-1');
+        if (t) t.textContent = '13';
+        const h1 = document.getElementById('hint-1');
+        if (h1) h1.textContent = '13';
+      }
+      if (state.clues.clock) {
+        const el = document.getElementById('chk-clock');
+        if (el) el.classList.add('done');
+        const t = document.getElementById('code-tag-2');
+        if (t) t.textContent = '7';
+        const h2 = document.getElementById('hint-2');
+        if (h2) h2.textContent = '7';
+      }
+      if (state.clues.shadow) {
+        const el = document.getElementById('chk-shadow');
+        if (el) el.classList.add('done');
+        const t = document.getElementById('code-tag-3');
+        if (t) t.textContent = '3';
+        const h3 = document.getElementById('hint-3');
+        if (h3) h3.textContent = '3';
+      }
+    }
+
+    function inspectNotice() {
+      Sfx.paperRustle();
+      document.getElementById('modal-notice').classList.add('active');
+      if (!state.clues.notice) {
+        state.clues.notice = true;
+        state.clueCount++;
+        updateBadge();
+        showToast("NOTICE DISCOVERED: Bell Minute = 13");
+      }
+    }
+
+    function inspectClock() {
+      Sfx.clockTick();
+      document.getElementById('modal-clock').classList.add('active');
+      if (!state.clues.clock) {
+        state.clues.clock = true;
+        state.clueCount++;
+        updateBadge();
+        showToast("CLOCK DISCOVERED: Frozen Hour = 7");
+      }
+    }
+
+    function inspectShadow() {
+      Sfx.whisper();
+      document.getElementById('modal-shadow').classList.add('active');
+      if (!state.clues.shadow) {
+        state.clues.shadow = true;
+        state.clueCount++;
+        updateBadge();
+        showToast("DARK CORRIDOR DISCOVERED: Death Knells = 3");
+      }
+    }
+
+    /* ==========================================================================
+       PADLOCK TUMBLERS & COMBINATION LOCK
+       ========================================================================== */
+    function openPadlockModal() {
+      Sfx.lockClick();
+      document.getElementById('modal-padlock').classList.add('active');
+    }
+
+    function adjustTumbler(idx, delta) {
+      Sfx.lockClick();
+      let val = state.tumblers[idx - 1];
+      val += delta;
+
+      // Wrap-around bounds
+      if (idx === 1) {
+        if (val < 0) val = 24;
+        if (val > 24) val = 0;
+        document.getElementById('tumbler-val-1').textContent = String(val).padStart(2, '0');
+      } else if (idx === 2) {
+        if (val < 0) val = 12;
+        if (val > 12) val = 0;
+        document.getElementById('tumbler-val-2').textContent = val;
+      } else if (idx === 3) {
+        if (val < 0) val = 9;
+        if (val > 9) val = 0;
+        document.getElementById('tumbler-val-3').textContent = val;
+      }
+
+      state.tumblers[idx - 1] = val;
+    }
+
+    function verifyGateCombination() {
+      const [t1, t2, t3] = state.tumblers;
+
+      // Correct code: 13 — 7 — 3
+      if (t1 === 13 && t2 === 7 && t3 === 3) {
+        // SUCCESS!
+        closeModal('modal-padlock');
+        state.gateUnlocked = true;
+        Sfx.successGate();
+        showToast("🔓 CLICK! OCCULT PADLOCK UNLOCKED!", 3000);
+        triggerGateOpeningCinematic();
+      } else {
+        // WRONG COMBINATION -> JUMPSCARE & SCREEN SHAKE!
+        closeModal('modal-padlock');
+        triggerJumpscare();
+      }
+    }
+
+    function triggerJumpscare() {
+      Sfx.jumpscare();
+      const jsOverlay = document.getElementById('jumpscare-overlay');
+      const vp = document.getElementById('gate-viewport');
+
+      jsOverlay.style.display = 'flex';
+      vp.classList.add('screen-shake', 'lights-flicker-red');
+
+      setTimeout(() => {
+        jsOverlay.style.display = 'none';
+        vp.classList.remove('screen-shake', 'lights-flicker-red');
+        showToast("⚠️ WRONG COMBINATION! Hint: 13 — 7 — 3!", 4000);
+      }, 1600);
+    }
+
+    /* ==========================================================================
+       CINEMATIC GATE OPENING SEQUENCE
+       ========================================================================== */
+    function triggerGateOpeningCinematic() {
+      const blackout = document.getElementById('cinematic-blackout');
+      blackout.style.display = 'flex';
+
+      const line1 = document.getElementById('cine-line-1');
+      const line2 = document.getElementById('cine-line-2');
+      const line3 = document.getElementById('cine-line-3');
+      const briefing = document.getElementById('mission-briefing-card');
+
+      setTimeout(() => {
+        line1.classList.add('visible');
+        Sfx.playTone(180, 'sine', 1.5, 0.3);
+      }, 800);
+
+      setTimeout(() => {
+        line2.classList.add('visible');
+        Sfx.playTone(150, 'sine', 1.5, 0.3);
+      }, 2600);
+
+      setTimeout(() => {
+        line3.classList.add('visible');
+        Sfx.playTone(110, 'sawtooth', 2.0, 0.4);
+      }, 4500);
+
+      setTimeout(() => {
+        line1.style.display = 'none';
+        line2.style.display = 'none';
+        line3.style.display = 'none';
+
+        briefing.style.display = 'block';
+        setTimeout(() => briefing.style.opacity = '1', 50);
+        Sfx.playTone(440, 'triangle', 2.5, 0.35);
+      }, 7000);
+    }
+
+    /* ==========================================================================
+       GAME LOOP & CONTROLS
+       ========================================================================== */
+    function gameLoop() {
+      if (!state.gateUnlocked) {
+        if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
+        if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
+        if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= player.speed * 0.7;
+        if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y += player.speed * 0.7;
+
+        // Boundaries outside the gate (road/pavement)
+        player.x = Math.max(60, Math.min(window.innerWidth - 60, player.x));
+        player.y = Math.max(window.innerHeight * 0.58, Math.min(window.innerHeight - 50, player.y));
+
+        const pEl = document.getElementById('player-sprite');
+        pEl.style.left = `${player.x}px`;
+        pEl.style.top = `${player.y}px`;
+
+        // Check nearest station to show [E] INTERACT prompt
+        let closest = null;
+        let minDist = 140;
+
+        const stations = [
+          { id: 'notice', name: 'NOTICE BOARD', x: window.innerWidth * 0.18, y: window.innerHeight * 0.46, action: inspectNotice },
+          { id: 'clock', name: 'STOPPED CLOCK', x: window.innerWidth * 0.41, y: window.innerHeight * 0.38, action: inspectClock },
+          { id: 'shadow', name: 'DARK CORRIDOR', x: window.innerWidth * 0.71, y: window.innerHeight * 0.54, action: inspectShadow },
+          { id: 'padlock', name: 'GATE PADLOCK', x: window.innerWidth * 0.48, y: window.innerHeight * 0.58, action: openPadlockModal }
+        ];
+
+        stations.forEach(s => {
+          const d = Math.hypot(player.x - s.x, player.y - s.y);
+          if (d < minDist) {
+            minDist = d;
+            closest = s;
+          }
+        });
+
+        const bubble = document.getElementById('player-bubble');
+        if (closest) {
+          bubble.style.display = 'block';
+          bubble.textContent = `[E] ${closest.name}`;
+          player._nearestAction = closest.action;
+        } else {
+          bubble.style.display = 'none';
+          player._nearestAction = null;
+        }
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Keyboard Listeners
+    window.addEventListener('keydown', e => {
+      keys[e.key] = true;
+
+      // E Key: Trigger nearest station or open padlock
+      if (e.key === 'e' || e.key === 'E') {
+        if (player._nearestAction) {
+          player._nearestAction();
+        } else {
+          openPadlockModal();
+        }
+      }
+
+      // SPACE Key: Open Padlock
+      if (e.code === 'Space') {
+        e.preventDefault();
+        openPadlockModal();
+      }
+    });
+
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    // Initial Load
+    window.addEventListener('DOMContentLoaded', () => {
+      const surv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : { name: 'AARAV', avatarClass: 'avatar-aarav', major: 'Robotics Eng' };
+      const sName = surv.name.toUpperCase();
+      const sAge = localStorage.getItem('survivorAge') || '18';
+      const hudName = document.getElementById('hud-survivor-name');
+      if (hudName) hudName.textContent = sName;
+      const hudMajor = document.getElementById('hud-survivor-major');
+      if (hudMajor) hudMajor.textContent = surv.major.toUpperCase();
+      const hudAvatar = document.getElementById('gate-hud-avatar');
+      if (hudAvatar) hudAvatar.className = `survivor-avatar ${surv.avatarClass}`;
+
+      // Render authentic in-game illustrated survivor model
+      if (typeof renderInGameSurvivorSprite === 'function') {
+        renderInGameSurvivorSprite('player-sprite');
+      }
+
+      updateBadge();
+      const b = document.getElementById('start-l1-banner');
+      b.classList.add('show');
+      setTimeout(() => b.classList.remove('show'), 3800);
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+
+</html>

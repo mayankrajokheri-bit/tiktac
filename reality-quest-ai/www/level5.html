@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Level 5 — The Judgement | Reality Quest AI</title>
+  <meta name="description" content="Level 5: The Judgement. The Final Encounter in the Grand Auditorium. Angel vs Stella. The Ultimate College Horror Twist.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/survivors.css">
+  <script src="js/survivors.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --angel-white: #ffffff;
+      --angel-glow: #e0f2fe;
+      --demon-red: #ff2222;
+      --gold-royal: #f59e0b;
+      --glitch-cyan: #00e5ff;
+      --font-horror: 'Creepster', cursive;
+      --font-ui: 'Oswald', sans-serif;
+      --font-body: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: var(--font-body);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+    }
+
+    /* Auditorium Canvas with Angel in White Saree vs Stella from User Photo */
+    #auditorium-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('assets/level5_angel_vs_stella.jpg');
+      background-size: cover;
+      background-position: center center;
+      transition: filter 1s ease, transform 1s ease;
+    }
+
+    /* Darkness overlay for sudden blackout */
+    #blackout-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 200;
+      opacity: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1.5s ease;
+      pointer-events: none;
+    }
+
+    /* Spotlight cone effect */
+    #holy-spotlight {
+      position: absolute;
+      top: 0;
+      left: 55%;
+      transform: translateX(-50%);
+      width: 320px;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(220, 240, 255, 0.15) 60%, transparent 100%);
+      filter: blur(14px);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 2s ease;
+      z-index: 5;
+    }
+
+    /* Occult Pentagram Ring over the Chained Chest from Photo */
+    #occult-ring-pulse {
+      position: absolute;
+      left: 52%;
+      top: 68%;
+      transform: translate(-50%, -50%);
+      width: 280px;
+      height: 140px;
+      border: 3px solid rgba(255, 34, 34, 0.7);
+      border-radius: 50%;
+      box-shadow: 0 0 35px rgba(255, 34, 34, 0.8), inset 0 0 25px rgba(255, 34, 34, 0.5);
+      pointer-events: none;
+      z-index: 6;
+      animation: pentagramPulse 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes pentagramPulse {
+      0% { transform: translate(-50%, -50%) scale(0.96); box-shadow: 0 0 25px rgba(255, 34, 34, 0.6); }
+      100% { transform: translate(-50%, -50%) scale(1.04); box-shadow: 0 0 55px rgba(255, 34, 34, 1), 0 0 80px rgba(245, 158, 11, 0.4); }
+    }
+
+    /* Luminous Angel Figure Descending over the Chest */
+    #angel-sprite {
+      position: absolute;
+      top: -120px;
+      left: 52%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 140px;
+      z-index: 12;
+      pointer-events: none;
+      opacity: 0;
+      transition: top 3s cubic-bezier(0.25, 1, 0.5, 1), opacity 2s ease;
+      filter: drop-shadow(0 0 25px #ffffff) drop-shadow(0 0 45px #00e5ff);
+    }
+
+    #angel-sprite.descended {
+      top: 32%;
+      opacity: 1;
+    }
+
+    .angel-radiant-halo {
+      width: 32px;
+      height: 10px;
+      border: 3px solid #fff;
+      border-radius: 50%;
+      margin: 0 auto 6px;
+      box-shadow: 0 0 15px #fff;
+      animation: haloGlow 1s infinite alternate;
+    }
+
+    @keyframes haloGlow {
+      from { box-shadow: 0 0 10px #fff; }
+      to { box-shadow: 0 0 25px #fff, 0 0 40px var(--glitch-cyan); }
+    }
+
+    .angel-wings-spread {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 160px;
+      height: 80px;
+      background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.9) 0%, rgba(224, 242, 254, 0.7) 50%, transparent 80%);
+      clip-path: polygon(50% 100%, 0 0, 35% 40%, 50% 60%, 65% 40%, 100% 0);
+      filter: blur(1px);
+      animation: wingFlutter 2s infinite alternate ease-in-out;
+    }
+
+    @keyframes wingFlutter {
+      0% { transform: translateX(-50%) scale(0.95); }
+      100% { transform: translateX(-50%) scale(1.08); }
+    }
+
+    .angel-celestial-body {
+      width: 30px;
+      height: 75px;
+      background: linear-gradient(180deg, #ffffff, rgba(220, 240, 255, 0.7));
+      border-radius: 15px 15px 4px 4px;
+      margin: 0 auto;
+      box-shadow: 0 0 20px #fff;
+    }
+
+    /* Stella Ghost Figure on Stage */
+    #stella-stage-sprite {
+      position: absolute;
+      top: 60%;
+      left: -80px;
+      width: 60px;
+      height: 90px;
+      z-index: 10;
+      pointer-events: none;
+      transition: left 2.5s ease-out, filter 0.5s;
+    }
+
+    #stella-stage-sprite.charging {
+      left: 28%;
+    }
+
+    #stella-stage-sprite.frozen {
+      filter: drop-shadow(0 0 20px #00e5ff) brightness(1.4);
+      animation: freezeTremble 0.1s infinite alternate;
+    }
+
+    @keyframes freezeTremble {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-3px); }
+    }
+
+    .stage-stella-head {
+      width: 22px;
+      height: 24px;
+      background: #a4b0be;
+      border-radius: 50%;
+      margin: 0 auto;
+    }
+
+    .stage-stella-gown {
+      width: 36px;
+      height: 55px;
+      background: linear-gradient(180deg, #747d8c, #2f3542);
+      clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
+      margin: 0 auto;
+    }
+
+    .holy-lightning-arcs {
+      position: absolute;
+      inset: -20px;
+      border: 3px dashed #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 30px #00e5ff;
+      display: none;
+      animation: lightningSparks 0.15s infinite;
+    }
+
+    @keyframes lightningSparks {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.2); }
+      100% { transform: rotate(360deg) scale(0.9); }
+    }
+
+    .black-smoke-spiral {
+      position: absolute;
+      inset: -40px;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.9) 20%, rgba(20, 20, 20, 0.6) 50%, transparent 80%);
+      border-radius: 50%;
+      display: none;
+      animation: smokeDisintegrate 1.5s forwards ease-out;
+    }
+
+    @keyframes smokeDisintegrate {
+      0% { transform: scale(0.5); opacity: 1; }
+      100% { transform: scale(2.2) translateY(-60px); opacity: 0; }
+    }
+
+    /* Cinematic Dialogue & Subtitle Subsystem */
+    #cinema-subtitles {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(720px, 90vw);
+      background: rgba(5, 5, 10, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 16px 28px;
+      text-align: center;
+      z-index: 150;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.9);
+      transition: all 0.4s ease;
+    }
+
+    .speaker-label {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      letter-spacing: 3px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .speaker-angel { color: var(--angel-glow); text-shadow: 0 0 10px var(--angel-glow); }
+    .speaker-whisper { color: #aaa; font-style: italic; }
+    .speaker-system { color: #ff3333; text-shadow: 0 0 12px #ff0000; }
+
+    .subtitle-text {
+      font-family: var(--font-body);
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      font-weight: 600;
+      letter-spacing: 1px;
+      line-height: 1.4;
+      min-height: 38px;
+    }
+
+    /* Blast Screen Flash */
+    #holy-blast-flash {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 180;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+
+    #holy-blast-flash.flash {
+      opacity: 1;
+    }
+
+    /* Screen Shake */
+    .screen-shake {
+      animation: shakeFX 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes shakeFX {
+      10%, 90% { transform: translate3d(-4px, 2px, 0); }
+      20%, 80% { transform: translate3d(6px, -4px, 0); }
+      30%, 50%, 70% { transform: translate3d(-8px, 6px, 0); }
+      40%, 60% { transform: translate3d(8px, -6px, 0); }
+    }
+
+    /* ==========================================================================
+       FINAL CLIMAX TWIST: GLITCH TEXT & GIANT LEADERBOARD
+       ========================================================================== */
+    #final-twist-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 250;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+
+    #final-twist-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .glitch-header {
+      font-family: var(--font-ui);
+      font-size: clamp(1.8rem, 4vw, 3.4rem);
+      font-weight: 700;
+      letter-spacing: 6px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    /* Glitch Animation */
+    .glitch-anim {
+      color: #fff;
+      text-shadow: 2px 0 var(--demon-red), -2px 0 var(--glitch-cyan);
+      animation: glitchTwitch 0.4s infinite alternate;
+    }
+
+    @keyframes glitchTwitch {
+      0% { text-shadow: 2px 0 var(--demon-red), -2px 0 var(--glitch-cyan); }
+      50% { text-shadow: -3px 0 var(--demon-red), 3px 0 var(--glitch-cyan); }
+      100% { text-shadow: 3px -1px var(--demon-red), -3px 1px var(--glitch-cyan); }
+    }
+
+    .final-quote-box {
+      max-width: 600px;
+      font-family: var(--font-body);
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      color: #bbb;
+      letter-spacing: 2px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    /* Giant Auditorium Screen with 6 Survivor Names */
+    .audit-screen-box {
+      width: min(640px, 92vw);
+      background: rgba(10, 10, 15, 0.95);
+      border: 2px solid #ff2222;
+      box-shadow: 0 0 50px rgba(255, 0, 0, 0.5), inset 0 0 30px rgba(255, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+
+    .audit-screen-title {
+      font-family: var(--font-horror);
+      font-size: 1.8rem;
+      color: #ff3333;
+      letter-spacing: 3px;
+      margin-bottom: 12px;
+    }
+
+    .player-roster-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .roster-card {
+      background: #14141c;
+      border: 1px solid #333;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      color: #888;
+    }
+
+    /* The One Highlighted in Red Glitch */
+    .roster-card.chosen-controller {
+      grid-column: span 2;
+      background: linear-gradient(135deg, rgba(192, 57, 43, 0.4), rgba(255, 0, 0, 0.2));
+      border: 2px solid #ff2222;
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      box-shadow: 0 0 25px #ff2222;
+      animation: glitchTwitch 0.3s infinite alternate;
+    }
+
+    .restart-btn {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 2px solid #ff6b6b;
+      padding: 14px 44px;
+      font-family: var(--font-ui);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(192, 57, 43, 0.8);
+      transition: transform 0.2s;
+    }
+
+    .restart-btn:hover { transform: scale(1.06); }
+  </style>
+</head>
+
+<body>
+
+  <div id="auditorium-container">
+    <div id="holy-spotlight"></div>
+    <div id="holy-blast-flash"></div>
+
+    <!-- Occult Pentagram Ring over the Chained Chest from Photo -->
+    <div id="occult-ring-pulse"></div>
+
+    <!-- Descending Luminous Angel Figure -->
+    <div id="angel-sprite">
+      <div class="angel-wings-spread"></div>
+      <div class="angel-radiant-halo"></div>
+      <div class="angel-celestial-body"></div>
+    </div>
+
+    <!-- Stella Ghost Charging / Frozen at Ring -->
+    <div id="stella-stage-sprite">
+      <div class="stage-stella-head"></div>
+      <div class="stage-stella-gown"></div>
+      <div class="holy-lightning-arcs" id="stella-lightning"></div>
+      <div class="black-smoke-spiral" id="stella-smoke"></div>
+    </div>
+
+    <!-- In-Game Player Survivor Standing in Foreground with Flaming Dagger -->
+    <div id="player-sprite" style="position: absolute; bottom: 45px; left: 60px; z-index: 25; pointer-events: none;">
+      <div class="player-tag" id="l5-player-tag">YOU (AARAV)</div>
+      <div class="char-head survivor-avatar avatar-aarav" id="l5-player-avatar" style="width:20px; height:20px; margin:0 auto 2px; box-shadow:none;"></div>
+      <div class="char-torso"></div>
+      <div class="char-legs">
+        <div class="char-leg"></div>
+        <div class="char-leg"></div>
+      </div>
+      <div class="dagger-flame" style="display: block;">🗡️🔥</div>
+    </div>
+  </div>
+
+  <!-- Initial Blackout -->
+  <div id="blackout-screen">
+    <div style="font-family: var(--font-horror); font-size: 2.2rem; color: #ff3333; letter-spacing: 4px; text-align: center;">
+      LEVEL 5: THE JUDGEMENT
+    </div>
+  </div>
+
+  <!-- Subtitle Narration Bar -->
+  <div id="cinema-subtitles">
+    <div class="speaker-label speaker-whisper" id="speaker-id">WHISPER IN THE DARK</div>
+    <div class="subtitle-text" id="subtitle-content">“You were never meant to find the dagger...”</div>
+  </div>
+
+  <!-- Final Climax Twist Overlay -->
+  <div id="final-twist-overlay">
+    <div class="glitch-header glitch-anim" id="glitch-title">WHO IS THE WINNER?</div>
+
+    <div class="final-quote-box" id="final-quote-text">
+      “The game was never about surviving.”<br>
+      <strong style="color:#ff3333;">“It was about finding the one who controls it.”</strong>
+    </div>
+
+    <!-- Giant Auditorium Screen with Surviving Roster -->
+    <div class="audit-screen-box">
+      <div class="audit-screen-title">AUDITORIUM ARCHIVE // VESSEL SELECTION</div>
+      <div class="player-roster-grid" id="l5-roster-grid">
+        <div class="roster-card chosen-controller" style="display:flex; align-items:center; gap:8px;">
+          <div class="survivor-avatar avatar-aarav" id="l5-vessel-avatar" style="width:30px; height:30px; box-shadow:none;"></div>
+          <span id="l5-vessel-card">👑 AARAV (YOU)</span>
+          <span style="color:#ff4757; margin-left:auto;">NEW VESSEL / CONTROLLER</span>
+        </div>
+        <div class="roster-card" style="display:flex; align-items:center; gap:8px;">
+          <div class="survivor-avatar avatar-alex" style="width:24px; height:24px; box-shadow:none;"></div>
+          <span>ALEX (MECH ENG)</span>
+          <span style="color:#2ed573; margin-left:auto;">SURVIVED</span>
+        </div>
+        <div class="roster-card" style="display:flex; align-items:center; gap:8px;">
+          <div class="survivor-avatar avatar-ben" style="width:24px; height:24px; box-shadow:none;"></div>
+          <span>BEN (ELEC ENG)</span>
+          <span style="color:#2ed573; margin-left:auto;">SURVIVED</span>
+        </div>
+        <div class="roster-card" style="display:flex; align-items:center; gap:8px;">
+          <div class="survivor-avatar avatar-chloe" style="width:24px; height:24px; box-shadow:none;"></div>
+          <span>CHLOE (CIVIL ENG)</span>
+          <span style="color:#2ed573; margin-left:auto;">SURVIVED</span>
+        </div>
+        <div class="roster-card" style="display:flex; align-items:center; gap:8px;">
+          <div class="survivor-avatar avatar-esha" style="width:24px; height:24px; box-shadow:none;"></div>
+          <span>ESHA (BIOTECH)</span>
+          <span style="color:#2ed573; margin-left:auto;">SURVIVED</span>
+        </div>
+        <div class="roster-card" style="display:flex; align-items:center; gap:8px;">
+          <div class="survivor-avatar avatar-dev" style="width:24px; height:24px; box-shadow:none; border-color:#e74c3c;"></div>
+          <span>DEV (COMP SCI)</span>
+          <span style="color:#f39c12; margin-left:auto;">SUSPICIOUS</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="restart-btn" onclick="window.location.href='level6.html'">PROCEED TO LEVEL 6: THE TRAITOR →</button>
+  </div>
+
+  <!-- Audio and Cinematic Script -->
+  <script>
+    const Sfx = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      },
+      play(freq, type, dur, vol = 0.3) {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        g.gain.setValueAtTime(vol, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + dur);
+      }
+    };
+
+    const blackoutEl = document.getElementById('blackout-screen');
+    const spotlightEl = document.getElementById('holy-spotlight');
+    const speakerEl = document.getElementById('speaker-id');
+    const subEl = document.getElementById('subtitle-content');
+    const flashEl = document.getElementById('holy-blast-flash');
+    const finalOverlay = document.getElementById('final-twist-overlay');
+    const glitchTitle = document.getElementById('glitch-title');
+
+    const angelSprite = document.getElementById('angel-sprite');
+    const stellaSprite = document.getElementById('stella-stage-sprite');
+    const stellaLightning = document.getElementById('stella-lightning');
+    const stellaSmoke = document.getElementById('stella-smoke');
+
+    function setSub(speaker, cls, text) {
+      speakerEl.className = `speaker-label ${cls}`;
+      speakerEl.textContent = speaker;
+      subEl.textContent = text;
+    }
+
+    // Cinematic Choreography Sequence
+    window.addEventListener('DOMContentLoaded', () => {
+      // Dynamic Survivor Name and Character Model
+      const surv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : { name: 'AARAV', avatarClass: 'avatar-aarav', major: 'Robotics Eng' };
+      const sName = surv.name.toUpperCase();
+      const vesselCard = document.getElementById('l5-vessel-card');
+      if (vesselCard) vesselCard.textContent = `👑 ${sName} (YOU)`;
+
+      // Render authentic in-game illustrated survivor model
+      if (typeof renderInGameSurvivorSprite === 'function') {
+        renderInGameSurvivorSprite('player-sprite');
+      }
+      const l5Tag = document.getElementById('l5-player-tag');
+      if (l5Tag) l5Tag.textContent = `YOU (${sName})`;
+      const l5Av = document.getElementById('l5-player-avatar');
+      if (l5Av) l5Av.className = `char-head survivor-avatar ${surv.avatarClass}`;
+
+      // Scene 1: Distant whisper
+      setTimeout(() => {
+        Sfx.play(60, 'sine', 2, 0.4);
+      }, 200);
+
+      // Scene 2: 0.8s - Reveal Photo & Holy Spotlight
+      setTimeout(() => {
+        blackoutEl.style.opacity = '0';
+        spotlightEl.style.opacity = '1';
+        setSub("STAGE SPOTLIGHT", "speaker-angel", "A blinding celestial white light pierces the auditorium darkness over the chained ritual chest...");
+        Sfx.play(440, 'sine', 2.0, 0.2);
+      }, 800);
+
+      // Scene 3: 5.5s - Angel descends
+      setTimeout(() => {
+        angelSprite.classList.add('descended');
+        setSub("THE ANGEL", "speaker-angel", "From the celestial beam, a radiant winged Angel descends directly above the occult chest...");
+      }, 5500);
+
+      // Scene 4: 8.5s - Stella attacks & Angel freezes her
+      setTimeout(() => {
+        stellaSprite.classList.add('charging');
+        setSub("STELLA", "speaker-system", "Stella screeches and charges the ritual chest! Angel raises her hand — FREEZE!");
+        Sfx.play(150, 'sawtooth', 0.8, 0.5);
+
+        setTimeout(() => {
+          stellaSprite.classList.add('frozen');
+          stellaLightning.style.display = 'block';
+        }, 1200);
+      }, 8500);
+
+      // Scene 5: 11.5s - Angel speaks
+      setTimeout(() => {
+        setSub("THE ANGEL", "speaker-angel", "“Your time is over.”");
+        Sfx.play(520, 'triangle', 1.5, 0.3);
+      }, 11500);
+
+      // Scene 6: 13.5s - HOLY BLAST BOOM!
+      setTimeout(() => {
+        flashEl.classList.add('flash');
+        document.body.classList.add('screen-shake');
+        Sfx.play(80, 'sawtooth', 2.0, 0.8);
+
+        stellaLightning.style.display = 'none';
+        stellaSmoke.style.display = 'block';
+        stellaSprite.style.opacity = '0';
+
+        setTimeout(() => flashEl.classList.remove('flash'), 250);
+        setTimeout(() => document.body.classList.remove('screen-shake'), 600);
+
+        setSub("CELESTIAL BLAST", "speaker-angel", "BOOOOM! Holy light engulfs Stella! Her body disintegrates into swirling black smoke...");
+      }, 13500);
+
+      // Scene 7: 17.0s - Angel absorbs the smoke into palm & chest
+      setTimeout(() => {
+        stellaSmoke.style.display = 'none';
+        setSub("THE ANGEL", "speaker-angel", "The Angel draws the black smoke into her palm and seals it within the chained chest.");
+        Sfx.play(200, 'sine', 2.0, 0.3);
+      }, 17000);
+
+      // Scene 8: 20.0s - The Dark Twist
+      setTimeout(() => {
+        setSub("THE ANGEL", "speaker-system", "Angel slowly turns her glowing eyes directly toward the players...");
+      }, 20000);
+
+      setTimeout(() => {
+        setSub("THE ANGEL", "speaker-system", "“I didn’t save you.”");
+      }, 22500);
+
+      setTimeout(() => {
+        setSub("THE ANGEL", "speaker-system", "“I needed her gone.” 😈");
+        Sfx.play(70, 'sawtooth', 2.5, 0.6);
+      }, 24500);
+
+      // Scene 9: 27.0s - SUDDEN LIGHTS OFF & 3-SECOND BLACKOUT
+      setTimeout(() => {
+        blackoutEl.style.opacity = '1';
+        spotlightEl.style.opacity = '0';
+        document.getElementById('cinema-subtitles').style.opacity = '0';
+      }, 27000);
+
+      // Scene 10: 30.0s - Mind-bending Words appear one by one
+      setTimeout(() => {
+        finalOverlay.classList.add('active');
+        glitchTitle.textContent = "WHO IS THE WINNER?";
+        Sfx.play(300, 'square', 0.2);
+      }, 30000);
+
+      setTimeout(() => {
+        const surv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : { name: 'AARAV', avatarClass: 'avatar-aarav' };
+        const sName = surv.name.toUpperCase();
+        const vCard = document.getElementById('l5-vessel-card');
+        if (vCard) vCard.textContent = `👑 ${sName} (YOU)`;
+        const vAvatar = document.getElementById('l5-vessel-avatar');
+        if (vAvatar) vAvatar.className = `survivor-avatar ${surv.avatarClass}`;
+        glitchTitle.textContent = `${sName}?`;
+        Sfx.play(350, 'square', 0.2);
+      }, 32000);
+
+      setTimeout(() => {
+        glitchTitle.textContent = "THE ANGEL?";
+        Sfx.play(400, 'square', 0.2);
+      }, 34000);
+
+      setTimeout(() => {
+        glitchTitle.textContent = "OR... THE COLLEGE? 💀";
+        Sfx.play(120, 'sawtooth', 1.0, 0.7);
+      }, 36000);
+    });
+  </script>
+</body>
+
+</html>

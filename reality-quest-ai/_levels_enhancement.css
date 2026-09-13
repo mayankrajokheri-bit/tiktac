@@ -1,0 +1,503 @@
+
+
+    /* ===== LEVELS UI ENHANCEMENTS (gate.html / ghost.html / level1..level7.html) ===== */
+
+    @keyframes lvShineSweep {
+      0% { transform: translateX(-150%) skewX(-25deg); }
+      100% { transform: translateX(250%) skewX(-25deg); }
+    }
+    @keyframes lvModalPopIn {
+      0%   { opacity: 0; transform: scale(.9) translateY(18px); }
+      60%  { opacity: 1; transform: scale(1.03) translateY(-2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes lvHaloPulse {
+      0%, 100% { opacity: .55; transform: scale(1); }
+      50%      { opacity: 1;   transform: scale(1.08); }
+    }
+    @keyframes lvChecklistShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes lvTitleGlowBreath {
+      0%, 100% { filter: drop-shadow(0 0 10px currentColor); }
+      50%      { filter: drop-shadow(0 0 22px currentColor); }
+    }
+
+    /* ---- Accessibility: keyboard focus outlines ---- */
+    button:focus-visible,
+    a:focus-visible,
+    [role="button"]:focus-visible,
+    .help-btn:focus-visible,
+    .action-btn-main:focus-visible,
+    .action-btn-gold:focus-visible,
+    .tumbler-btn:focus-visible,
+    .gate-pin-station:focus-visible,
+    .next-level-btn:focus-visible,
+    .modal-close-btn:focus-visible {
+      outline: 2px solid #00ff9d !important;
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
+    /* ---- HUD / Top Bar ---- */
+    .level-badge-l1,
+    [class*="level-badge-"] {
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s ease;
+    }
+    [class*="level-badge-"]::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+      transform: translateX(-180%) skewX(-25deg);
+      pointer-events: none;
+    }
+    [class*="level-badge-"]:hover::after { animation: lvShineSweep .7s ease forwards; }
+
+    .level-title-l1,
+    [class*="level-title-"] {
+      display: inline-block;
+      transition: transform .3s ease;
+    }
+    [class*="level-title-"]:hover {
+      transform: scale(1.04);
+      animation: lvTitleGlowBreath 2.2s ease-in-out infinite;
+    }
+
+    /* ---- Help / HUD small buttons ---- */
+    .help-btn,
+    [class*="-btn"][class*="help"],
+    [class*="hud"] button,
+    button[class*="back-"],
+    button[class*="close-"],
+    button[class*="menu-"] {
+      position: relative;
+      overflow: hidden;
+      transition: transform .2s cubic-bezier(.16,1,.3,1), box-shadow .25s ease, background .25s ease, color .25s ease !important;
+    }
+    .help-btn::after,
+    [class*="-btn"][class*="help"]::after,
+    [class*="hud"] button::after,
+    button[class*="back-"]::after,
+    button[class*="close-"]::after,
+    button[class*="menu-"]::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 38%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+      transform: translateX(-180%) skewX(-25deg);
+      pointer-events: none;
+    }
+    .help-btn:hover::after,
+    [class*="-btn"][class*="help"]:hover::after,
+    [class*="hud"] button:hover::after,
+    button[class*="back-"]:hover::after,
+    button[class*="close-"]:hover::after,
+    button[class*="menu-"]:hover::after { animation: lvShineSweep .65s ease forwards; }
+    .help-btn:active,
+    [class*="-btn"][class*="help"]:active,
+    button[class*="back-"]:active,
+    button[class*="close-"]:active,
+    button[class*="menu-"]:active { transform: scale(.96) !important; }
+
+    /* ---- Mission / Objective panel ---- */
+    #mission-panel,
+    [id*="mission-panel"],
+    [class*="mission-panel"],
+    [id*="objective-panel"],
+    [id*="hud-quest"] {
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s ease, border-color .3s ease;
+    }
+    #mission-panel::before,
+    [id*="mission-panel"]::before,
+    [class*="mission-panel"]::before,
+    [id*="objective-panel"]::before,
+    [id*="hud-quest"]::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #ff2a2a 0%, #f39c12 50%, #00ff9d 100%);
+      border-radius: 10px 0 0 10px;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    #mission-panel:hover,
+    [id*="mission-panel"]:hover,
+    [class*="mission-panel"]:hover,
+    [id*="objective-panel"]:hover,
+    [id*="hud-quest"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 44px rgba(0,0,0,.85), 0 0 22px rgba(192,57,43,.35) !important;
+      border-color: rgba(243,156,18,.55) !important;
+    }
+    #mission-panel:hover::before,
+    [id*="mission-panel"]:hover::before,
+    [class*="mission-panel"]:hover::before,
+    [id*="objective-panel"]:hover::before,
+    [id*="hud-quest"]:hover::before { opacity: 1; }
+
+    .checklist-item {
+      transition: all .25s cubic-bezier(.16,1,.3,1) !important;
+    }
+    .checklist-item:hover {
+      transform: translateX(3px);
+      background: rgba(255,255,255,.08) !important;
+    }
+    .checklist-item.done {
+      position: relative;
+      overflow: hidden;
+    }
+    .checklist-item.done::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(46,213,115,.18), transparent);
+      background-size: 200% 100%;
+      animation: lvChecklistShimmer 3s linear infinite;
+      pointer-events: none;
+    }
+
+    /* ---- Pin stations / interactive map dots ---- */
+    .gate-pin-station,
+    [class*="pin-station"],
+    [id*="station-"],
+    [class*="-clickable"][class*="map"] {
+      position: relative;
+      will-change: transform;
+    }
+    .gate-pin-station:hover,
+    [class*="pin-station"]:hover,
+    [class*="-clickable"][class*="map"]:hover {
+      transform: scale(1.18) !important;
+    }
+    .gate-pin-orb,
+    [class*="-pin-orb"],
+    [class*="pin-"] [class*="-orb"],
+    [class*="map-dot"] {
+      transition: box-shadow .25s ease;
+    }
+    .gate-pin-station:hover .gate-pin-orb,
+    [class*="pin-station"]:hover [class*="-pin-orb"],
+    [class*="map-dot"]:hover {
+      box-shadow: 0 0 30px currentColor, 0 0 55px currentColor !important;
+    }
+
+    .gate-pin-label,
+    [class*="-pin-label"] {
+      transition: transform .2s ease, color .2s ease, border-color .2s ease !important;
+    }
+    .gate-pin-station:hover .gate-pin-label,
+    [class*="pin-station"]:hover [class*="-pin-label"] {
+      transform: translateY(-2px) scale(1.04);
+    }
+
+    /* ---- Bottom action CTAs ---- */
+    .action-btn-main,
+    .action-btn-gold,
+    #bottom-action-dock button,
+    [id*="action-dock"] button,
+    button[class*="cta-"],
+    .next-level-btn,
+    button[class*="start-level"],
+    button[class*="enter-"],
+    button[class*="continue-"] {
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s cubic-bezier(.16,1,.3,1), box-shadow .3s ease, filter .25s ease !important;
+    }
+    .action-btn-main::after,
+    .action-btn-gold::after,
+    #bottom-action-dock button::after,
+    [id*="action-dock"] button::after,
+    button[class*="cta-"]::after,
+    .next-level-btn::after,
+    button[class*="start-level"]::after,
+    button[class*="enter-"]::after,
+    button[class*="continue-"]::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 42%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+      transform: translateX(-180%) skewX(-25deg);
+      pointer-events: none;
+    }
+    .action-btn-main:hover::after,
+    .action-btn-gold:hover::after,
+    #bottom-action-dock button:hover::after,
+    [id*="action-dock"] button:hover::after,
+    button[class*="cta-"]:hover::after,
+    .next-level-btn:hover::after,
+    button[class*="start-level"]:hover::after,
+    button[class*="enter-"]:hover::after,
+    button[class*="continue-"]:hover::after {
+      animation: lvShineSweep .95s ease forwards;
+    }
+    .action-btn-main:hover,
+    .next-level-btn:hover {
+      transform: scale(1.06) translateY(-2px) !important;
+      box-shadow: 0 10px 38px rgba(192,57,43,.9), 0 0 28px rgba(255,71,87,.55) !important;
+    }
+    .action-btn-gold:hover {
+      transform: scale(1.06) translateY(-2px) !important;
+      box-shadow: 0 10px 40px rgba(241,196,15,.9), 0 0 32px rgba(243,156,18,.55) !important;
+    }
+    .action-btn-main:active,
+    .action-btn-gold:active,
+    .next-level-btn:active,
+    #bottom-action-dock button:active,
+    button[class*="cta-"]:active {
+      transform: scale(.95) !important;
+    }
+
+    /* ---- Popup / Modals ---- */
+    .overlay-modal.active .modal-card,
+    [class*="-modal"].active > [class*="-card"],
+    [id*="-modal"].active > [class*="card"] {
+      animation: lvModalPopIn .38s cubic-bezier(.18,.89,.32,1.28) both;
+    }
+
+    .modal-card,
+    [class*="modal-card"],
+    [id*="-popup"],
+    [class*="-dialog"] {
+      position: relative;
+      overflow: hidden;
+    }
+    .modal-card::before,
+    [class*="modal-card"]::before,
+    [id*="-popup"]::before,
+    [class*="-dialog"]::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #ff2a2a 30%, #f39c12 60%, #00ff9d, transparent);
+      opacity: .9;
+    }
+    .modal-card::after,
+    [class*="modal-card"]::after,
+    [id*="-popup"]::after,
+    [class*="-dialog"]::after {
+      content: '';
+      position: absolute;
+      width: 120px; height: 120px;
+      right: -28px; bottom: -28px;
+      background: radial-gradient(circle, rgba(243,156,18,.28) 0%, transparent 70%);
+      opacity: 0;
+      animation: lvHaloPulse 3.5s ease-in-out infinite;
+      pointer-events: none;
+      transition: opacity .4s ease;
+    }
+    .modal-card:hover::after,
+    [class*="modal-card"]:hover::after,
+    [id*="-popup"]:hover::after { opacity: 1; }
+
+    .modal-title,
+    [class*="-modal-title"],
+    [class*="dialog-title"] {
+      display: inline-block;
+      transition: transform .3s ease, text-shadow .3s ease;
+    }
+    .modal-title:hover,
+    [class*="-modal-title"]:hover,
+    [class*="dialog-title"]:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 20px currentColor, 0 0 40px currentColor !important;
+    }
+
+    .clue-reveal-box,
+    [class*="clue-"],
+    [class*="reveal-box"],
+    [class*="answer-box"],
+    [class*="-evidence"] {
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s ease, box-shadow .3s ease !important;
+    }
+    .clue-reveal-box:hover,
+    [class*="clue-"]:hover,
+    [class*="reveal-box"]:hover,
+    [class*="answer-box"]:hover,
+    [class*="-evidence"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255,71,87,.35) !important;
+    }
+
+    /* ---- Padlock / tumbler controls ---- */
+    .tumbler-btn,
+    [class*="tumbler"] button,
+    [class*="dice-"],
+    [class*="rune-btn"],
+    [class*="chest-"] button,
+    button[class*="key-"] {
+      position: relative;
+      overflow: hidden;
+      transition: all .2s cubic-bezier(.16,1,.3,1) !important;
+    }
+    .tumbler-btn::after,
+    [class*="tumbler"] button::after,
+    [class*="dice-"]::after,
+    [class*="rune-btn"]::after,
+    [class*="chest-"] button::after,
+    button[class*="key-"]::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 40%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+      transform: translateX(-180%) skewX(-25deg);
+      pointer-events: none;
+    }
+    .tumbler-btn:hover::after,
+    [class*="tumbler"] button:hover::after,
+    [class*="dice-"]:hover::after,
+    [class*="rune-btn"]:hover::after,
+    [class*="chest-"] button:hover::after,
+    button[class*="key-"]:hover::after { animation: lvShineSweep .7s ease forwards; }
+    .tumbler-btn:hover,
+    [class*="tumbler"] button:hover,
+    [class*="rune-btn"]:hover,
+    [class*="chest-"] button:hover,
+    button[class*="key-"]:hover {
+      transform: translateY(-2px) !important;
+      background: #3d566e !important;
+      box-shadow: 0 6px 20px rgba(0,0,0,.5);
+    }
+    .tumbler-display,
+    [class*="display"][class*="tumbler"],
+    [class*="chest-display"],
+    [class*="lock-display"] {
+      transition: transform .2s ease, box-shadow .25s ease;
+    }
+    .tumbler-display:hover,
+    [class*="display"][class*="tumbler"]:hover,
+    [class*="chest-display"]:hover,
+    [class*="lock-display"]:hover {
+      transform: scale(1.05);
+      box-shadow: inset 0 0 22px rgba(241,196,15,.6), 0 0 20px rgba(241,196,15,.35) !important;
+    }
+
+    /* ---- Cinematic / narrative text ---- */
+    .cinematic-line,
+    [class*="-subtitle"],
+    [id*="subtitle-"],
+    [class*="narrative"] {
+      transition: transform .35s ease, opacity .35s ease, text-shadow .35s ease;
+    }
+    .cinematic-line:hover,
+    [class*="-subtitle"]:hover,
+    [id*="subtitle-"]:hover,
+    [class*="narrative"]:hover {
+      text-shadow: 0 0 12px currentColor !important;
+    }
+
+    /* ---- Player tag / interact bubble ---- */
+    .player-tag {
+      transition: transform .2s ease, color .2s ease;
+    }
+    .interact-bubble {
+      transition: box-shadow .25s ease;
+    }
+    .interact-bubble:hover {
+      box-shadow: 0 0 22px rgba(255, 118, 117, 0.95) !important;
+    }
+
+    /* ---- Toast / notifications ---- */
+    #game-toast,
+    [id*="toast"],
+    [class*="toast"],
+    [class*="notification-"] {
+      position: relative;
+      overflow: hidden;
+    }
+    #game-toast::before,
+    [id*="toast"]::before,
+    [class*="toast"]::before,
+    [class*="notification-"]::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #00ff9d, #f39c12, #ff2a2a);
+      border-radius: 6px 0 0 6px;
+    }
+
+    /* ---- Responsive polish <600px ---- */
+    @media (max-width: 600px) {
+      #hud-top,
+      [id*="hud-top"],
+      [class*="hud-topbar"] { padding: 10px 14px !important; gap: 8px !important; }
+      .level-badge-l1,
+      [class*="level-badge-"] { font-size: 10px !important; padding: 4px 10px !important; letter-spacing: 1px !important; }
+      .level-title-l1,
+      [class*="level-title-"] { font-size: 1.4rem !important; letter-spacing: 1px !important; }
+      .help-btn,
+      [class*="help-btn"] { font-size: 10px !important; padding: 5px 10px !important; letter-spacing: 0.5px !important; }
+      .hud-controls-group,
+      [class*="controls-group"] { gap: 6px !important; }
+      #mission-panel,
+      [id*="mission-panel"],
+      [class*="mission-panel"] { width: calc(100vw - 24px) !important; left: 12px !important; right: 12px !important; top: 60px !important; padding: 10px 12px !important; }
+      #bottom-action-dock,
+      [id*="action-dock"],
+      [class*="bottom-dock"] { width: 92vw !important; justify-content: center; gap: 10px !important; flex-wrap: wrap !important; }
+      .action-btn-main,
+      .action-btn-gold,
+      .next-level-btn {
+        font-size: 1.1rem !important;
+        padding: 12px 22px !important;
+        letter-spacing: 1.5px !important;
+      }
+      .modal-card,
+      [class*="modal-card"],
+      [id*="-popup"] { padding: 22px 18px !important; max-width: 94vw !important; border-radius: 12px !important; }
+      .modal-title,
+      [class*="modal-title"] { font-size: 1.7rem !important; }
+      .modal-body-text,
+      [class*="modal-body"] { font-size: .95rem !important; }
+      .padlock-tumblers,
+      [class*="padlock"],
+      [class*="-tumblers"] { gap: 10px !important; margin: 18px 0 !important; }
+      .tumbler-display,
+      [class*="display"][class*="tumbler"] { width: 54px !important; height: 54px !important; font-size: 1.6rem !important; }
+      .tumbler-btn,
+      [class*="tumbler"] button { width: 38px !important; height: 28px !important; }
+      .clue-reveal-box,
+      [class*="clue-reveal-box"] { padding: 10px 14px !important; margin-bottom: 18px !important; }
+      .clue-reveal-box strong { font-size: 1.1rem !important; padding: 2px 8px !important; }
+    }
+
+    @media (max-width: 400px) {
+      .action-btn-main,
+      .action-btn-gold,
+      .next-level-btn {
+        width: 100%;
+        font-size: 1rem !important;
+        padding: 11px 18px !important;
+      }
+      #bottom-action-dock,
+      [id*="action-dock"] { flex-direction: column !important; }
+    }
+
+    /* ---- Reduced-motion override ---- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+

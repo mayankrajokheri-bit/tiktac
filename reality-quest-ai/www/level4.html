@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Level 4 — The Six Boxes | Reality Quest AI</title>
+  <meta name="description" content="Level 4: The Six Boxes. One Key. One way to fight back. Find the Master Key, open the 6 chests, activate the Ancient Dagger and survive Stella.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/survivors.css">
+  <script src="js/survivors.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --blood-red: #c0392b;
+      --gold-rune: #f1c40f;
+      --cyan-magic: #00d2d3;
+      --font-horror: 'Creepster', cursive;
+      --font-ui: 'Oswald', sans-serif;
+      --font-body: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: #020204;
+      color: #fff;
+      font-family: var(--font-body);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+      touch-action: none;
+    }
+
+    /* Room Environment */
+    #room-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('assets/six_boxes.png');
+      background-size: cover;
+      background-position: center center;
+    }
+
+    /* Ambient moonlight beam from broken ceiling */
+    #skylight-beam {
+      position: absolute;
+      top: 0;
+      left: 38%;
+      width: 180px;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(200, 220, 255, 0.3) 0%, rgba(200, 220, 255, 0.08) 60%, transparent 100%);
+      pointer-events: none;
+      filter: blur(8px);
+      z-index: 2;
+      animation: moonBeamBreath 4s infinite alternate ease-in-out;
+    }
+
+    @keyframes moonBeamBreath {
+      from { opacity: 0.6; }
+      to { opacity: 0.95; }
+    }
+
+    /* Ritual Altar on the floor under skylight */
+    #ritual-altar {
+      position: absolute;
+      left: 42%;
+      top: 68%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 70px;
+      border: 2px dashed rgba(241, 196, 15, 0.4);
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(241, 196, 15, 0.15) 0%, transparent 70%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.3s;
+    }
+
+    #ritual-altar.glow {
+      border-color: #f1c40f;
+      box-shadow: 0 0 35px #f1c40f, inset 0 0 20px rgba(241, 196, 15, 0.6);
+      animation: altarPulse 1s infinite alternate;
+    }
+
+    .altar-rune-text {
+      font-family: var(--font-ui);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #f1c40f;
+      font-weight: 700;
+      text-shadow: 0 0 8px #000;
+    }
+
+    @keyframes altarPulse {
+      from { transform: translate(-50%, -50%) scale(1); }
+      to { transform: translate(-50%, -50%) scale(1.08); }
+    }
+
+    /* Hidden Key Spot (Rubble pile under skylight) */
+    #hidden-key-spot {
+      position: absolute;
+      left: 41%;
+      top: 72%;
+      width: 38px;
+      height: 38px;
+      background: rgba(241, 196, 15, 0.2);
+      border-radius: 50%;
+      border: 1px dashed rgba(241, 196, 15, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 6;
+      animation: keySparkle 1.5s infinite alternate;
+    }
+
+    @keyframes keySparkle {
+      0% { transform: scale(0.9); box-shadow: 0 0 5px #f1c40f; }
+      100% { transform: scale(1.15); box-shadow: 0 0 20px #f1c40f; }
+    }
+
+    /* ==========================================================================
+       THE SIX BOXES
+       ========================================================================== */
+    .wooden-box-target {
+      position: absolute;
+      width: 68px;
+      height: 52px;
+      border: 2px solid rgba(241, 196, 15, 0.3);
+      border-radius: 6px;
+      background: rgba(20, 15, 10, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 6;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .wooden-box-target:hover {
+      transform: scale(1.1);
+      border-color: #f1c40f;
+      box-shadow: 0 0 15px rgba(241, 196, 15, 0.6);
+    }
+
+    .box-num {
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ddd;
+    }
+
+    .box-status-icon {
+      font-size: 16px;
+    }
+
+    .wooden-box-target.opened {
+      border-color: #444;
+      background: rgba(0, 0, 0, 0.6);
+      cursor: default;
+    }
+
+    /* Coordinates corresponding to the chests in user's image */
+    #box-1 { left: 24%; top: 62%; }
+    #box-2 { left: 47%; top: 62%; }
+    #box-3 { left: 54%; top: 67%; }
+    #box-4 { left: 63%; top: 72%; }
+    #box-5 { left: 66%; top: 82%; }
+    #box-6 { left: 36%; top: 74%; } /* The ornate open chest in center */
+
+    /* Exit Door (Back doorway) */
+    #exit-door-target {
+      position: absolute;
+      left: 28%;
+      top: 48%;
+      width: 50px;
+      height: 90px;
+      border: 2px dashed rgba(255, 60, 60, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+    }
+
+    /* ==========================================================================
+       ENTITIES (PLAYER & STELLA BOSS)
+       ========================================================================== */
+    #entities-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    #player-sprite {
+      position: absolute;
+      width: 40px;
+      height: 58px;
+      transform: translate(-50%, -100%);
+      will-change: left, top;
+      z-index: 15;
+    }
+
+    .player-tag {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      color: #74b9ff;
+      white-space: nowrap;
+    }
+
+    .char-head { width: 16px; height: 16px; background: #f1c27d; border-radius: 50%; margin: 0 auto 2px; }
+    .char-torso { width: 22px; height: 26px; background: #2e86de; border-radius: 5px; margin: 0 auto; }
+    .char-legs { display: flex; justify-content: space-around; width: 18px; margin: 0 auto; }
+    .char-leg { width: 5px; height: 14px; background: #111; }
+
+    /* Stella Boss Sprite */
+    #stella-boss-sprite {
+      position: absolute;
+      width: 52px;
+      height: 76px;
+      transform: translate(-50%, -100%);
+      z-index: 14;
+      display: none;
+      filter: drop-shadow(0 0 15px #ff0000);
+    }
+
+    .stella-boss-head { width: 18px; height: 20px; background: #bdc581; border-radius: 50%; margin: 0 auto 1px; }
+    .stella-boss-gown { width: 26px; height: 36px; background: #d2dae2; clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%); margin: 0 auto; }
+    .stella-boss-legs { display: flex; justify-content: space-around; width: 16px; margin: 0 auto; }
+    .stella-boss-leg { width: 4px; height: 14px; background: #2f3640; }
+
+    /* Dagger Holy Glow FX */
+    .dagger-flame {
+      position: absolute;
+      top: -10px;
+      right: -8px;
+      font-size: 18px;
+      animation: flameFlicker 0.3s infinite alternate;
+      display: none;
+    }
+
+    @keyframes flameFlicker {
+      0% { transform: scale(1) rotate(-5deg); }
+      100% { transform: scale(1.3) rotate(5deg); }
+    }
+
+    /* ==========================================================================
+       HUD
+       ========================================================================== */
+    #hud-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.94) 0%, transparent 100%);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .hud-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-l4 {
+      background: linear-gradient(135deg, #d35400, #e67e22);
+      padding: 3px 10px;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 4px;
+      letter-spacing: 2px;
+    }
+
+    .title-l4 {
+      font-family: var(--font-horror);
+      font-size: 1.8rem;
+      color: #f39c12;
+      text-shadow: 0 0 15px #d35400;
+      letter-spacing: 2px;
+    }
+
+    .stats-card-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-pill {
+      background: rgba(15, 10, 5, 0.85);
+      border: 1px solid rgba(241, 196, 15, 0.4);
+      padding: 5px 14px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-lbl { font-size: 8px; font-family: var(--font-ui); color: #aaa; letter-spacing: 1.5px; }
+    .stat-val { font-size: 1.2rem; font-family: var(--font-ui); font-weight: 700; color: #f1c40f; }
+
+    /* Bottom Inventory Bar */
+    #hud-inventory {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(10, 8, 5, 0.9);
+      border: 1.5px solid rgba(241, 196, 15, 0.4);
+      padding: 8px 18px;
+      border-radius: 14px;
+      z-index: 100;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.8);
+      pointer-events: auto;
+    }
+
+    .inv-item-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 60px;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+    }
+
+    .inv-item-card.obtained {
+      border-color: #f1c40f;
+      background: rgba(241, 196, 15, 0.15);
+      animation: itemPulse 1.2s infinite alternate;
+    }
+
+    .activate-dagger-btn {
+      background: linear-gradient(135deg, #f39c12, #d35400);
+      border: 1.5px solid #f1c40f;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(243, 156, 18, 0.7);
+      animation: actBtnPulse 1.2s infinite alternate;
+      transition: all 0.2s;
+    }
+
+    @keyframes actBtnPulse {
+      0% { transform: scale(1); box-shadow: 0 0 15px rgba(243, 156, 18, 0.6); }
+      100% { transform: scale(1.06); box-shadow: 0 0 30px rgba(241, 196, 15, 0.95); }
+    }
+
+    .strike-dagger-btn {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 2px solid #ff7675;
+      padding: 12px 28px;
+      border-radius: 25px;
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fff;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 0 25px rgba(255, 34, 34, 0.9);
+      animation: strikeBtnPulse 0.9s infinite alternate;
+    }
+
+    @keyframes strikeBtnPulse {
+      from { transform: scale(1); box-shadow: 0 0 20px rgba(255, 34, 34, 0.8); }
+      to { transform: scale(1.08); box-shadow: 0 0 35px rgba(241, 196, 15, 1); }
+    }
+
+    .stella-death-animation {
+      animation: stellaVaporize 2.2s forwards cubic-bezier(0.25, 1, 0.5, 1) !important;
+      pointer-events: none !important;
+    }
+
+    @keyframes stellaVaporize {
+      0% {
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 30px #f1c40f) brightness(2.5);
+        opacity: 1;
+      }
+      25% {
+        transform: scale(1.3) rotate(-10deg);
+        filter: drop-shadow(0 0 50px #ff2222) brightness(3);
+      }
+      50% {
+        transform: scale(1.1) rotate(10deg) translateY(-15px);
+        filter: drop-shadow(0 0 45px #f39c12) hue-rotate(90deg);
+        opacity: 0.9;
+      }
+      75% {
+        transform: scale(0.6) translateY(-45px);
+        filter: brightness(4) blur(4px);
+        opacity: 0.6;
+      }
+      100% {
+        transform: scale(0.05) translateY(-90px);
+        filter: brightness(0) blur(12px);
+        opacity: 0;
+      }
+    }
+
+    .doorway-unlocked-glow {
+      box-shadow: 0 0 40px rgba(46, 213, 115, 0.95), inset 0 0 20px rgba(46, 213, 115, 0.6) !important;
+      border: 2px solid #2ed573 !important;
+      animation: doorwayPulse 1.4s infinite alternate;
+    }
+
+    @keyframes doorwayPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.12); }
+    }
+
+    .screen-shake {
+      animation: shakeScreen 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes shakeScreen {
+      10%, 90% { transform: translate3d(-5px, 2px, 0); }
+      20%, 80% { transform: translate3d(7px, -4px, 0); }
+      30%, 50%, 70% { transform: translate3d(-9px, 6px, 0); }
+      40%, 60% { transform: translate3d(9px, -6px, 0); }
+    }
+
+    /* Start Banner */
+    #level4-start-banner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(15, 10, 5, 0.95);
+      border: 2px solid #f1c40f;
+      box-shadow: 0 0 60px rgba(241, 196, 15, 0.6);
+      padding: 30px 48px;
+      border-radius: 12px;
+      text-align: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    #level4-start-banner.show { opacity: 1; }
+
+    /* Toast */
+    #toast-bar {
+      position: fixed;
+      top: 75px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(15, 10, 5, 0.94);
+      border: 1.5px solid #f1c40f;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
+      box-shadow: 0 0 25px rgba(241, 196, 15, 0.5);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    #toast-bar.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Modal for Cutscene / Transition */
+    .l4-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .l4-modal.active { opacity: 1; pointer-events: auto; }
+  </style>
+</head>
+
+<body>
+
+  <div id="room-container">
+    <div id="skylight-beam"></div>
+
+    <!-- Hidden Master Key Sparkle under rubble -->
+    <div id="hidden-key-spot" onclick="findMasterKey()">
+      <span style="font-size: 16px;">🔑</span>
+    </div>
+
+    <!-- Ancient Ritual Altar on Floor -->
+    <div id="ritual-altar" onclick="activateDaggerOnAltar()">
+      <span style="font-size: 20px;">⚡</span>
+      <span class="altar-rune-text" id="altar-status-text">RITUAL MARK</span>
+    </div>
+
+    <!-- The 6 Boxes -->
+    <div class="wooden-box-target" id="box-1" onclick="openBox(1)">
+      <span class="box-status-icon" id="box-icon-1">📦</span>
+      <span class="box-num">BOX 1</span>
+    </div>
+    <div class="wooden-box-target" id="box-2" onclick="openBox(2)">
+      <span class="box-status-icon" id="box-icon-2">📦</span>
+      <span class="box-num">BOX 2</span>
+    </div>
+    <div class="wooden-box-target" id="box-3" onclick="openBox(3)">
+      <span class="box-status-icon" id="box-icon-3">📦</span>
+      <span class="box-num">BOX 3</span>
+    </div>
+    <div class="wooden-box-target" id="box-4" onclick="openBox(4)">
+      <span class="box-status-icon" id="box-icon-4">📦</span>
+      <span class="box-num">BOX 4</span>
+    </div>
+    <div class="wooden-box-target" id="box-5" onclick="openBox(5)">
+      <span class="box-status-icon" id="box-icon-5">📦</span>
+      <span class="box-num">BOX 5</span>
+    </div>
+    <div class="wooden-box-target" id="box-6" onclick="openBox(6)">
+      <span class="box-status-icon" id="box-icon-6">✨</span>
+      <span class="box-num">BOX 6 (ORNATE)</span>
+    </div>
+
+    <!-- Exit Door -->
+    <div id="exit-door-target" onclick="enterLevelFive()">
+      <span style="font-size: 24px;" id="exit-icon">🚪</span>
+      <span style="font-size: 9px; font-family: var(--font-ui); color:#888;" id="exit-lbl">DOORWAY</span>
+    </div>
+
+    <!-- Entities -->
+    <div id="entities-layer">
+      <!-- Player -->
+      <div id="player-sprite">
+        <div class="player-tag" id="l4-player-tag">YOU (AARAV)</div>
+        <div class="char-head survivor-avatar avatar-aarav" id="l4-player-avatar" style="width:20px; height:20px; margin:0 auto 2px; box-shadow:none;"></div>
+        <div class="char-torso"></div>
+        <div class="char-legs">
+          <div class="char-leg"></div>
+          <div class="char-leg"></div>
+        </div>
+        <div class="dagger-flame" id="player-dagger-flame">🗡️🔥</div>
+      </div>
+
+      <!-- Stella Boss -->
+      <div id="stella-boss-sprite">
+        <div style="font-family: var(--font-horror); font-size:12px; color:#ff0000; text-align:center;">STELLA</div>
+        <div class="stella-boss-head"></div>
+        <div class="stella-boss-gown"></div>
+        <div class="stella-boss-legs">
+          <div class="stella-boss-leg"></div>
+          <div class="stella-boss-leg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD Top -->
+  <div id="hud-top">
+    <div class="hud-title-wrap" style="display:flex; align-items:center; gap:8px;">
+      <div class="badge-l4">LEVEL 4</div>
+      <div class="title-l4">THE SIX BOXES</div>
+      <div id="l4-survivor-badge" style="background:rgba(243,156,18,0.15); border:1px solid #f39c12; padding:3px 10px; border-radius:18px; font-family:var(--font-ui); font-size:11px; font-weight:700; color:#f1c40f; display:flex; align-items:center; gap:6px; pointer-events:auto;">
+        <div id="l4-hud-avatar" class="survivor-avatar avatar-aarav" style="width:22px; height:22px; box-shadow:none;"></div>
+        <span id="l4-survivor-name">AARAV</span>
+        <button onclick="openSquadRosterModal()" style="background:#e74c3c; border:none; color:#fff; border-radius:8px; padding:1px 6px; font-size:9px; cursor:pointer; font-weight:bold;">SQUAD</button>
+      </div>
+    </div>
+
+    <div class="stats-card-group">
+      <div class="stat-pill">
+        <div class="stat-lbl">BOXES OPENED</div>
+        <div class="stat-val" id="hud-boxes-opened">0 / 6</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-lbl">DAGGER STATUS</div>
+        <div class="stat-val" id="hud-dagger-status" style="font-size:0.95rem; color:#888;">LOCKED</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stella Boss Health HUD Bar -->
+  <div id="stella-boss-hud" style="position:fixed; top:72px; left:50%; transform:translateX(-50%); display:none; flex-direction:column; align-items:center; gap:6px; z-index:160; background:rgba(12,6,6,0.94); border:2px solid #ff3333; padding:8px 24px; border-radius:12px; box-shadow:0 0 30px rgba(255,0,0,0.7);">
+    <div style="font-family:var(--font-horror); font-size:1.15rem; color:#ff3333; letter-spacing:3px; display:flex; align-items:center; gap:10px;">
+      <span>💀</span>
+      <span>STELLA THE CORRUPTED</span>
+      <span id="stella-hp-text" style="font-family:var(--font-ui); font-size:0.95rem; color:#f1c40f; font-weight:700;">100 / 100 HP</span>
+    </div>
+    <div style="width:280px; height:12px; background:#222; border:1px solid #ff4747; border-radius:6px; overflow:hidden;">
+      <div id="stella-hp-fill" style="width:100%; height:100%; background:linear-gradient(90deg, #c0392b, #ff4747); transition:width 0.35s ease;"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Inventory Bar -->
+  <div id="hud-inventory">
+    <div class="inv-item-card" id="inv-master-key">
+      <span style="font-size: 18px;" id="icon-mkey">🔒</span>
+      <span style="font-size: 8px; font-family: var(--font-ui);">MASTER KEY</span>
+    </div>
+    <div class="inv-item-card" id="inv-dagger" onclick="activateDaggerOnAltar()" title="Click to Empower Dagger">
+      <span style="font-size: 18px;" id="icon-dagger">🔒</span>
+      <span style="font-size: 8px; font-family: var(--font-ui);">DAGGER</span>
+    </div>
+    <button class="activate-dagger-btn" id="btn-activate-dagger" onclick="activateDaggerOnAltar()">⚡ ACTIVATE DAGGER</button>
+    <button class="strike-dagger-btn" id="btn-strike-dagger" onclick="strikeStellaWithDagger()">⚔️ STRIKE & KILL STELLA!</button>
+  </div>
+
+  <!-- Start Banner -->
+  <div id="level4-start-banner">
+    <h1 style="font-family: var(--font-horror); font-size: 2.8rem; color: #f1c40f; margin-bottom: 6px;">“SIX BOXES. ONE KEY.”</h1>
+    <h3 style="font-family: var(--font-ui); font-size: 1.4rem; color: #ddd; letter-spacing: 3px;">ONE WAY TO FIGHT BACK.</h3>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-bar"></div>
+
+  <!-- Stella Arrival Cutscene Modal -->
+  <div class="l4-modal" id="modal-stella-arrival">
+    <h1 style="font-family: var(--font-horror); font-size: 3rem; color: #ff3333; margin-bottom: 12px;">💥 BOOOOM!</h1>
+    <h2 style="font-family: var(--font-ui); font-size: 1.8rem; color: #f1c40f; letter-spacing: 3px; margin-bottom: 8px;">THE DOOR BURSTS OPEN!</h2>
+    <p style="font-size: 1.1rem; color: #ccc; max-width: 440px; margin-bottom: 24px;">
+      Stella stands in the doorway with bloodshot eyes.<br>
+      She isn't here to hunt... she is here for the Dagger.<br>
+      <strong style="color:#ff4747;">“KILL HER BEFORE SHE REACHES YOU!”</strong>
+    </p>
+    <button class="strike-dagger-btn" style="display:inline-block;" onclick="dismissStellaModal()">⚔️ FACE & KILL HER!</button>
+  </div>
+
+  <!-- Stella Slain Victory Modal -->
+  <div class="l4-modal" id="modal-stella-killed">
+    <h1 style="font-family: var(--font-horror); font-size: 3.2rem; color: #f1c40f; text-shadow: 0 0 35px #f1c40f; margin-bottom: 8px;">⚔️ STELLA SLAIN WITH ANCIENT DAGGER! 💀</h1>
+    <h2 style="font-family: var(--font-ui); font-size: 1.8rem; color: #2ed573; letter-spacing: 3px; margin-bottom: 12px;">HER CORRUPTED SOUL HAS BEEN DESTROYED</h2>
+    <p style="font-size: 1.15rem; color: #ddd; max-width: 500px; margin-bottom: 24px; line-height: 1.6;">
+      The celestial fire from the ancient blade pierced straight into Stella's demonic heart, disintegrating her body into ashes!<br>
+      The doorway leading to the <strong style="color:#f1c40f;">Grand Auditorium</strong> is now unlocked!
+    </p>
+    <button class="strike-dagger-btn" style="display:inline-block; font-size:1.1rem; padding:14px 38px; background:linear-gradient(135deg, #27ae60, #2ecc71); box-shadow:0 0 30px rgba(46,204,113,0.8);" onclick="enterLevelFive()">
+      🔥 PROCEED TO LEVEL 5: THE AUDITORIUM ➡️
+    </button>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const Sfx = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      },
+      play(freq, type, dur) {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        g.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + dur);
+      }
+    };
+
+    let state = {
+      hasMasterKey: false,
+      boxesOpened: 0,
+      hasDagger: false,
+      daggerActivated: false,
+      stellaHere: false,
+      stellaStunned: false,
+      stellaKilled: false,
+      stellaHP: 100,
+      playerHP: 100
+    };
+
+    const player = {
+      x: window.innerWidth * 0.28,
+      y: window.innerHeight * 0.75,
+      speed: 4
+    };
+
+    const stella = {
+      x: window.innerWidth * 0.28,
+      y: window.innerHeight * 0.52,
+      speed: 1.8
+    };
+
+    const keys = {};
+
+    function showToast(msg, dur = 2800) {
+      const t = document.getElementById('toast-bar');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    // Step 1: Find Master Key
+    function findMasterKey() {
+      if (state.hasMasterKey) return;
+      state.hasMasterKey = true;
+      document.getElementById('hidden-key-spot').style.display = 'none';
+      document.getElementById('inv-master-key').classList.add('obtained');
+      document.getElementById('icon-mkey').textContent = '🔑';
+      showToast("🔑 MASTER KEY ACQUIRED! UNLOCK THE 6 BOXES!");
+      Sfx.play(650, 'triangle', 0.5);
+    }
+
+    // Step 2: Open Boxes
+    const BOX_REWARDS = {
+      1: { name: "EMPTY", icon: "❌", msg: "Box 1 is empty... only cobwebs and dust." },
+      2: { name: "SCROLL", icon: "📜", msg: "📜 Ancient Scroll found: 'The blade hungers for the ritual mark!'" },
+      3: { name: "MEDKIT", icon: "💉", msg: "💉 Full Medkit found! Health fully restored!" },
+      4: { name: "TRAP", icon: "😈", msg: "😈 TRAP ACTIVATED! Poison darts fired! (Dodged!)" },
+      5: { name: "SHIELD", icon: "🛡️", msg: "🛡️ Guardian Shield Ring found! Defence boosted!" },
+      6: { name: "DAGGER", icon: "🗡️", msg: "🗡️ ANCIENT DAGGER FOUND! 'The weapon that can kill her...'" }
+    };
+
+    function openBox(boxId) {
+      if (!state.hasMasterKey) {
+        showToast("LOCKED! Find the Master Key hidden in the room first.");
+        return;
+      }
+
+      const boxEl = document.getElementById(`box-${boxId}`);
+      if (boxEl.classList.contains('opened')) {
+        showToast("Box already opened!");
+        return;
+      }
+
+      boxEl.classList.add('opened');
+      state.boxesOpened++;
+      document.getElementById('hud-boxes-opened').textContent = `${state.boxesOpened} / 6`;
+
+      const rew = BOX_REWARDS[boxId];
+      document.getElementById(`box-icon-${boxId}`).textContent = rew.icon;
+      showToast(rew.msg);
+      Sfx.play(500, 'sine', 0.2);
+
+      if (boxId === 6) {
+        // Ancient Dagger Found!
+        state.hasDagger = true;
+        document.getElementById('inv-dagger').classList.add('obtained');
+        document.getElementById('icon-dagger').textContent = '🗡️';
+        document.getElementById('hud-dagger-status').textContent = 'READY TO ACTIVATE';
+        document.getElementById('hud-dagger-status').style.color = '#f1c40f';
+
+        // Prompt player to activate dagger
+        document.getElementById('ritual-altar').classList.add('glow');
+        document.getElementById('altar-status-text').textContent = 'ACTIVATE DAGGER';
+
+        const actBtn = document.getElementById('btn-activate-dagger');
+        if (actBtn) {
+          actBtn.style.animation = 'actBtnPulse 0.6s infinite alternate';
+          actBtn.style.boxShadow = '0 0 35px #f1c40f';
+        }
+        showToast("🗡️ ANCIENT DAGGER FOUND! CLICK [⚡ ACTIVATE DAGGER] TO EMPOWER IT!", 4000);
+      }
+    }
+
+    // Step 3: Activate Dagger
+    function activateDaggerOnAltar() {
+      // If player doesn't have dagger yet, automatically grant it from Box 6 so user never gets stuck!
+      if (!state.hasDagger) {
+        state.hasMasterKey = true;
+        const keySpot = document.getElementById('hidden-key-spot');
+        if (keySpot) keySpot.style.display = 'none';
+        const mKey = document.getElementById('inv-master-key');
+        if (mKey) mKey.classList.add('obtained');
+        const iconKey = document.getElementById('icon-mkey');
+        if (iconKey) iconKey.textContent = '🔑';
+
+        state.hasDagger = true;
+        const b6 = document.getElementById('box-6');
+        if (b6) b6.classList.add('opened');
+        const b6Icon = document.getElementById('box-icon-6');
+        if (b6Icon) b6Icon.textContent = '🗡️';
+        const invDag = document.getElementById('inv-dagger');
+        if (invDag) invDag.classList.add('obtained');
+        const iconDag = document.getElementById('icon-dagger');
+        if (iconDag) iconDag.textContent = '🗡️';
+        showToast("🗡️ ANCIENT DAGGER RETRIEVED FROM RITUAL CHEST!", 2500);
+      }
+
+      if (state.daggerActivated) {
+        if (!state.stellaHere && !state.stellaKilled) {
+          showToast("⚡ DAGGER IS ALREADY BURNING WITH CELESTIAL FIRE!");
+        }
+        return;
+      }
+
+      state.daggerActivated = true;
+      document.getElementById('player-dagger-flame').style.display = 'block';
+      document.getElementById('hud-dagger-status').textContent = '🔥 ACTIVATED (LETHAL)';
+      document.getElementById('hud-dagger-status').style.color = '#2ed573';
+      document.getElementById('ritual-altar').classList.remove('glow');
+      document.getElementById('altar-status-text').textContent = 'ALTAR EMPOWERED';
+
+      const actBtn = document.getElementById('btn-activate-dagger');
+      if (actBtn) {
+        actBtn.textContent = '🔥 DAGGER ACTIVATED';
+        actBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+        actBtn.style.animation = 'none';
+        actBtn.disabled = true;
+      }
+
+      showToast("⚔️ ANCIENT DAGGER EMPOWERED WITH CELESTIAL FIRE! READY TO KILL STELLA!", 3500);
+      Sfx.play(900, 'triangle', 0.8);
+
+      // Trigger Stella Arrival BOOM!
+      setTimeout(() => {
+        document.getElementById('modal-stella-arrival').classList.add('active');
+        Sfx.play(80, 'sawtooth', 1.5);
+      }, 1200);
+    }
+
+    function dismissStellaModal() {
+      document.getElementById('modal-stella-arrival').classList.remove('active');
+      state.stellaHere = true;
+
+      // Show Stella Sprite at doorway
+      const gEl = document.getElementById('stella-boss-sprite');
+      if (gEl) {
+        gEl.style.display = 'block';
+        gEl.style.left = `${stella.x}px`;
+        gEl.style.top = `${stella.y}px`;
+      }
+
+      // Show Boss Health HUD
+      const bossHud = document.getElementById('stella-boss-hud');
+      if (bossHud) bossHud.style.display = 'flex';
+
+      // Show Strike Button
+      const strkBtn = document.getElementById('btn-strike-dagger');
+      if (strkBtn) {
+        strkBtn.style.display = 'inline-block';
+        strkBtn.textContent = '⚔️ STRIKE & KILL STELLA!';
+      }
+
+      showToast("⚠️ STELLA IS ATTACKING! USE THE DAGGER TO KILL HER!", 3500);
+    }
+
+    function strikeStellaWithDagger() {
+      if (!state.stellaHere || !state.daggerActivated || state.stellaKilled) return;
+
+      state.stellaHP = Math.max(0, (state.stellaHP || 100) - 50);
+      const hpFill = document.getElementById('stella-hp-fill');
+      const hpText = document.getElementById('stella-hp-text');
+      const stellaEl = document.getElementById('stella-boss-sprite');
+
+      if (state.stellaHP > 0) {
+        // Strike 1: Heavy wound & knockback
+        if (hpFill) hpFill.style.width = `${state.stellaHP}%`;
+        if (hpText) hpText.textContent = `${state.stellaHP} / 100 HP`;
+
+        state.stellaStunned = true;
+        showToast("💥 CELESTIAL DAGGER STABBED STELLA! (50 HP LEFT) - FINISH HER!", 2500);
+        Sfx.play(400, 'sawtooth', 0.6);
+
+        // Knockback & holy gold flash
+        stella.x += (player.x > stella.x ? -100 : 100);
+        if (stellaEl) {
+          stellaEl.style.left = `${stella.x}px`;
+          stellaEl.style.filter = 'drop-shadow(0 0 40px #f1c40f) brightness(2)';
+        }
+
+        // Screen shake
+        document.body.classList.add('screen-shake');
+        setTimeout(() => document.body.classList.remove('screen-shake'), 400);
+
+        setTimeout(() => {
+          state.stellaStunned = false;
+          if (!state.stellaKilled && stellaEl) {
+            stellaEl.style.filter = 'drop-shadow(0 0 20px #ff0000)';
+          }
+        }, 2800);
+
+      } else {
+        // FATAL KILLING BLOW: HP = 0! STELLA DIES!
+        if (hpFill) {
+          hpFill.style.width = '0%';
+          hpFill.style.background = '#333';
+        }
+        if (hpText) {
+          hpText.textContent = '0 / 100 HP (DEAD)';
+          hpText.style.color = '#ff2222';
+        }
+
+        state.stellaKilled = true;
+        state.stellaHere = false;
+        state.stellaStunned = true;
+
+        showToast("💀 FATAL BLOW! STELLA PURGED AND KILLED BY ANCIENT DAGGER!", 4000);
+
+        // Screeching death audio sequence
+        Sfx.play(600, 'sawtooth', 0.5);
+        setTimeout(() => Sfx.play(300, 'sawtooth', 0.8), 200);
+        setTimeout(() => Sfx.play(120, 'sawtooth', 1.8), 500);
+
+        // Screen shake and violent death disintegration animation
+        document.body.classList.add('screen-shake');
+        if (stellaEl) stellaEl.classList.add('stella-death-animation');
+
+        // Hide strike button
+        const strkBtn = document.getElementById('btn-strike-dagger');
+        if (strkBtn) strkBtn.style.display = 'none';
+
+        // Unlock Exit Doorway to Level 5 with Bright Beacon
+        const exitIcon = document.getElementById('exit-icon');
+        if (exitIcon) exitIcon.textContent = '🔓';
+        const exitLbl = document.getElementById('exit-lbl');
+        if (exitLbl) {
+          exitLbl.textContent = 'AUDITORIUM PORTAL (UNLOCKED)';
+          exitLbl.style.color = '#2ed573';
+        }
+        const exitDoor = document.getElementById('exit-door-target');
+        if (exitDoor) exitDoor.classList.add('doorway-unlocked-glow');
+
+        // After disintegration completes, remove sprite and open Grand Victory Modal!
+        setTimeout(() => {
+          if (stellaEl) stellaEl.style.display = 'none';
+          document.body.classList.remove('screen-shake');
+          const bossHud = document.getElementById('stella-boss-hud');
+          if (bossHud) bossHud.style.display = 'none';
+
+          // Show Victory Modal
+          const vModal = document.getElementById('modal-stella-killed');
+          if (vModal) vModal.classList.add('active');
+
+          // Victory chime
+          Sfx.play(523.25, 'triangle', 0.4);
+          setTimeout(() => Sfx.play(659.25, 'triangle', 0.4), 200);
+          setTimeout(() => Sfx.play(783.99, 'triangle', 0.8), 400);
+        }, 2200);
+      }
+    }
+
+    function enterLevelFive() {
+      if (!state.daggerActivated) {
+        showToast("You cannot leave without activating the Ancient Dagger!");
+        return;
+      }
+      showToast("ENTERING THE AUDITORIUM FOR THE FINAL JUDGEMENT...", 2000);
+      setTimeout(() => {
+        window.location.href = 'level5.html';
+      }, 800);
+    }
+
+    // Game loop
+    function gameLoop() {
+      if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
+      if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
+      if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= player.speed * 0.7;
+      if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y += player.speed * 0.7;
+
+      player.x = Math.max(80, Math.min(window.innerWidth - 80, player.x));
+      player.y = Math.max(window.innerHeight * 0.5, Math.min(window.innerHeight - 50, player.y));
+
+      document.getElementById('player-sprite').style.left = `${player.x}px`;
+      document.getElementById('player-sprite').style.top = `${player.y}px`;
+
+      // Stella AI chase if active and not stunned and not killed
+      if (state.stellaHere && !state.stellaStunned && !state.stellaKilled) {
+        stella.x += (player.x > stella.x ? 1 : -1) * stella.speed;
+        stella.y += (player.y > stella.y ? 1 : -1) * (stella.speed * 0.7);
+
+        const gEl = document.getElementById('stella-boss-sprite');
+        if (gEl) {
+          gEl.style.left = `${stella.x}px`;
+          gEl.style.top = `${stella.y}px`;
+        }
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.addEventListener('keydown', e => {
+      keys[e.key] = true;
+      if (e.key === ' ' && state.stellaHere) strikeStellaWithDagger();
+    });
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const surv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : { name: 'AARAV', avatarClass: 'avatar-aarav', spriteClass: 'char-aarav', major: 'Robotics Eng' };
+      const sName = surv.name.toUpperCase();
+
+      // Render authentic in-game illustrated survivor model
+      if (typeof renderInGameSurvivorSprite === 'function') {
+        renderInGameSurvivorSprite('player-sprite');
+      }
+
+      const hudAvatar = document.getElementById('l4-hud-avatar');
+      if (hudAvatar) hudAvatar.className = `survivor-avatar ${surv.avatarClass}`;
+      const hudName = document.getElementById('l4-survivor-name');
+      if (hudName) hudName.textContent = `${sName} (${surv.major.split(' ')[0]})`;
+
+      const b = document.getElementById('level4-start-banner');
+      b.classList.add('show');
+      setTimeout(() => b.classList.remove('show'), 3000);
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+
+</html>

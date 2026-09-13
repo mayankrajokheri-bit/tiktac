@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Level 3 — The Haunted Corridor | Reality Quest AI</title>
+  <meta name="description" content="Level 3: The Haunted Corridor. Survive Stella, solve 3 puzzles, secure the Guardian Token, and escape before time runs out.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/survivors.css">
+  <script src="js/survivors.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --blood-red: #c0392b;
+      --neon-red: #ff2222;
+      --stella-glow: #e74c3c;
+      --light-on-amber: #f5f6fa;
+      --shield-cyan: #00d2d3;
+      --font-horror: 'Creepster', cursive;
+      --font-ui: 'Oswald', sans-serif;
+      --font-body: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: #030304;
+      color: #fff;
+      font-family: var(--font-body);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+      touch-action: none;
+    }
+
+    /* ==========================================================================
+       CORRIDOR ENVIRONMENT
+       ========================================================================== */
+    #corridor-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* Dark background */
+    #corridor-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/corridor_dark.jpg');
+      background-size: cover;
+      background-position: center center;
+      transition: opacity 0.8s ease, filter 0.8s ease;
+      z-index: 1;
+    }
+
+    /* Illuminated variant (When power is turned on) */
+    #corridor-bg-lit {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/corridor_stella.png');
+      background-size: cover;
+      background-position: center center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1s ease;
+      z-index: 2;
+    }
+
+    /* Vignette & Darkness overlay */
+    #darkness-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, 0.92) 85%);
+      pointer-events: none;
+      z-index: 3;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Flashlight beam around player */
+    #flashlight-beam {
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 230, 0.16) 0%, rgba(255, 255, 200, 0.05) 50%, transparent 75%);
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      transition: opacity 0.3s ease;
+    }
+
+    /* ==========================================================================
+       INTERACTIVE PUZZLE STATIONS IN CORRIDOR
+       ========================================================================== */
+    .interactable-station {
+      position: absolute;
+      z-index: 8;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s, filter 0.3s;
+    }
+
+    .interactable-station:hover {
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 12px var(--blood-red));
+    }
+
+    .station-marker {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(20, 5, 5, 0.85);
+      border: 2px solid var(--blood-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 15px rgba(255, 34, 34, 0.5);
+      animation: stationPulse 1.8s infinite alternate;
+    }
+
+    .station-label {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #ff7675;
+      text-shadow: 0 0 8px #000;
+      margin-top: 4px;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    @keyframes stationPulse {
+      from { box-shadow: 0 0 8px var(--blood-red); transform: scale(1); }
+      to { box-shadow: 0 0 25px #ff2222, 0 0 40px rgba(255, 34, 34, 0.6); transform: scale(1.06); }
+    }
+
+    /* Stations coordinates */
+    #station-locker { left: 18%; top: 58%; }
+    #station-power { left: 52%; top: 48%; }
+    #station-cabinet { left: 78%; top: 62%; }
+    #station-exit { left: 88%; top: 38%; }
+
+    /* ==========================================================================
+       ENTITIES: PLAYER, SURVIVORS & STELLA
+       ========================================================================== */
+    #entities-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Player Entity */
+    #player-sprite {
+      position: absolute;
+      width: 42px;
+      height: 60px;
+      transform: translate(-50%, -100%);
+      will-change: left, top;
+      z-index: 15;
+    }
+
+    .player-hud-tag {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #74b9ff;
+      text-shadow: 0 0 5px #000;
+      white-space: nowrap;
+    }
+
+    .char-head {
+      width: 16px;
+      height: 16px;
+      background: #f1c27d;
+      border-radius: 50%;
+      margin: 0 auto 2px;
+      border: 1.5px solid rgba(0, 0, 0, 0.4);
+    }
+
+    .char-torso {
+      width: 22px;
+      height: 28px;
+      background: linear-gradient(180deg, #2e86de, #1b4f72);
+      border-radius: 5px;
+      margin: 0 auto;
+    }
+
+    .char-legs {
+      display: flex;
+      justify-content: space-around;
+      width: 18px;
+      margin: 0 auto;
+    }
+
+    .char-leg {
+      width: 5px;
+      height: 14px;
+      background: #111;
+      border-radius: 2px;
+    }
+
+    /* Guardian Token Active Shield Bubble */
+    .guardian-shield-bubble {
+      position: absolute;
+      width: 76px;
+      height: 76px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2.5px solid var(--shield-cyan);
+      box-shadow: 0 0 25px var(--shield-cyan), inset 0 0 20px rgba(0, 210, 211, 0.4);
+      background: radial-gradient(circle, rgba(0, 210, 211, 0.15) 0%, transparent 80%);
+      animation: shieldSpin 1s infinite linear;
+      display: none;
+    }
+
+    @keyframes shieldSpin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    /* STELLA ENTITY */
+    #stella-sprite {
+      position: absolute;
+      width: 50px;
+      height: 75px;
+      transform: translate(-50%, -100%);
+      will-change: left, top;
+      z-index: 12;
+      transition: filter 0.3s;
+    }
+
+    .stella-hud-tag {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-horror);
+      font-size: 14px;
+      color: #ff3333;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #ff0000;
+      white-space: nowrap;
+    }
+
+    .stella-head {
+      width: 18px;
+      height: 20px;
+      background: #bdc581;
+      border-radius: 50%;
+      margin: 0 auto 1px;
+      position: relative;
+    }
+
+    .stella-eyes {
+      display: flex;
+      justify-content: space-around;
+      width: 12px;
+      margin: 6px auto 0;
+    }
+
+    .stella-eye {
+      width: 3px;
+      height: 3px;
+      background: #ff0000;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #ff0000;
+    }
+
+    .stella-gown {
+      width: 26px;
+      height: 36px;
+      background: linear-gradient(180deg, #d2dae2, #808e9b);
+      clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
+      margin: 0 auto;
+      border-bottom: 2px solid #b71540;
+    }
+
+    .stella-legs {
+      display: flex;
+      justify-content: space-around;
+      width: 16px;
+      margin: 0 auto;
+    }
+
+    .stella-leg {
+      width: 4px;
+      height: 14px;
+      background: #2f3640;
+    }
+
+    /* Stella States visual hints */
+    #stella-state-indicator {
+      position: absolute;
+      top: -42px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      filter: drop-shadow(0 0 8px #ff0000);
+    }
+
+    /* ==========================================================================
+       HEADS UP DISPLAY (HUD)
+       ========================================================================== */
+    #hud-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 24px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.5) 75%, transparent 100%);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .level-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .level-badge {
+      background: linear-gradient(135deg, #2c3e50, #1a252f);
+      border: 1px solid #7f8c8d;
+      padding: 3px 10px;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 4px;
+      letter-spacing: 2px;
+    }
+
+    .level-name {
+      font-family: var(--font-horror);
+      font-size: 1.8rem;
+      color: #e74c3c;
+      text-shadow: 0 0 15px #c0392b;
+      letter-spacing: 2px;
+    }
+
+    .status-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .hud-pill {
+      background: rgba(15, 15, 20, 0.88);
+      border: 1px solid rgba(255, 60, 60, 0.35);
+      padding: 5px 14px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .hud-pill-lbl {
+      font-size: 8px;
+      font-family: var(--font-ui);
+      letter-spacing: 1.5px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .hud-pill-val {
+      font-size: 1.2rem;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      color: #ff4747;
+      line-height: 1;
+    }
+
+    .hud-pill-val.timer {
+      font-family: monospace;
+      color: #ff9f43;
+    }
+
+    /* Inventory & Quick Action Bar Bottom */
+    #hud-bottom {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+      pointer-events: auto;
+    }
+
+    .inventory-slot {
+      width: 56px;
+      height: 56px;
+      background: rgba(10, 10, 15, 0.88);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .inventory-slot.has-item {
+      border-color: var(--shield-cyan);
+      box-shadow: 0 0 15px rgba(0, 210, 211, 0.4);
+      animation: tokenGlow 1.2s infinite alternate;
+    }
+
+    @keyframes tokenGlow {
+      from { box-shadow: 0 0 8px var(--shield-cyan); }
+      to { box-shadow: 0 0 25px var(--shield-cyan); }
+    }
+
+    .slot-icon { font-size: 22px; }
+    .slot-label { font-size: 8px; font-family: var(--font-ui); color: #aaa; letter-spacing: 1px; }
+
+    .action-btn-pill {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 1px solid #ff7675;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(192, 57, 43, 0.6);
+      transition: transform 0.15s;
+    }
+
+    .action-btn-pill:active { transform: scale(0.94); }
+
+    /* Stealth Sneak Status Indicator */
+    #stealth-indicator {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #2ed573;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 4px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(46, 213, 115, 0.3);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       PUZZLE MODALS (3 DISTINCT INTERACTIVE MINI-GAMES)
+       ========================================================================== */
+    .puzzle-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 250;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    }
+
+    .puzzle-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .puzzle-box {
+      background: #111116;
+      border: 2px solid #ff4747;
+      border-radius: 14px;
+      padding: 28px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 0 40px rgba(255, 34, 34, 0.4);
+      text-align: center;
+      position: relative;
+    }
+
+    .puzzle-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .puzzle-title {
+      font-family: var(--font-horror);
+      font-size: 2rem;
+      color: #ff4747;
+      letter-spacing: 3px;
+      margin-bottom: 6px;
+    }
+
+    .puzzle-desc {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* Puzzle 1: Keypad UI */
+    .keypad-display {
+      width: 180px;
+      height: 44px;
+      background: #000;
+      border: 1px solid #444;
+      border-radius: 6px;
+      margin: 0 auto 16px;
+      font-family: monospace;
+      font-size: 1.8rem;
+      color: #2ed573;
+      letter-spacing: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 56px);
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .keypad-num {
+      width: 56px;
+      height: 48px;
+      background: #1e1e24;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      font-family: var(--font-ui);
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .keypad-num:active { background: #ff4747; }
+
+    /* Puzzle 2: Electrical Panel UI */
+    .wire-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding: 10px;
+      background: #09090c;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+
+    .wire-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wire-plug {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .wire-red { background: #c0392b; color: #fff; }
+    .wire-blue { background: #2980b9; color: #fff; }
+    .wire-yellow { background: #f39c12; color: #fff; }
+
+    .wire-status-led {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #333;
+    }
+
+    .wire-status-led.connected {
+      background: #2ed573;
+      box-shadow: 0 0 10px #2ed573;
+    }
+
+    /* Puzzle 3: Cabinet Cipher */
+    .cipher-dial-group {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .cipher-dial {
+      width: 60px;
+      height: 80px;
+      background: #000;
+      border: 2px solid #555;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cipher-val {
+      font-family: var(--font-ui);
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff9f43;
+    }
+
+    .dial-btn {
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* ==========================================================================
+       CINEMATIC OVERLAYS & DRAMA
+       ========================================================================== */
+    /* Start Banner */
+    #start-warning-banner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10, 0, 0, 0.94);
+      border: 2px solid #ff2222;
+      box-shadow: 0 0 60px #ff2222;
+      padding: 30px 48px;
+      border-radius: 12px;
+      text-align: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    #start-warning-banner.show {
+      opacity: 1;
+    }
+
+    /* Level Complete Escape Cutscene */
+    #escape-modal {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+
+    #escape-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .horror-sub-line {
+      font-family: var(--font-ui);
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+      color: #ff4747;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .horror-ominous-line {
+      font-family: var(--font-horror);
+      font-size: clamp(1.8rem, 4vw, 3.2rem);
+      color: #fff;
+      text-shadow: 0 0 20px #ff0000;
+      letter-spacing: 3px;
+      margin-bottom: 36px;
+    }
+
+    .proceed-btn {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 2px solid #ff6b6b;
+      padding: 16px 44px;
+      font-family: var(--font-ui);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #fff;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 35px rgba(192, 57, 43, 0.8);
+      transition: transform 0.2s;
+    }
+
+    .proceed-btn:hover { transform: scale(1.06); }
+
+    /* Toast Notification */
+    #game-toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(10, 0, 0, 0.94);
+      border: 1.5px solid #ff2222;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.6);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    #game-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="corridor-container">
+    <!-- Dark & Lit Corridor Backgrounds (Corridor 1: West Wing, Corridor 2: East Wing) -->
+    <div id="corridor-bg"></div>
+    <div id="corridor-bg-2" style="position:absolute; inset:0; background-image:url('assets/corridor_stella.png'); background-size:cover; background-position:center center; opacity:0; transition:opacity 0.6s ease; z-index:1;"></div>
+    <div id="corridor-bg-lit"></div>
+    <div id="darkness-overlay"></div>
+    <div id="flashlight-beam"></div>
+
+    <!-- Interactive Puzzle Stations: CORRIDOR 1 (WEST WING) -->
+    <!-- 1. Locker Station -->
+    <div class="interactable-station" id="station-locker" onclick="openLockerPuzzle()" style="left:22%; top:60%;">
+      <div class="station-marker">🔐</div>
+      <div class="station-label">OLD LOCKER</div>
+    </div>
+
+    <!-- 2. Electrical Power Panel -->
+    <div class="interactable-station" id="station-power" onclick="openPowerPuzzle()" style="left:52%; top:48%;">
+      <div class="station-marker">⚡</div>
+      <div class="station-label">BREAKER PANEL</div>
+    </div>
+
+    <!-- Portal: Corridor 1 -> Corridor 2 -->
+    <div class="corridor-archway-portal" id="portal-to-corridor-2" onclick="switchCorridor(2)" style="left:88%; top:48%;">
+      <div style="font-size:28px;">🚪➔</div>
+      <div class="archway-label">EAST WING (CORRIDOR 2)</div>
+    </div>
+
+    <!-- Interactive Puzzle Stations: CORRIDOR 2 (EAST WING) -->
+    <!-- Portal: Corridor 2 -> Corridor 1 -->
+    <div class="corridor-archway-portal" id="portal-to-corridor-1" onclick="switchCorridor(1)" style="left:12%; top:48%; display:none;">
+      <div style="font-size:28px;">⬅🚪</div>
+      <div class="archway-label">WEST WING (CORRIDOR 1)</div>
+    </div>
+
+    <!-- 3. Medical Defence Cabinet -->
+    <div class="interactable-station" id="station-cabinet" onclick="openCabinetPuzzle()" style="display:none; left:52%; top:60%;">
+      <div class="station-marker">🛡️</div>
+      <div class="station-label">LOCKED CABINET</div>
+    </div>
+
+    <!-- Exit Door Station -->
+    <div class="interactable-station" id="station-exit" onclick="attemptExit()" style="display:none; left:84%; top:42%;">
+      <div class="station-marker" id="exit-door-icon">🚪</div>
+      <div class="station-label" id="exit-door-label">SEALED EXIT</div>
+    </div>
+
+    <!-- Entities Layer -->
+    <div id="entities-layer">
+      <!-- Player (Authentic Survivor Model) -->
+      <div id="player-sprite">
+        <div class="player-hud-tag" id="l3-player-tag">YOU (AARAV)</div>
+        <div class="char-head survivor-avatar avatar-aarav" id="l3-player-avatar" style="width:24px; height:24px; margin:0 auto 2px; box-shadow:none;"></div>
+        <div class="char-torso"></div>
+        <div class="char-legs">
+          <div class="char-leg"></div>
+          <div class="char-leg"></div>
+        </div>
+        <div class="guardian-shield-bubble" id="player-shield-bubble"></div>
+      </div>
+
+      <!-- NPC Squad Member 1: Ben (Electrical Eng) -->
+      <div id="npc-ben" class="npc-squad" style="position:absolute; width:36px; height:56px; transform:translate(-50%,-100%); z-index:11; pointer-events:none;">
+        <div style="font-family:var(--font-ui); font-size:8px; font-weight:700; color:#f1c40f; text-align:center; white-space:nowrap; background:rgba(0,0,0,0.7); padding:1px 5px; border-radius:3px; margin-bottom:1px;">BEN</div>
+        <div class="survivor-avatar avatar-ben" style="width:22px; height:22px; border-width:1.5px; box-shadow:none; margin:0 auto 1px;"></div>
+        <div style="width:20px; height:20px; background:linear-gradient(180deg,#f1c40f,#7d6608); border-radius:3px; margin:0 auto;"></div>
+        <div style="display:flex; justify-content:center; gap:3px; margin-top:1px;">
+          <div style="width:5px; height:12px; background:#111; border-radius:2px;"></div>
+          <div style="width:5px; height:12px; background:#111; border-radius:2px;"></div>
+        </div>
+        <div class="npc-aura" style="position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); width:28px; height:8px; background:radial-gradient(ellipse,rgba(241,196,15,0.5) 0%,transparent 75%); border-radius:50%;"></div>
+      </div>
+
+      <!-- NPC Squad Member 2: Esha (Biotech) -->
+      <div id="npc-esha" class="npc-squad" style="position:absolute; width:36px; height:56px; transform:translate(-50%,-100%); z-index:11; pointer-events:none;">
+        <div style="font-family:var(--font-ui); font-size:8px; font-weight:700; color:#2ecc71; text-align:center; white-space:nowrap; background:rgba(0,0,0,0.7); padding:1px 5px; border-radius:3px; margin-bottom:1px;">ESHA</div>
+        <div class="survivor-avatar avatar-esha" style="width:22px; height:22px; border-width:1.5px; box-shadow:none; margin:0 auto 1px;"></div>
+        <div style="width:20px; height:20px; background:linear-gradient(180deg,#2ecc71,#145a32); border-radius:3px; margin:0 auto;"></div>
+        <div style="display:flex; justify-content:center; gap:3px; margin-top:1px;">
+          <div style="width:5px; height:12px; background:#111; border-radius:2px;"></div>
+          <div style="width:5px; height:12px; background:#111; border-radius:2px;"></div>
+        </div>
+        <div class="npc-aura" style="position:absolute; bottom:-3px; left:50%; transform:translateX(-50%); width:28px; height:8px; background:radial-gradient(ellipse,rgba(46,204,113,0.5) 0%,transparent 75%); border-radius:50%;"></div>
+      </div>
+
+      <!-- Stella -->
+      <div id="stella-sprite">
+        <div id="stella-state-indicator">👣</div>
+        <div class="stella-hud-tag">STELLA</div>
+        <div class="stella-head">
+          <div class="stella-eyes">
+            <div class="stella-eye"></div>
+            <div class="stella-eye"></div>
+          </div>
+        </div>
+        <div class="stella-gown"></div>
+        <div class="stella-legs">
+          <div class="stella-leg"></div>
+          <div class="stella-leg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top HUD -->
+  <div id="hud-top">
+    <div class="level-title-group" style="display:flex; align-items:center; gap:8px;">
+      <div class="level-badge">LEVEL 3</div>
+      <div class="level-name">THE HAUNTED CORRIDOR</div>
+      <div id="l3-survivor-badge" style="background:rgba(243,156,18,0.15); border:1px solid #f39c12; padding:3px 10px; border-radius:18px; font-family:var(--font-ui); font-size:11px; font-weight:700; color:#f1c40f; display:flex; align-items:center; gap:6px;">
+        <div id="l3-hud-avatar" class="survivor-avatar avatar-aarav" style="width:22px; height:22px; box-shadow:none;"></div>
+        <span id="l3-survivor-name">AARAV</span>
+        <button onclick="openSquadRosterModal()" style="background:#e74c3c; border:none; color:#fff; border-radius:8px; padding:1px 6px; font-size:9px; cursor:pointer; font-weight:bold;">SQUAD</button>
+      </div>
+
+      <!-- Dual Corridor Navigation Tabs -->
+      <div class="corridor-nav-tabs">
+        <button class="corridor-tab active" id="tab-corridor-1" onclick="switchCorridor(1)">
+          🚪 CORRIDOR 1 (WEST WING)
+        </button>
+        <button class="corridor-tab" id="tab-corridor-2" onclick="switchCorridor(2)">
+          🚪 CORRIDOR 2 (EAST WING)
+        </button>
+      </div>
+    </div>
+
+    <div class="status-group">
+      <div class="hud-pill">
+        <div class="hud-pill-lbl">TIME LEFT</div>
+        <div class="hud-pill-val timer" id="hud-timer">10:00</div>
+      </div>
+      <div class="hud-pill">
+        <div class="hud-pill-lbl">PUZZLES</div>
+        <div class="hud-pill-val" id="hud-puzzles-val">0 / 3</div>
+      </div>
+      <div class="hud-pill">
+        <div class="hud-pill-lbl">STELLA STATUS</div>
+        <div class="hud-pill-val" id="hud-stella-state" style="font-size:0.95rem; color:#f39c12;">PATROL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Inventory & Stealth HUD -->
+  <div id="stealth-indicator">STEALTH: NORMAL (RUNNING MAKES NOISE)</div>
+
+  <div id="hud-bottom">
+    <div class="inventory-slot" id="inv-key">
+      <div class="slot-icon" id="icon-key">🔒</div>
+      <div class="slot-label">BRASS KEY</div>
+    </div>
+    <div class="inventory-slot" id="inv-token" onclick="activateGuardianToken()">
+      <div class="slot-icon" id="icon-token">🔒</div>
+      <div class="slot-label">TOKEN (5s)</div>
+    </div>
+    <button class="action-btn-pill" id="btn-crouch" onclick="toggleSneak()">👟 SNEAK (C)</button>
+  </div>
+
+  <!-- Start Warning Banner -->
+  <div id="start-warning-banner">
+    <h1 style="font-family: var(--font-horror); font-size: 3rem; color: #ff3333; margin-bottom: 6px;">“SHE IS COMING.”</h1>
+    <h3 style="font-family: var(--font-ui); font-size: 1.4rem; color: #ccc; letter-spacing: 3px;">FIND WHAT YOU NEED BEFORE SHE FINDS YOU.</h3>
+  </div>
+
+  <!-- Toast -->
+  <div id="game-toast"></div>
+
+  <!-- ========================================================================
+       PUZZLE 1: OLD LOCKER KEYPAD
+       ======================================================================== -->
+  <div class="puzzle-modal" id="modal-locker">
+    <div class="puzzle-box">
+      <button class="puzzle-close-btn" onclick="closePuzzle('modal-locker')">✕</button>
+      <h2 class="puzzle-title">OLD LOCKER</h2>
+      <p class="puzzle-desc">
+        Rusted corridor locker containing the Brass Key.<br>
+        Blood scratches on the nearby wall reveal clues:<br>
+        <span style="color:#ff6b6b; font-weight:700;">3 cracked window frames… 7 bloody handprints… 9 broken floor tiles.</span><br>
+        Enter 3-digit combination:
+      </p>
+      <div class="keypad-display" id="keypad-display">---</div>
+      <div class="keypad-grid">
+        <button class="keypad-num" onclick="enterKeypad('1')">1</button>
+        <button class="keypad-num" onclick="enterKeypad('2')">2</button>
+        <button class="keypad-num" onclick="enterKeypad('3')">3</button>
+        <button class="keypad-num" onclick="enterKeypad('4')">4</button>
+        <button class="keypad-num" onclick="enterKeypad('5')">5</button>
+        <button class="keypad-num" onclick="enterKeypad('6')">6</button>
+        <button class="keypad-num" onclick="enterKeypad('7')">7</button>
+        <button class="keypad-num" onclick="enterKeypad('8')">8</button>
+        <button class="keypad-num" onclick="enterKeypad('9')">9</button>
+      </div>
+      <button class="action-btn-pill" onclick="clearKeypad()" style="background:#555; padding:8px 24px; font-size:0.85rem;">CLEAR</button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       PUZZLE 2: ELECTRICAL BREAKER PANEL (WITH LIGHTS TWIST)
+       ======================================================================== -->
+  <div class="puzzle-modal" id="modal-power">
+    <div class="puzzle-box">
+      <button class="puzzle-close-btn" onclick="closePuzzle('modal-power')">✕</button>
+      <h2 class="puzzle-title">BREAKER PANEL</h2>
+      <p class="puzzle-desc">
+        Connect all 3 circuit breakers to restore corridor lighting.<br>
+        <strong style="color:#ff4747;">⚠️ WARNING: Turning lights ON will reveal your location to Stella!</strong>
+      </p>
+      <div class="wire-container">
+        <div class="wire-row">
+          <div class="wire-plug wire-red" id="breaker-1" onclick="toggleBreaker(1)">BREAKER 1: [OFF]</div>
+          <div class="wire-status-led" id="led-1"></div>
+        </div>
+        <div class="wire-row">
+          <div class="wire-plug wire-blue" id="breaker-2" onclick="toggleBreaker(2)">BREAKER 2: [OFF]</div>
+          <div class="wire-status-led" id="led-2"></div>
+        </div>
+        <div class="wire-row">
+          <div class="wire-plug wire-yellow" id="breaker-3" onclick="toggleBreaker(3)">BREAKER 3: [OFF]</div>
+          <div class="wire-status-led" id="led-3"></div>
+        </div>
+      </div>
+      <button class="action-btn-pill" onclick="activateBreakerMaster()" id="btn-engage-power">ENGAGE POWER GRID</button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       PUZZLE 3: LOCKED MEDICAL CABINET (GUARDIAN TOKEN)
+       ======================================================================== -->
+  <div class="puzzle-modal" id="modal-cabinet">
+    <div class="puzzle-box">
+      <button class="puzzle-close-btn" onclick="closePuzzle('modal-cabinet')">✕</button>
+      <h2 class="puzzle-title">DEFENCE CABINET</h2>
+      <p class="puzzle-desc">
+        Reinforced medical defence cabinet containing the Guardian Shield Token.<br>
+        Requires Brass Key from Puzzle 1 + Breaker Voltage Code: <span style="color:#ff9f43; font-weight:700;">[4 - 2 - 8]</span>
+      </p>
+      <div class="cipher-dial-group">
+        <div class="cipher-dial">
+          <button class="dial-btn" onclick="rotateDial(0, 1)">▲</button>
+          <div class="cipher-val" id="dial-0">0</div>
+          <button class="dial-btn" onclick="rotateDial(0, -1)">▼</button>
+        </div>
+        <div class="cipher-dial">
+          <button class="dial-btn" onclick="rotateDial(1, 1)">▲</button>
+          <div class="cipher-val" id="dial-1">0</div>
+          <button class="dial-btn" onclick="rotateDial(1, -1)">▼</button>
+        </div>
+        <div class="cipher-dial">
+          <button class="dial-btn" onclick="rotateDial(2, 1)">▲</button>
+          <div class="cipher-val" id="dial-2">0</div>
+          <button class="dial-btn" onclick="rotateDial(2, -1)">▼</button>
+        </div>
+      </div>
+      <button class="action-btn-pill" onclick="unlockCabinet()" style="background:#27ae60; padding:12px 30px; font-size:1.1rem; width:100%;">
+        VERIFY CIPHER & INSERT KEY
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       ESCAPE CUTSCENE (DOOR SLAMS ON STELLA)
+       ======================================================================== -->
+  <div id="escape-modal">
+    <div class="horror-sub-line">“YOU SURVIVED HER.”</div>
+    <div class="horror-ominous-line">“BUT SOMETHING FOLLOWED YOU.”</div>
+    <button class="proceed-btn" onclick="window.location.href='level4.html'">LEVEL 4 LOADING →</button>
+  </div>
+
+  <!-- ========================================================================
+       LEVEL 3 JAVASCRIPT LOGIC
+       ======================================================================== -->
+  <script>
+    // Audio engine
+    const Sfx = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      },
+      play(freq, type, dur, ramp = 0.01) {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        g.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(ramp, this.ctx.currentTime + dur);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + dur);
+      }
+    };
+
+    // State
+    let state = {
+      secondsLeft: 600, // 10 minutes
+      puzzlesSolved: 0,
+      hasBrassKey: false,
+      lightsRestored: false,
+      hasGuardianToken: false,
+      isShieldActive: false,
+      isSneaking: false,
+      exitUnlocked: false,
+      gameOver: false,
+      keypadInput: '',
+      dials: [0, 0, 0],
+      breakers: [false, false, false]
+    };
+
+    // Player & Stella positions
+    const player = {
+      x: window.innerWidth * 0.12,
+      y: window.innerHeight * 0.7,
+      speed: 3.8
+    };
+
+    const stella = {
+      x: window.innerWidth * 0.85,
+      y: window.innerHeight * 0.65,
+      speed: 1.4,
+      aiState: 'PATROL', // PATROL, INVESTIGATE, CHASE
+      targetX: window.innerWidth * 0.5,
+      patrolDir: -1
+    };
+
+    const keys = {};
+
+    // Elements
+    const playerEl = document.getElementById('player-sprite');
+    const stellaEl = document.getElementById('stella-sprite');
+    const beamEl = document.getElementById('flashlight-beam');
+    const toastEl = document.getElementById('game-toast');
+
+    function showToast(msg, dur = 2800) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      setTimeout(() => toastEl.classList.remove('show'), dur);
+    }
+
+    function unlockLocker() {
+      state.hasBrassKey = true;
+      state.puzzlesSolved = Math.max(state.puzzlesSolved, 1);
+      document.getElementById('hud-puzzles-val').textContent = `${state.puzzlesSolved} / 3`;
+      document.getElementById('inv-key').classList.add('has-item');
+      document.getElementById('icon-key').textContent = '🔑';
+      closePuzzle('modal-locker');
+      showToast("CORRECT! BRASS KEY ACQUIRED 🔑");
+      Sfx.play(800, 'triangle', 0.5);
+    }
+
+    function openLockerPuzzle() {
+      if (state.hasBrassKey) {
+        showToast("Locker already unlocked! You have the Brass Key.");
+        return;
+      }
+      document.getElementById('modal-locker').classList.add('active');
+    }
+
+    function enterKeypad(num) {
+      if (state.keypadInput.length < 3) {
+        state.keypadInput += num;
+        document.getElementById('keypad-display').textContent = state.keypadInput.padEnd(3, '-');
+        Sfx.play(400, 'sine', 0.1);
+
+        if (state.keypadInput.length === 3) {
+          if (state.keypadInput === '379') {
+            unlockLocker();
+          } else {
+            showToast("INCORRECT CODE! TRY AGAIN");
+            Sfx.play(150, 'sawtooth', 0.3);
+            setTimeout(clearKeypad, 600);
+          }
+        }
+      }
+    }
+
+    function clearKeypad() {
+      state.keypadInput = '';
+      document.getElementById('keypad-display').textContent = '---';
+    }
+
+    /* ========================================================================
+       PUZZLE 2: POWER PANEL (LIGHTS TWIST)
+       ======================================================================== */
+    function openPowerPuzzle() {
+      if (state.lightsRestored) {
+        showToast("Power grid is already fully engaged!");
+        return;
+      }
+      document.getElementById('modal-power').classList.add('active');
+    }
+
+    function toggleBreaker(idx) {
+      state.breakers[idx - 1] = !state.breakers[idx - 1];
+      const plug = document.getElementById(`breaker-${idx}`);
+      const led = document.getElementById(`led-${idx}`);
+      if (state.breakers[idx - 1]) {
+        plug.textContent = `BREAKER ${idx}: [ONLINE]`;
+        led.classList.add('connected');
+        Sfx.play(600, 'sine', 0.1);
+      } else {
+        plug.textContent = `BREAKER ${idx}: [OFF]`;
+        led.classList.remove('connected');
+      }
+    }
+
+    function activateBreakerMaster() {
+      if (state.breakers[0] && state.breakers[1] && state.breakers[2]) {
+        state.lightsRestored = true;
+        state.puzzlesSolved++;
+        document.getElementById('hud-puzzles-val').textContent = `${state.puzzlesSolved} / 3`;
+        closePuzzle('modal-power');
+
+        // Turn on corridor lights
+        document.getElementById('corridor-bg-lit').style.opacity = '1';
+        document.getElementById('darkness-overlay').style.opacity = '0.35';
+        beamEl.style.opacity = '0.2';
+
+        // THE TWIST: Stella detects lights and enters Investigation/Chase mode!
+        stella.aiState = 'INVESTIGATE';
+        stella.targetX = player.x;
+        document.getElementById('hud-stella-state').textContent = 'INVESTIGATING';
+        document.getElementById('hud-stella-state').style.color = '#e74c3c';
+        document.getElementById('stella-state-indicator').textContent = '👀';
+
+        showToast("💡 LIGHTS RESTORED! BUT STELLA NOTICED THE LIGHT SURGE!");
+        Sfx.play(120, 'sawtooth', 1.0);
+      } else {
+        showToast("ALL 3 BREAKERS MUST BE ENGAGED!");
+      }
+    }
+
+    /* ========================================================================
+       PUZZLE 3: CABINET (GUARDIAN TOKEN)
+       ======================================================================== */
+    function openCabinetPuzzle() {
+      if (state.hasGuardianToken) {
+        showToast("Guardian Token already collected!");
+        return;
+      }
+      document.getElementById('modal-cabinet').classList.add('active');
+    }
+
+    function rotateDial(idx, dir) {
+      state.dials[idx] = (state.dials[idx] + dir + 10) % 10;
+      document.getElementById(`dial-${idx}`).textContent = state.dials[idx];
+      Sfx.play(500, 'sine', 0.05);
+    }
+
+    function unlockCabinet() {
+      if (!state.hasBrassKey) {
+        showToast("LOCKED! YOU NEED THE BRASS KEY FROM THE LOCKER!");
+        Sfx.play(150, 'sawtooth', 0.3);
+        return;
+      }
+      if (state.dials[0] === 4 && state.dials[1] === 2 && state.dials[2] === 8) {
+        state.hasGuardianToken = true;
+        state.puzzlesSolved = 3;
+        document.getElementById('hud-puzzles-val').textContent = `3 / 3`;
+        document.getElementById('inv-token').classList.add('has-item');
+        document.getElementById('icon-token').textContent = '🛡️';
+        closePuzzle('modal-cabinet');
+
+        // Unlock exit door
+        state.exitUnlocked = true;
+        document.getElementById('exit-door-icon').textContent = '🔓';
+        document.getElementById('exit-door-label').textContent = 'EXIT UNLOCKED';
+        document.getElementById('exit-door-label').style.color = '#2ed573';
+
+        showToast("🛡️ GUARDIAN TOKEN ACQUIRED! EXIT DOOR IS UNLOCKED!");
+        Sfx.play(700, 'triangle', 0.6);
+      } else {
+        showToast("INCORRECT VOLTAGE CIPHER! CHECK CODE [4 - 2 - 8]");
+        Sfx.play(150, 'sawtooth', 0.3);
+      }
+    }
+
+    function closePuzzle(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    /* ========================================================================
+       DEFENCE: GUARDIAN TOKEN ACTIVATION (5s SHIELD)
+       ======================================================================== */
+    function activateGuardianToken() {
+      if (!state.hasGuardianToken || state.isShieldActive) return;
+      state.isShieldActive = true;
+      document.getElementById('player-shield-bubble').style.display = 'block';
+      showToast("🛡️ GUARDIAN SHIELD ACTIVE (5s PROTECTION)!");
+      Sfx.play(600, 'sine', 0.4);
+
+      setTimeout(() => {
+        state.isShieldActive = false;
+        document.getElementById('player-shield-bubble').style.display = 'none';
+        showToast("Guardian Shield has expired.");
+      }, 5000);
+    }
+
+    function toggleSneak() {
+      state.isSneaking = !state.isSneaking;
+      const ind = document.getElementById('stealth-indicator');
+      const btn = document.getElementById('btn-crouch');
+      if (state.isSneaking) {
+        ind.textContent = "STEALTH: SNEAKING (SILENT BUT SLOW)";
+        ind.style.color = "#00d2d3";
+        btn.textContent = "🏃 RUN (C)";
+      } else {
+        ind.textContent = "STEALTH: NORMAL (RUNNING MAKES NOISE)";
+        ind.style.color = "#2ed573";
+        btn.textContent = "👟 SNEAK (C)";
+      }
+    }
+
+    /* ========================================================================
+       EXIT & CLIMAX SEQUENCE
+       ======================================================================== */
+    function attemptExit() {
+      state.exitUnlocked = true;
+      // Final escape sequence: Stella lunges, door slams!
+      state.gameOver = true;
+      stella.x = player.x + 35; // Stella lunges from right behind
+      stellaEl.style.left = `${stella.x}px`;
+
+      showToast("STELLA LUNGES AT THE DOOR! SPRINT!");
+      Sfx.play(100, 'sawtooth', 1.2);
+
+      setTimeout(() => {
+        document.getElementById('escape-modal').classList.add('active');
+      }, 1200);
+    }
+
+    /* ========================================================================
+       DUAL CORRIDOR TRAVERSAL (CORRIDOR 1 & CORRIDOR 2)
+       ======================================================================== */
+    let activeCorridor = 1;
+    stella.corridor = 1;
+
+    function switchCorridor(num) {
+      if (activeCorridor === num) return;
+      activeCorridor = num;
+
+      const tab1 = document.getElementById('tab-corridor-1');
+      const tab2 = document.getElementById('tab-corridor-2');
+      if (tab1) tab1.classList.toggle('active', num === 1);
+      if (tab2) tab2.classList.toggle('active', num === 2);
+
+      const bg1 = document.getElementById('corridor-bg');
+      const bg2 = document.getElementById('corridor-bg-2');
+      const bgLit = document.getElementById('corridor-bg-lit');
+
+      if (num === 1) {
+        if (bg1) bg1.style.opacity = '1';
+        if (bg2) bg2.style.opacity = '0';
+        if (bgLit) bgLit.style.opacity = state.powerRestored ? '0.7' : '0';
+
+        // Corridor 1 stations: Show Locker, Power, Portal to 2
+        document.getElementById('station-locker').style.display = 'flex';
+        document.getElementById('station-power').style.display = 'flex';
+        document.getElementById('portal-to-corridor-2').style.display = 'flex';
+
+        // Corridor 2 stations: Hide
+        document.getElementById('station-cabinet').style.display = 'none';
+        document.getElementById('station-exit').style.display = 'none';
+        document.getElementById('portal-to-corridor-1').style.display = 'none';
+
+        // Spawn player near right portal threshold
+        player.x = window.innerWidth * 0.76;
+        showToast("📍 ENTERED CORRIDOR 1: ABANDONED WEST WING (OLD LOCKER & POWER PANEL)");
+      } else {
+        if (bg1) bg1.style.opacity = '0';
+        if (bg2) bg2.style.opacity = '1';
+        if (bgLit) bgLit.style.opacity = state.powerRestored ? '0.4' : '0';
+
+        // Corridor 2 stations: Show Cabinet, Exit, Portal to 1
+        document.getElementById('station-cabinet').style.display = 'flex';
+        document.getElementById('station-exit').style.display = 'flex';
+        document.getElementById('portal-to-corridor-1').style.display = 'flex';
+
+        // Corridor 1 stations: Hide
+        document.getElementById('station-locker').style.display = 'none';
+        document.getElementById('station-power').style.display = 'none';
+        document.getElementById('portal-to-corridor-2').style.display = 'none';
+
+        // Spawn player near left portal threshold
+        player.x = window.innerWidth * 0.22;
+        showToast("📍 ENTERED CORRIDOR 2: CORRUPTED EAST WING (DEFENCE CABINET & ESCAPE GATE)");
+      }
+
+      Sfx.play(220, 'sawtooth', 0.25);
+    }
+
+    function updateStella() {
+      // Check if Stella is in the active corridor
+      if (stella.corridor !== activeCorridor) {
+        stellaEl.style.opacity = '0';
+        stellaEl.style.pointerEvents = 'none';
+
+        // Chance for Stella to cross over into player's corridor
+        if (Math.random() < 0.003) {
+          stella.corridor = activeCorridor;
+          stella.x = (activeCorridor === 1) ? window.innerWidth * 0.85 : window.innerWidth * 0.15;
+          showToast("⚠️ WARNING: STELLA HAS ENTERED YOUR CORRIDOR!");
+          Sfx.play(140, 'sawtooth', 0.6);
+        }
+        return;
+      }
+
+      stellaEl.style.opacity = '1';
+      stellaEl.style.pointerEvents = 'auto';
+
+      const dist = Math.abs(player.x - stella.x);
+
+      // AI Logic: Senses player within proximity
+      if (dist < 260 && (!state.isSneaking || dist < 120)) {
+        stella.aiState = 'CHASE';
+        document.getElementById('hud-stella-state').textContent = 'CHASE! 🚨';
+        document.getElementById('hud-stella-state').style.color = '#ff3333';
+        document.getElementById('stella-state-indicator').textContent = '👁️';
+        stella.speed = 1.9;
+      } else if (stella.aiState !== 'INVESTIGATE') {
+        stella.aiState = 'PATROL';
+        document.getElementById('hud-stella-state').textContent = 'PATROL 👣';
+        document.getElementById('hud-stella-state').style.color = '#f39c12';
+        document.getElementById('stella-state-indicator').textContent = '👣';
+        stella.speed = 1.2;
+      }
+
+      // AI Movement
+      if (stella.aiState === 'CHASE') {
+        stella.x += (player.x > stella.x ? 1 : -1) * stella.speed;
+      } else if (stella.aiState === 'INVESTIGATE') {
+        stella.x += (stella.targetX > stella.x ? 1 : -1) * (stella.speed * 1.5);
+        if (Math.abs(stella.x - stella.targetX) < 15) {
+          stella.aiState = 'PATROL';
+        }
+      } else {
+        // Patrol
+        stella.x += stella.patrolDir * stella.speed;
+        if (stella.x < window.innerWidth * 0.3) stella.patrolDir = 1;
+        if (stella.x > window.innerWidth * 0.88) stella.patrolDir = -1;
+
+        // Chance to wander into the other corridor
+        if (Math.random() < 0.0015) {
+          stella.corridor = (activeCorridor === 1) ? 2 : 1;
+        }
+      }
+
+      stellaEl.style.left = `${stella.x}px`;
+      stellaEl.style.top = `${stella.y}px`;
+
+      // Catch check
+      if (dist < 45 && Math.abs(player.y - stella.y) < 45) {
+        if (state.isShieldActive) {
+          showToast("🛡️ GUARDIAN SHIELD DEFLECTED STELLA'S ATTACK!");
+          stella.x += (stella.x > player.x ? 60 : -60); // knockback stella
+        } else {
+          // Player caught!
+          showToast("💀 STELLA CAUGHT YOU! RETRYING...");
+          state.gameOver = true;
+          setTimeout(() => location.reload(), 2000);
+        }
+      }
+    }
+
+    /* ========================================================================
+       NPC SQUAD WAYPOINT MOVEMENT SYSTEM
+       ======================================================================== */
+    const npcBen = {
+      x: window.innerWidth * 0.25, y: window.innerHeight * 0.72,
+      speed: 0.9, dir: 1,
+      waypoints: [
+        { x: window.innerWidth * 0.18, y: window.innerHeight * 0.70 },
+        { x: window.innerWidth * 0.34, y: window.innerHeight * 0.72 },
+        { x: window.innerWidth * 0.28, y: window.innerHeight * 0.65 },
+        { x: window.innerWidth * 0.20, y: window.innerHeight * 0.75 }
+      ],
+      wpIdx: 0, pauseTimer: 0
+    };
+
+    const npcEsha = {
+      x: window.innerWidth * 0.60, y: window.innerHeight * 0.70,
+      speed: 1.0, dir: -1,
+      waypoints: [
+        { x: window.innerWidth * 0.55, y: window.innerHeight * 0.68 },
+        { x: window.innerWidth * 0.68, y: window.innerHeight * 0.72 },
+        { x: window.innerWidth * 0.62, y: window.innerHeight * 0.62 },
+        { x: window.innerWidth * 0.50, y: window.innerHeight * 0.70 }
+      ],
+      wpIdx: 0, pauseTimer: 0
+    };
+
+    let npcWalkTick = 0;
+
+    function updateNPCMovement(npc, elId) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+
+      if (npc.pauseTimer > 0) {
+        npc.pauseTimer--;
+        return;
+      }
+
+      const target = npc.waypoints[npc.wpIdx];
+      const dx = target.x - npc.x;
+      const dy = target.y - npc.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 6) {
+        npc.wpIdx = (npc.wpIdx + 1) % npc.waypoints.length;
+        npc.pauseTimer = Math.floor(Math.random() * 80) + 20; // pause 0.3-1.5s
+      } else {
+        npc.x += (dx / dist) * npc.speed;
+        npc.y += (dy / dist) * npc.speed;
+      }
+
+      el.style.left = `${npc.x}px`;
+      el.style.top  = `${npc.y}px`;
+
+      // Walk bob animation
+      npcWalkTick++;
+      const bob = Math.sin(npcWalkTick * 0.25) * 2;
+      el.style.transform = `translate(-50%, -100%) translateY(${bob}px)`;
+    }
+
+    // Corridor visibility: hide NPCs in wrong corridor
+    function syncNPCsWithCorridor() {
+      const benEl  = document.getElementById('npc-ben');
+      const eshaEl = document.getElementById('npc-esha');
+      if (activeCorridor === 1) {
+        if (benEl)  benEl.style.opacity  = '1';
+        if (eshaEl) eshaEl.style.opacity = '0';
+      } else {
+        if (benEl)  benEl.style.opacity  = '0';
+        if (eshaEl) eshaEl.style.opacity = '1';
+        // Relocate esha in corridor 2 range if needed
+        if (npcEsha.x < window.innerWidth * 0.35) {
+          npcEsha.x = window.innerWidth * 0.5;
+          npcEsha.y = window.innerHeight * 0.68;
+        }
+      }
+    }
+
+    function gameLoop() {
+      if (!state.gameOver) {
+        // Move player
+        const spd = state.isSneaking ? player.speed * 0.55 : player.speed;
+        let isMoving = false;
+        if (keys['ArrowLeft'] || keys['a'] || keys['A']) { player.x -= spd; isMoving = true; }
+        if (keys['ArrowRight'] || keys['d'] || keys['D']) { player.x += spd; isMoving = true; }
+        if (keys['ArrowUp'] || keys['w'] || keys['W']) { player.y -= spd * 0.7; isMoving = true; }
+        if (keys['ArrowDown'] || keys['s'] || keys['S']) { player.y += spd * 0.7; isMoving = true; }
+
+        // Animate model
+        const model = document.querySelector('.in-game-survivor-model');
+        if (model) model.classList.toggle('moving', isMoving);
+
+        // Clamp
+        player.x = Math.max(50, Math.min(window.innerWidth - 60, player.x));
+        player.y = Math.max(window.innerHeight * 0.45, Math.min(window.innerHeight - 60, player.y));
+
+        playerEl.style.left = `${player.x}px`;
+        playerEl.style.top = `${player.y}px`;
+
+        beamEl.style.left = `${player.x}px`;
+        beamEl.style.top = `${player.y}px`;
+
+        // Doorway auto-crossing check
+        if (activeCorridor === 1 && player.x > window.innerWidth - 75) {
+          switchCorridor(2);
+        } else if (activeCorridor === 2 && player.x < 75) {
+          switchCorridor(1);
+        }
+
+        // Noise alert if running near Stella
+        if (!state.isSneaking && stella.corridor === activeCorridor && Math.abs(player.x - stella.x) < 180 && stella.aiState === 'PATROL') {
+          stella.aiState = 'INVESTIGATE';
+          stella.targetX = player.x;
+        }
+
+        updateStella();
+        updateNPCMovement(npcBen, 'npc-ben');
+        updateNPCMovement(npcEsha, 'npc-esha');
+        syncNPCsWithCorridor();
+      }
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Input
+    window.addEventListener('keydown', e => {
+      keys[e.key] = true;
+      if (e.key === 'c' || e.key === 'C') toggleSneak();
+    });
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    // Timer (10 minutes)
+    setInterval(() => {
+      if (state.secondsLeft > 0 && !state.gameOver) {
+        state.secondsLeft--;
+        const m = Math.floor(state.secondsLeft / 60);
+        const s = state.secondsLeft % 60;
+        document.getElementById('hud-timer').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+        // Escalate Stella speed when time is low
+        if (state.secondsLeft < 180) stella.speed = 2.2;
+      }
+    }, 1000);
+
+    // Entry warning banner & Authentic In-Game Survivor Init
+    window.addEventListener('DOMContentLoaded', () => {
+      const surv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : { name: 'AARAV', avatarClass: 'avatar-aarav', spriteClass: 'char-aarav', major: 'Robotics Eng' };
+      const sName = surv.name.toUpperCase();
+
+      // Render authentic in-game illustrated survivor model
+      if (typeof renderInGameSurvivorSprite === 'function') {
+        renderInGameSurvivorSprite('player-sprite', { includeShield: true });
+      }
+
+      // Update HUD badge (these are separate elements, not inside player-sprite)
+      const hudAvatar = document.getElementById('l3-hud-avatar');
+      if (hudAvatar) hudAvatar.className = `survivor-avatar ${surv.avatarClass}`;
+      const hudName = document.getElementById('l3-survivor-name');
+      if (hudName) hudName.textContent = `${sName} (${surv.major.split(' ')[0]})`;
+
+      const b = document.getElementById('start-warning-banner');
+      if (b) {
+        b.classList.add('show');
+        setTimeout(() => b.classList.remove('show'), 3200);
+      }
+
+      // Initialize NPC positions
+      const benEl = document.getElementById('npc-ben');
+      if (benEl) { benEl.style.left = `${npcBen.x}px`; benEl.style.top = `${npcBen.y}px`; }
+      const eshaEl = document.getElementById('npc-esha');
+      if (eshaEl) { eshaEl.style.left = `${npcEsha.x}px`; eshaEl.style.top = `${npcEsha.y}px`; eshaEl.style.opacity = '0'; }
+
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+
+</html>

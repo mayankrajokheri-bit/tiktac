@@ -1,0 +1,6 @@
+{
+  "appId": "com.realityquest.apocalypse",
+  "appName": "The Apocalypse",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

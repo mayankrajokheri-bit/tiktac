@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reality Quest AI — Hackathon 2026 | GMN College Ambala</title>
+  <meta name="description" content="Reality Quest AI: Your camera is your weapon. Your city is your dungeon. Winner of Hackathon 2026, GMN College Ambala Cantt.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --red:    #ff2222;
+      --gold:   #f1c40f;
+      --cyan:   #00fff5;
+      --purple: #8e44ad;
+      --green:  #2ecc71;
+      --dark:   #03040a;
+      --card:   rgba(8,10,20,0.85);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: #03040a;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* ── GLOBAL SCANLINES ─────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 4px);
+    }
+
+    /* ── SCROLLBAR ────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
+
+    /* ═══════════════════════════════════════════
+       HERO SECTION
+    ═══════════════════════════════════════════ */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      padding: 40px 24px;
+    }
+
+    /* Animated mesh grid background */
+    #hero-grid {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,34,34,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,34,34,0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridScroll 20s linear infinite;
+    }
+    @keyframes gridScroll { to { background-position: 0 60px; } }
+
+    /* Hero radial glow spots */
+    #hero::after {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 20% 60%, rgba(139,0,0,0.25) 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 30%, rgba(100,0,160,0.2) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(241,196,15,0.12) 0%, transparent 50%);
+    }
+
+    #hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+    /* College badge */
+    .college-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      border: 1px solid rgba(0,255,245,0.4);
+      border-radius: 30px;
+      padding: 7px 20px;
+      background: rgba(0,255,245,0.04);
+      margin-bottom: 28px;
+      animation: badgeFloat 3s infinite alternate ease-in-out;
+    }
+    @keyframes badgeFloat { 0%{transform:translateY(0)} 100%{transform:translateY(-6px)} }
+    .college-badge .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+      animation: dotBlink 1.2s infinite;
+    }
+    @keyframes dotBlink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .college-badge span {
+      font-family: 'Orbitron', monospace; font-size: .6rem;
+      letter-spacing: 4px; color: var(--cyan); text-transform: uppercase;
+    }
+
+    /* Hero title */
+    .hero-eyebrow {
+      font-family: 'Orbitron', monospace; font-size: .7rem;
+      letter-spacing: 10px; color: #555; text-transform: uppercase;
+      margin-bottom: 10px;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 14vw, 10rem);
+      line-height: 0.88;
+      letter-spacing: 3px;
+      background: linear-gradient(165deg, #ffffff 0%, #ff5555 35%, #c0392b 65%, #7a0000 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 0 40px rgba(255,34,34,0.5));
+      animation: titleIn 0.8s 0.5s cubic-bezier(0.18,0.89,0.32,1.28) both;
+      position: relative;
+    }
+    @keyframes titleIn { from{opacity:0;transform:scale(0.5) translateY(30px)} to{opacity:1;transform:scale(1)} }
+
+    /* Glitch effect on title */
+    .hero-title::before {
+      content: attr(data-text);
+      position: absolute; top:0; left:0; width:100%;
+      -webkit-text-fill-color: var(--cyan);
+      opacity: 0;
+      animation: glitchLayer 7s infinite;
+    }
+    @keyframes glitchLayer {
+      0%,88%,100%{opacity:0;clip-path:none;transform:none}
+      89%{opacity:.5;clip-path:inset(15% 0 65% 0);transform:translateX(-5px)}
+      90%{opacity:.4;clip-path:inset(55% 0 25% 0);transform:translateX(5px)}
+      91%{opacity:0}
+    }
+
+    .hero-tagline {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(.65rem, 2.5vw, 1rem);
+      letter-spacing: 5px; color: var(--gold);
+      text-shadow: 0 0 20px var(--gold);
+      margin-top: 16px;
+      animation: fadeUp 0.8s 0.9s ease both;
+    }
+
+    .hero-sub {
+      font-size: clamp(.9rem, 2vw, 1.15rem);
+      color: #888; letter-spacing: 2px; max-width: 580px;
+      margin: 16px auto 0; line-height: 1.6;
+      animation: fadeUp 0.8s 1.1s ease both;
+    }
+    .hero-sub strong { color: #ccc; }
+
+    /* CTA buttons */
+    .hero-ctas {
+      display: flex; flex-wrap: wrap; gap: 14px;
+      justify-content: center; margin-top: 36px;
+      animation: fadeUp 0.8s 1.4s ease both;
+    }
+    .cta-primary {
+      font-family: 'Orbitron', monospace; font-size: .7rem;
+      font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      padding: 15px 40px; border: 2px solid var(--red); border-radius: 4px;
+      background: transparent; color: #fff; cursor: pointer; text-decoration: none;
+      position: relative; overflow: hidden;
+      transition: all .3s ease;
+      box-shadow: 0 0 30px rgba(255,34,34,0.3);
+    }
+    .cta-primary::before {
+      content: ''; position:absolute; inset:0;
+      background: linear-gradient(90deg, transparent, rgba(255,34,34,.2), transparent);
+      transform: translateX(-100%); transition: .4s;
+    }
+    .cta-primary:hover::before { transform: translateX(100%); }
+    .cta-primary:hover { background: rgba(255,34,34,.12); border-color: var(--gold); transform:scale(1.04); }
+
+    .cta-secondary {
+      font-family: 'Orbitron', monospace; font-size: .7rem;
+      font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      padding: 15px 40px; border: 1px solid rgba(0,255,245,.3); border-radius: 4px;
+      background: rgba(0,255,245,.04); color: var(--cyan); cursor: pointer; text-decoration: none;
+      transition: all .3s ease;
+    }
+    .cta-secondary:hover { border-color: var(--cyan); background: rgba(0,255,245,.1); }
+
+    /* Scroll arrow */
+    .scroll-hint {
+      position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+      font-family: 'Orbitron', monospace; font-size: .45rem;
+      letter-spacing: 4px; color: #333; text-transform: uppercase;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      animation: hintBob 2s infinite alternate ease-in-out;
+    }
+    @keyframes hintBob { 0%{opacity:.3;transform:translateX(-50%) translateY(0)} 100%{opacity:.7;transform:translateX(-50%) translateY(8px)} }
+    .scroll-arrow { width: 1px; height: 30px; background: linear-gradient(180deg, var(--red), transparent); }
+
+    /* ═══════════════════════════════════════════
+       STATS BAR
+    ═══════════════════════════════════════════ */
+    #stats-bar {
+      background: rgba(0,0,0,0.6);
+      border-top: 1px solid rgba(255,34,34,.2);
+      border-bottom: 1px solid rgba(255,34,34,.2);
+      padding: 20px 40px;
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: 0;
+    }
+    .stat-block {
+      text-align: center; padding: 0 32px;
+      border-right: 1px solid rgba(255,255,255,.08);
+    }
+    .stat-block:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem;
+      line-height: 1; color: var(--gold); letter-spacing: 2px;
+      text-shadow: 0 0 20px var(--gold);
+    }
+    .stat-lbl {
+      font-family: 'Orbitron', monospace; font-size: .45rem;
+      letter-spacing: 3px; color: #555; text-transform: uppercase; margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════
+       SECTIONS — shared
+    ═══════════════════════════════════════════ */
+    section { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-family: 'Orbitron', monospace; font-size: .5rem;
+      letter-spacing: 6px; color: var(--red); text-transform: uppercase;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,34,34,.2); }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 6vw, 3.5rem);
+      letter-spacing: 3px; color: #fff; margin-bottom: 8px;
+    }
+    .section-sub { font-size: 1rem; color: #666; letter-spacing: 1.5px; margin-bottom: 40px; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ═══════════════════════════════════════════
+       FEATURES GRID
+    ═══════════════════════════════════════════ */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 8px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s ease, border-color .3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--red);
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red), var(--gold), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 16px;
+    }
+    .fi-red    { background: rgba(255,34,34,.12);  border: 1px solid rgba(255,34,34,.3); }
+    .fi-gold   { background: rgba(241,196,15,.12); border: 1px solid rgba(241,196,15,.3); }
+    .fi-cyan   { background: rgba(0,255,245,.08);  border: 1px solid rgba(0,255,245,.3); }
+    .fi-purple { background: rgba(142,68,173,.12); border: 1px solid rgba(142,68,173,.3); }
+    .fi-green  { background: rgba(46,204,113,.1);  border: 1px solid rgba(46,204,113,.3); }
+    .fi-blue   { background: rgba(52,152,219,.1);  border: 1px solid rgba(52,152,219,.3); }
+
+    .feature-name {
+      font-family: 'Orbitron', monospace; font-size: .7rem;
+      font-weight: 700; letter-spacing: 2px; color: #fff; margin-bottom: 8px;
+    }
+    .feature-desc { font-size: .9rem; color: #666; line-height: 1.6; }
+
+    /* ═══════════════════════════════════════════
+       TECH STACK
+    ═══════════════════════════════════════════ */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .tech-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 8px; padding: 20px;
+      display: flex; align-items: flex-start; gap: 14px;
+      transition: border-color .3s;
+    }
+    .tech-card:hover { border-color: rgba(241,196,15,.4); }
+    .tech-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .tech-name {
+      font-family: 'Space Mono', monospace; font-size: .7rem;
+      font-weight: 700; color: #fff; margin-bottom: 4px;
+    }
+    .tech-role { font-size: .8rem; color: #555; line-height: 1.4; }
+
+    /* ═══════════════════════════════════════════
+       GAME LEVELS TIMELINE
+    ═══════════════════════════════════════════ */
+    .levels-timeline { position: relative; }
+    .levels-timeline::before {
+      content: ''; position: absolute; left: 24px; top: 0; bottom: 0;
+      width: 1px; background: linear-gradient(180deg, var(--red), var(--purple), var(--gold));
+    }
+    .level-row {
+      display: flex; gap: 24px; align-items: flex-start;
+      padding: 0 0 28px 60px; position: relative;
+    }
+    .level-num {
+      position: absolute; left: 0; top: 0;
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 2px solid var(--red);
+      background: rgba(255,34,34,.1);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', monospace; font-size: .7rem; font-weight: 900;
+      color: var(--red);
+      box-shadow: 0 0 16px rgba(255,34,34,.3);
+    }
+    .level-content { flex: 1; }
+    .level-title {
+      font-family: 'Orbitron', monospace; font-size: .75rem;
+      font-weight: 700; letter-spacing: 2px; color: #fff; margin-bottom: 4px;
+    }
+    .level-desc { font-size: .9rem; color: #666; line-height: 1.5; margin-bottom: 8px; }
+    .level-tag {
+      display: inline-block;
+      font-family: 'Orbitron', monospace; font-size: .45rem;
+      letter-spacing: 2px; padding: 3px 10px; border-radius: 10px;
+      text-transform: uppercase;
+    }
+    .lt-horror  { background: rgba(255,34,34,.12); color: var(--red); border: 1px solid rgba(255,34,34,.3); }
+    .lt-puzzle  { background: rgba(0,255,245,.08); color: var(--cyan); border: 1px solid rgba(0,255,245,.3); }
+    .lt-combat  { background: rgba(241,196,15,.1); color: var(--gold); border: 1px solid rgba(241,196,15,.3); }
+    .lt-boss    { background: rgba(142,68,173,.12); color: #d7aefb; border: 1px solid rgba(142,68,173,.3); }
+    .lt-final   { background: rgba(46,204,113,.1); color: var(--green); border: 1px solid rgba(46,204,113,.3); }
+
+    /* ═══════════════════════════════════════════
+       JUDGING CRITERIA
+    ═══════════════════════════════════════════ */
+    .criteria-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+    .criteria-card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 8px; padding: 24px;
+      position: relative; overflow: hidden;
+    }
+    .criteria-score {
+      font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem;
+      line-height: 1; color: var(--gold); text-shadow: 0 0 25px var(--gold);
+      margin-bottom: 4px;
+    }
+    .criteria-name {
+      font-family: 'Orbitron', monospace; font-size: .55rem;
+      letter-spacing: 2px; color: #aaa; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .criteria-bar-track {
+      width: 100%; height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden;
+    }
+    .criteria-bar-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, var(--red), var(--gold));
+      box-shadow: 0 0 8px var(--gold);
+      animation: fillBar 1.5s ease forwards; width: 0;
+    }
+    @keyframes fillBar { to { width: var(--fill); } }
+    .criteria-note { font-size: .8rem; color: #555; margin-top: 10px; line-height: 1.4; }
+
+    /* ═══════════════════════════════════════════
+       DEMO SCRIPT TABLE
+    ═══════════════════════════════════════════ */
+    .demo-table {
+      width: 100%; border-collapse: collapse;
+      font-size: .9rem;
+    }
+    .demo-table th {
+      font-family: 'Orbitron', monospace; font-size: .5rem;
+      letter-spacing: 3px; color: #555; text-transform: uppercase;
+      text-align: left; padding: 10px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .demo-table td {
+      padding: 16px; vertical-align: top; color: #888;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .demo-table tr:hover td { background: rgba(255,255,255,.02); color: #bbb; }
+    .demo-time { font-family: 'Space Mono', monospace; color: var(--gold); font-size: .75rem; white-space: nowrap; }
+    .demo-screen { color: var(--cyan); font-weight: 700; font-size: .8rem; }
+    .demo-quote { color: #666; font-style: italic; font-size: .82rem; border-left: 2px solid var(--red); padding-left: 10px; margin-top: 6px; }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    footer {
+      border-top: 1px solid rgba(255,34,34,.15);
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem;
+      letter-spacing: 4px;
+      background: linear-gradient(90deg, var(--red), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 8px;
+    }
+    .footer-sub { font-family: 'Orbitron', monospace; font-size: .5rem; letter-spacing: 5px; color: #333; }
+    .footer-links { display: flex; gap: 24px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+    .footer-links a {
+      font-family: 'Orbitron', monospace; font-size: .55rem;
+      letter-spacing: 3px; color: #444; text-decoration: none; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .footer-links a:hover { color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       NAV BAR
+    ═══════════════════════════════════════════ */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 32px;
+      background: rgba(3,4,10,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,34,34,.12);
+      transition: border-color .3s;
+    }
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+      letter-spacing: 3px; color: var(--red);
+      text-shadow: 0 0 12px rgba(255,34,34,.5);
+    }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a {
+      font-family: 'Orbitron', monospace; font-size: .5rem;
+      letter-spacing: 3px; color: #444; text-decoration: none;
+      text-transform: uppercase; transition: color .2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-badge {
+      font-family: 'Orbitron', monospace; font-size: .45rem;
+      letter-spacing: 2px; color: var(--cyan);
+      border: 1px solid rgba(0,255,245,.3); border-radius: 20px;
+      padding: 4px 12px; text-transform: uppercase;
+    }
+
+    /* Floating corner brackets on section headings */
+    .bracket-wrap { position: relative; display: inline-block; }
+    .bracket-wrap::before, .bracket-wrap::after {
+      content: ''; position: absolute;
+      width: 10px; height: 10px; border-color: var(--gold); border-style: solid;
+    }
+    .bracket-wrap::before { top: -4px; left: -8px; border-width: 2px 0 0 2px; }
+    .bracket-wrap::after  { bottom: -4px; right: -8px; border-width: 0 2px 2px 0; }
+
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .stat-block { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ═══════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-logo">THE APOCALYPSE</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#levels">Levels</a>
+    <a href="#tech">Tech Stack</a>
+    <a href="#demo">Live Demo</a>
+    <a href="#judging">Judging</a>
+  </div>
+  <div class="nav-badge">&#127942; Hackathon 2026</div>
+</nav>
+
+<!-- ══ HERO ═══════════════════════════════════ -->
+<section id="hero" style="max-width:100vw; padding-top:80px;">
+  <div id="hero-grid"></div>
+
+  <div id="hero-content">
+    <div class="college-badge">
+      <div class="dot"></div>
+      <span>GMN College Ambala Cantt &nbsp;&#183;&nbsp; CSE Department &nbsp;&#183;&nbsp; Hackathon 2026</span>
+    </div>
+
+    <div class="hero-eyebrow">Reality Quest AI Presents</div>
+
+    <h1 class="hero-title" data-text="THE APOCALYPSE">THE APOCALYPSE</h1>
+
+    <div class="hero-tagline">"YOUR CAMERA IS YOUR WEAPON. YOUR CITY IS YOUR DUNGEON."</div>
+
+    <p class="hero-sub">
+      A <strong>cinematic survival horror web game</strong> built in 24 hours.
+      10 survivors. 7 deadly trials. 1 ancient treasure chest.
+      Powered by <strong>Vanilla JS, Web Audio API &amp; AI-driven NPCs</strong>.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="splash.html" class="cta-primary">&#9654;&nbsp; PLAY THE GAME</a>
+      <a href="#demo" class="cta-secondary">&#9654;&nbsp; WATCH DEMO SCRIPT</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ══ STATS BAR ══════════════════════════════ -->
+<div id="stats-bar">
+  <div class="stat-block"><div class="stat-num">7</div><div class="stat-lbl">Deadly Levels</div></div>
+  <div class="stat-block"><div class="stat-num">10</div><div class="stat-lbl">Unique Survivors</div></div>
+  <div class="stat-block"><div class="stat-num">24H</div><div class="stat-lbl">Built In</div></div>
+  <div class="stat-block"><div class="stat-num">0</div><div class="stat-lbl">Dependencies</div></div>
+  <div class="stat-block"><div class="stat-num">PWA</div><div class="stat-lbl">Platform</div></div>
+  <div class="stat-block"><div class="stat-num">1v1</div><div class="stat-lbl">Final PvP Battle</div></div>
+</div>
+
+<!-- ══ FEATURES ═══════════════════════════════ -->
+<section id="features">
+  <div class="section-label">01 &nbsp; Core Features</div>
+  <h2 class="section-title bracket-wrap">WHAT WE BUILT</h2>
+  <p class="section-sub">A full cinematic survival horror experience — no frameworks, no shortcuts.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon fi-red">&#127898;</div>
+      <div class="feature-name">7 UNIQUE LEVELS</div>
+      <div class="feature-desc">Each level has distinct mechanics — puzzle-solving, corridor escapes, 1v1 combat, boss fights, and PvP. Every level has its own environment, AI, and game loop.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-gold">&#129499;</div>
+      <div class="feature-name">10 SURVIVOR AVATARS</div>
+      <div class="feature-desc">10 unique 3D-rendered character avatars with distinct colors, names, and university majors. Fully selectable with confirmation flow before game start.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-cyan">&#129302;</div>
+      <div class="feature-name">AI NPC MOVEMENT</div>
+      <div class="feature-desc">NPCs use a real-time waypoint AI system with patrol logic, pause timers, and sinusoidal walk-bob animations — all running at 60fps in requestAnimationFrame.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-purple">&#128138;</div>
+      <div class="feature-name">WEB AUDIO ENGINE</div>
+      <div class="feature-desc">Custom Web Audio API synthesizer plays cinematic drones, impact slams, chimes, and horror stingers — all procedurally generated with oscillators and gain envelopes.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-green">&#127942;</div>
+      <div class="feature-name">CINEMATIC FINALE</div>
+      <div class="feature-desc">Level 7 ends with a full cinematic sequence: key glow → CSS chest unlock → treasure explosion → dramatic fade → glitch horror text → "THE APOCALYPSE HAS ONLY JUST BEGUN."</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon fi-blue">&#128247;</div>
+      <div class="feature-name">ZERO DEPENDENCIES</div>
+      <div class="feature-desc">100% Vanilla HTML, CSS, and JavaScript. No frameworks, no bundlers, no npm at runtime. Loads instantly on any browser. Works offline as a PWA.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LEVELS TIMELINE ════════════════════════ -->
+<section id="levels" style="max-width:800px;">
+  <div class="section-label">02 &nbsp; Game Levels</div>
+  <h2 class="section-title">7 DEADLY TRIALS</h2>
+  <p class="section-sub">Each level is a self-contained experience with unique mechanics.</p>
+
+  <div class="levels-timeline">
+    <div class="level-row">
+      <div class="level-num">1</div>
+      <div class="level-content">
+        <div class="level-title">THE LOCKED GATE</div>
+        <div class="level-desc">GMN College entrance. Find 3 hidden clues to crack the occult combination lock 13-7-3. Ambient red eyes glow from the corridor. Atmospheric horror puzzle.</div>
+        <span class="level-tag lt-puzzle">Puzzle</span> &nbsp; <span class="level-tag lt-horror">Horror</span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-num">2</div>
+      <div class="level-content">
+        <div class="level-title">THE FIGHT ARENA</div>
+        <div class="level-desc">10-man battle royale. Punch, kick, dropkick against 9 AI opponents with health bars, knockback physics, and guard system. Last survivor advances.</div>
+        <span class="level-tag lt-combat">Combat</span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-num">3</div>
+      <div class="level-content">
+        <div class="level-title">THE HAUNTED CORRIDOR</div>
+        <div class="level-desc">Dual-corridor maze. Stella AI hunts the player using chase logic, state machine (PATROL → CHASE → FLEE), and speed escalation. Squad NPCs Ben &amp; Esha patrol independently.</div>
+        <span class="level-tag lt-horror">Horror</span> &nbsp; <span class="level-tag lt-puzzle">Puzzle</span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-num">4</div>
+      <div class="level-content">
+        <div class="level-title">THE SIX BOXES</div>
+        <div class="level-desc">Search 6 boxes for the Ancient Dagger. Activate it on the ritual altar. Stella boss appears with HP bar, chase AI, and disintegration death animation. Dagger lights up in hand.</div>
+        <span class="level-tag lt-boss">Boss Fight</span> &nbsp; <span class="level-tag lt-combat">Combat</span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-num">5</div>
+      <div class="level-content">
+        <div class="level-title">THE JUDGEMENT</div>
+        <div class="level-desc">Angel vs Stella. Moral choice system. Navigate the trial to decide Stella's fate. Full cinematic angel artwork with particle halos and divine light effects.</div>
+        <span class="level-tag lt-boss">Boss</span> &nbsp; <span class="level-tag lt-horror">Horror</span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-num">6</div>
+      <div class="level-content">
+        <div class="level-title">THE TRAITOR</div>
+        <div class="level-desc">Stella reborn. Electric corridor traps. Largest level with 96KB of game logic. Multiple game mechanics layered together. Current electricity traps as environmental hazards.</div>
+        <span class="level-tag lt-boss">Final Boss</span> &nbsp; <span class="level-tag lt-horror">Horror</span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-num">7</div>
+      <div class="level-content">
+        <div class="level-title">THE FINAL BATTLE</div>
+        <div class="level-desc">1v1 PvP arena. Player vs rival survivor. Punch, kick, dropkick combat with phase shifts. Winner gets the glowing key, unlocks the CSS-rendered treasure chest, and triggers the 4-phase cinematic ending.</div>
+        <span class="level-tag lt-final">PvP Final</span> &nbsp; <span class="level-tag lt-combat">Combat</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TECH STACK ══════════════════════════════ -->
+<section id="tech">
+  <div class="section-label">03 &nbsp; Technology</div>
+  <h2 class="section-title">TECH STACK</h2>
+  <p class="section-sub">Handcrafted with precision — no shortcuts, no frameworks.</p>
+
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#e44d26; background:#e44d26;"></div>
+      <div><div class="tech-name">HTML5</div><div class="tech-role">Semantic markup, canvas elements, PWA manifest, offline capability</div></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#264de4; background:#264de4;"></div>
+      <div><div class="tech-name">CSS3</div><div class="tech-role">Keyframe animations, clip-path gems, glassmorphism, CSS custom properties, 3D transforms</div></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#f1c40f; background:#f1c40f;"></div>
+      <div><div class="tech-name">Vanilla JS</div><div class="tech-role">requestAnimationFrame game loops, AI state machines, real-time collision detection, localStorage</div></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#00fff5; background:#00fff5;"></div>
+      <div><div class="tech-name">Web Audio API</div><div class="tech-role">Procedural synthesizer — oscillators, gain envelopes, drone layers, impact slams, horror stingers</div></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#9b59b6; background:#9b59b6;"></div>
+      <div><div class="tech-name">Canvas API</div><div class="tech-role">Particle systems, ambient fog, atmospheric dust, glowing sparkle backgrounds</div></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#2ecc71; background:#2ecc71;"></div>
+      <div><div class="tech-name">PWA / Service Worker</div><div class="tech-role">Offline-capable, installable on mobile home screen, manifest.json, web app meta</div></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#e67e22; background:#e67e22;"></div>
+      <div><div class="tech-name">Google Fonts</div><div class="tech-role">Creepster, Orbitron, Bebas Neue, Rajdhani, Oswald — cinematic typography system</div></div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-dot" style="color:#e74c3c; background:#e74c3c;"></div>
+      <div><div class="tech-name">React Native (Ext.)</div><div class="tech-role">AR Camera scanner module, GPS mapping, Gemini Vision API integration — mobile companion</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DEMO SCRIPT ════════════════════════════ -->
+<section id="demo">
+  <div class="section-label">04 &nbsp; Presentation</div>
+  <h2 class="section-title">2-MIN DEMO SCRIPT</h2>
+  <p class="section-sub">Present this sequence to judges for maximum impact.</p>
+
+  <div style="background:var(--card); border:1px solid rgba(255,255,255,.06); border-radius:8px; overflow:hidden;">
+    <table class="demo-table" style="width:100%;">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Screen</th>
+          <th>Action &amp; Voiceover</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="demo-time">0:00&nbsp;—&nbsp;0:20</div></td>
+          <td><div class="demo-screen">hackathon.html</div></td>
+          <td>Open the showcase page. Show the animated hero, stats bar.
+            <div class="demo-quote">"Judges — what if you could build an entire survival horror world in 24 hours? We did."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="demo-time">0:20&nbsp;—&nbsp;0:35</div></td>
+          <td><div class="demo-screen">splash.html</div></td>
+          <td>Launch the cinematic splash. Show hackathon badge → logo glitch → loading bar → "ENTER THE APOCALYPSE".
+            <div class="demo-quote">"This is THE APOCALYPSE. 10 survivors trapped inside GMN College. 7 trials. 1 treasure. Zero dependencies."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="demo-time">0:35&nbsp;—&nbsp;0:50</div></td>
+          <td><div class="demo-screen">Character Select</div></td>
+          <td>Show the survivor selection screen. Click an avatar, confirm, begin.
+            <div class="demo-quote">"Choose your survivor — each has a unique avatar, color, and university major."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="demo-time">0:50&nbsp;—&nbsp;1:10</div></td>
+          <td><div class="demo-screen">Level 3</div></td>
+          <td>Navigate the corridor. Let Stella chase you. Show Ben &amp; Esha NPCs walking autonomously.
+            <div class="demo-quote">"This is our AI. Stella uses a full state machine — PATROL, CHASE, FLEE. NPC squad members navigate independently using waypoint AI."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="demo-time">1:10&nbsp;—&nbsp;1:30</div></td>
+          <td><div class="demo-screen">Level 4</div></td>
+          <td>Find boxes, activate dagger on altar. Watch dagger appear in hand. Stella appears.
+            <div class="demo-quote">"When activated, the Ancient Dagger appears in the character's hand — dynamically injected into the DOM after render."</div>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="demo-time">1:30&nbsp;—&nbsp;2:00</div></td>
+          <td><div class="demo-screen">Level 7 Finale</div></td>
+          <td>Win the PvP. Show: key glow → CSS chest unlock → CSS gem treasures → horror text → glitch → fade black.
+            <div class="demo-quote">"Every gem, crown, and gold bar in this ending is pure CSS — no images, no emoji. The chest physically opens. And then... the game asks you something it has never asked before."</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══ JUDGING CRITERIA ═══════════════════════ -->
+<section id="judging">
+  <div class="section-label">05 &nbsp; Evaluation</div>
+  <h2 class="section-title">JUDGING CRITERIA</h2>
+  <p class="section-sub">Scored against the official hackathon rubric.</p>
+
+  <div class="criteria-grid">
+    <div class="criteria-card">
+      <div class="criteria-score">10</div>
+      <div class="criteria-name">Theme Relevance</div>
+      <div class="criteria-bar-track"><div class="criteria-bar-fill" style="--fill:100%"></div></div>
+      <div class="criteria-note">Directly merges physical college environment (GMN Campus) with survival horror gaming mechanics. The college IS the game world.</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-score">10</div>
+      <div class="criteria-name">Technical Execution</div>
+      <div class="criteria-bar-track"><div class="criteria-bar-fill" style="--fill:100%"></div></div>
+      <div class="criteria-note">7 fully-playable levels, AI NPC systems, Web Audio synthesizer, CSS particle art, requestAnimationFrame game loops — all in pure Vanilla JS.</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-score">10</div>
+      <div class="criteria-name">UI/UX &amp; Aesthetics</div>
+      <div class="criteria-bar-track"><div class="criteria-bar-fill" style="--fill:100%"></div></div>
+      <div class="criteria-note">Cinematic splash, glitch title animations, scanline overlays, glassmorphism HUDs, CSS-rendered 3D treasure, and 4-phase ending sequence.</div>
+    </div>
+    <div class="criteria-card">
+      <div class="criteria-score">10</div>
+      <div class="criteria-name">Innovation</div>
+      <div class="criteria-bar-track"><div class="criteria-bar-fill" style="--fill:100%"></div></div>
+      <div class="criteria-note">CSS gem art (clip-path polygon facets), procedural audio synthesis, dynamic NPC state machines, cinematic game-over sequence — all novel for a 24h hackathon.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">THE APOCALYPSE</div>
+  <div class="footer-sub">Reality Quest AI &nbsp;&#183;&nbsp; GMN College Ambala Cantt &nbsp;&#183;&nbsp; Hackathon 2026</div>
+  <div class="footer-links">
+    <a href="splash.html">Play Game</a>
+    <a href="index.html">World Map</a>
+    <a href="docs/HACKATHON_PITCH.md">Pitch Deck</a>
+    <a href="docs/ARCHITECTURE.md">Architecture</a>
+    <a href="level7.html">Final Level</a>
+  </div>
+  <div style="font-family:'Space Mono',monospace; font-size:.45rem; color:#222; margin-top:20px; letter-spacing:3px;">
+    BUILT IN 24 HOURS &nbsp;&#183;&nbsp; 0 DEPENDENCIES &nbsp;&#183;&nbsp; 100% VANILLA
+  </div>
+</footer>
+
+<script>
+  /* Intersection Observer for scroll-triggered animations */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .tech-card, .level-row, .criteria-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+
+  /* Smooth nav highlight */
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('nav');
+    nav.style.borderBottomColor = window.scrollY > 80
+      ? 'rgba(255,34,34,0.35)'
+      : 'rgba(255,34,34,0.12)';
+  });
+
+  /* Stat counter animation */
+  function animateCounter(el, target, suffix='') {
+    let cur = 0;
+    const step = target / 40;
+    const iv = setInterval(() => {
+      cur += step;
+      if (cur >= target) { cur = target; clearInterval(iv); }
+      el.textContent = (Number.isInteger(target) ? Math.floor(cur) : cur.toFixed(0)) + suffix;
+    }, 40);
+  }
+
+  const statsObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        document.querySelectorAll('.stat-num').forEach(el => {
+          const txt = el.textContent.trim();
+          if (!isNaN(parseInt(txt))) animateCounter(el, parseInt(txt));
+        });
+        statsObs.disconnect();
+      }
+    });
+  }, { threshold: 0.5 });
+  const statsBar = document.getElementById('stats-bar');
+  if (statsBar) statsObs.observe(statsBar);
+</script>
+</body>
+</html>

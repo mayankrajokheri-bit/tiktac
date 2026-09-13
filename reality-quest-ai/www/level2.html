@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Level 2 — Combat Arena | Reality Quest AI</title>
+  <meta name="description" content="Level 2: The Training & Fight Arena. 10 enter. Only 6 will leave. Master punches, kicks, dropkicks, and the Shadow Dash.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/survivors.css">
+  <script src="js/survivors.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --primary-red: #c0392b;
+      --neon-red: #ff2a2a;
+      --dark-crimson: #550707;
+      --shadow-blue: #00e5ff;
+      --shadow-purple: #9d4edd;
+      --gold-accent: #f59e0b;
+      --stamina-cyan: #00cec9;
+      --hud-bg: rgba(12, 12, 16, 0.88);
+      --font-horror: 'Creepster', cursive;
+      --font-ui: 'Oswald', sans-serif;
+      --font-body: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background-color: #050507;
+      color: #fff;
+      font-family: var(--font-body);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+      touch-action: none;
+    }
+
+    /* ==========================================================================
+       ARENA VIEWPORT & PHOTOGRAPHIC BACKGROUND
+       ========================================================================== */
+    #arena-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0d0c10;
+    }
+
+    #gym-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/fight_arena_gym.jpg');
+      background-size: cover;
+      background-position: center bottom;
+      filter: brightness(0.92) contrast(1.08);
+      transition: filter 0.8s ease;
+      z-index: 1;
+    }
+
+    #gym-lights-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 180, 50, 0.12) 0%, transparent 60%),
+                  radial-gradient(circle at 20% 70%, rgba(200, 30, 30, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 70%, rgba(200, 30, 30, 0.15) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 2;
+      transition: opacity 0.5s ease;
+    }
+
+    .ceiling-cove-light {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 12px;
+      background: linear-gradient(180deg, rgba(255, 190, 70, 0.8), rgba(255, 160, 40, 0.2), transparent);
+      box-shadow: 0 0 35px 8px rgba(255, 180, 50, 0.5);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    #gym-clock {
+      position: absolute;
+      top: 14%;
+      left: 38%;
+      font-family: monospace;
+      font-size: clamp(14px, 2vw, 22px);
+      font-weight: 700;
+      color: #ff2222;
+      background: #110202;
+      padding: 4px 12px;
+      border: 2px solid #550707;
+      border-radius: 4px;
+      box-shadow: 0 0 15px rgba(255, 34, 34, 0.6);
+      letter-spacing: 3px;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       INTERACTIVE GYM PROPS: PUNCHING BAGS
+       ========================================================================== */
+    .punching-bag-prop {
+      position: absolute;
+      z-index: 6;
+      width: 45px;
+      height: 120px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: top center;
+      transition: transform 0.15s ease-out;
+    }
+
+    .bag-steel-chain {
+      width: 4px;
+      height: 35px;
+      background: linear-gradient(90deg, #555, #888, #333);
+    }
+
+    .bag-leather-body {
+      width: 38px;
+      height: 85px;
+      background: linear-gradient(180deg, #1a1a1a, #0d0d0d);
+      border: 2px solid #333;
+      border-radius: 16px 16px 20px 20px;
+      box-shadow: inset -5px 0 10px rgba(0,0,0,0.8), 0 8px 20px rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .bag-leather-body::after {
+      content: 'EVERLAST';
+      position: absolute;
+      font-family: var(--font-ui);
+      font-size: 7px;
+      letter-spacing: 1.5px;
+      color: rgba(255, 255, 255, 0.35);
+      transform: rotate(-90deg);
+    }
+
+    .punching-bag-prop.hit-swing-left {
+      animation: bagSwingLeft 0.8s ease-in-out;
+    }
+
+    .punching-bag-prop.hit-swing-right {
+      animation: bagSwingRight 0.8s ease-in-out;
+    }
+
+    @keyframes bagSwingLeft {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-24deg); }
+      50% { transform: rotate(16deg); }
+      75% { transform: rotate(-8deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    @keyframes bagSwingRight {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(24deg); }
+      50% { transform: rotate(-16deg); }
+      75% { transform: rotate(8deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    #bag-1 { left: 8%; top: 46%; }
+    #bag-2 { left: 16%; top: 48%; }
+    #bag-3 { left: 24%; top: 50%; }
+
+    /* ==========================================================================
+       TACTICAL COMBAT ZONES
+       ========================================================================== */
+    .zone-marker {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    #zone-bags {
+      left: 6%;
+      top: 50%;
+      width: 220px;
+      height: 180px;
+      border: 2px dashed rgba(255, 75, 75, 0.4);
+      background: radial-gradient(circle, rgba(192, 57, 43, 0.12) 0%, transparent 70%);
+      animation: zonePulse 2.5s infinite ease-in-out;
+    }
+
+    #zone-center {
+      left: 36%;
+      top: 60%;
+      width: 280px;
+      height: 220px;
+      border: 2.5px solid rgba(255, 50, 50, 0.6);
+      background: radial-gradient(circle, rgba(231, 76, 60, 0.22) 0%, transparent 75%);
+      box-shadow: 0 0 30px rgba(255, 40, 40, 0.35);
+      animation: centerMatPulse 3s infinite alternate;
+    }
+
+    #zone-cage {
+      right: 8%;
+      top: 54%;
+      width: 220px;
+      height: 180px;
+      border: 2px dashed rgba(255, 75, 75, 0.4);
+      background: radial-gradient(circle, rgba(192, 57, 43, 0.12) 0%, transparent 70%);
+      animation: zonePulse 2.5s infinite ease-in-out 1.2s;
+    }
+
+    .zone-title {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      letter-spacing: 2px;
+      font-weight: 700;
+      color: rgba(255, 140, 140, 0.9);
+      text-shadow: 0 0 8px rgba(255, 50, 50, 0.8);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .zone-multiplier {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--gold-accent);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    @keyframes zonePulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.04); opacity: 1; border-color: rgba(255, 90, 90, 0.8); }
+    }
+
+    @keyframes centerMatPulse {
+      0% { box-shadow: 0 0 20px rgba(255, 40, 40, 0.2); }
+      100% { box-shadow: 0 0 50px rgba(255, 40, 40, 0.6); }
+    }
+
+    /* Secret Crimson Reward Locker */
+    #secret-locker {
+      position: absolute;
+      right: 13%;
+      top: 48%;
+      width: 48px;
+      height: 86px;
+      background: linear-gradient(180deg, #220808, #110202);
+      border: 2px solid #5a1111;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #secret-locker .locker-vent {
+      width: 24px;
+      height: 2px;
+      background: #444;
+      margin: 2px 0;
+    }
+
+    #secret-locker .locker-lock-icon {
+      font-size: 16px;
+      margin-top: 6px;
+      transition: transform 0.3s ease;
+    }
+
+    #secret-locker.unlocking-ready {
+      border-color: #ff3b30;
+      box-shadow: 0 0 30px #ff2a2a, inset 0 0 15px rgba(255, 60, 60, 0.6);
+      animation: lockerGlow 1s infinite alternate;
+    }
+
+    #secret-locker.unlocking-ready .locker-lock-icon {
+      animation: bounceLock 0.6s infinite alternate;
+      color: #ffdd55;
+      text-shadow: 0 0 10px #ffea79;
+    }
+
+    @keyframes lockerGlow {
+      from { box-shadow: 0 0 15px #c0392b; }
+      to { box-shadow: 0 0 45px #ff2a2a, 0 0 70px rgba(255, 100, 100, 0.8); }
+    }
+
+    @keyframes bounceLock {
+      from { transform: translateY(0); }
+      to { transform: translateY(-4px); }
+    }
+
+    /* ==========================================================================
+       ENTITIES: FIGHTER WITH ANIMATED LEGS, ARMS & COMBAT POSES
+       ========================================================================== */
+    #entities-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .fighter-entity {
+      position: absolute;
+      width: 48px;
+      height: 68px;
+      transform: translate(-50%, -100%);
+      will-change: left, top, transform;
+      transition: filter 0.2s;
+    }
+
+    .fighter-hud {
+      position: absolute;
+      top: -26px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 60px;
+    }
+
+    .fighter-name-tag {
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      text-shadow: 0 1px 3px #000;
+    }
+
+    .fighter-hp-track {
+      width: 100%;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      overflow: hidden;
+      margin-top: 1px;
+    }
+
+    .fighter-hp-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      transition: width 0.2s ease;
+    }
+
+    /* Character Body Parts for Dynamic Martial Arts */
+    .fighter-visual-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.1s ease-out;
+    }
+
+    .fighter-head {
+      width: 18px;
+      height: 18px;
+      background: #f1c27d;
+      border-radius: 50%;
+      margin: 0 auto 2px;
+      border: 1.5px solid rgba(0, 0, 0, 0.4);
+      position: relative;
+    }
+
+    .fighter-torso {
+      width: 24px;
+      height: 28px;
+      margin: 0 auto;
+      border-radius: 6px;
+      position: relative;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Arms with Boxing Gloves */
+    .fighter-arm {
+      position: absolute;
+      top: 6px;
+      width: 6px;
+      height: 16px;
+      background: #c0392b;
+      border-radius: 3px;
+      transition: transform 0.12s ease;
+    }
+
+    .fighter-arm.left-arm { left: -4px; }
+    .fighter-arm.right-arm { right: -4px; }
+
+    /* Animated Martial Arts Legs */
+    .fighter-legs-container {
+      display: flex;
+      justify-content: space-around;
+      width: 22px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .fighter-leg {
+      width: 6px;
+      height: 20px;
+      background: #1a1a24;
+      border-radius: 3px;
+      transform-origin: top center;
+      transition: transform 0.12s ease;
+    }
+
+    /* DYNAMIC ACTION ANIMATIONS (PUNCH, KICK, DROPKICK, GUARD) */
+    /* 1. Punch Pose */
+    .fighter-entity.anim-punch .fighter-arm.right-arm {
+      transform: translateY(-4px) scaleY(1.5) scaleX(1.4);
+      background: #ff3838;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    /* 2. High Kick ("Laat Maarna") Pose */
+    .fighter-entity.anim-kick .fighter-leg.right-leg {
+      transform: rotate(-95deg) translateY(-6px) scaleY(1.4);
+      background: #ff2222;
+      box-shadow: 0 0 12px #ff2222;
+    }
+
+    /* 3. Flying Dropkick Airborne Pose */
+    .fighter-entity.anim-dropkick {
+      transform: translate(-50%, -100%) rotate(-65deg) scale(1.15) !important;
+      filter: drop-shadow(0 0 15px #f39c12);
+    }
+
+    .fighter-entity.anim-dropkick .fighter-leg {
+      transform: rotate(-85deg) scaleY(1.5);
+      background: #f1c40f;
+    }
+
+    /* 4. Guard / Block Shield Pose */
+    .fighter-guard-shield {
+      position: absolute;
+      width: 55px;
+      height: 55px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2.5px solid var(--stamina-cyan);
+      box-shadow: 0 0 20px var(--stamina-cyan), inset 0 0 15px rgba(0, 206, 201, 0.4);
+      background: radial-gradient(circle, rgba(0, 206, 201, 0.2) 0%, transparent 75%);
+      display: none;
+      animation: shieldPulse 0.8s infinite alternate;
+    }
+
+    @keyframes shieldPulse {
+      from { transform: translate(-50%, -50%) scale(0.95); }
+      to { transform: translate(-50%, -50%) scale(1.05); }
+    }
+
+    /* ==========================================================================
+       SPECIAL COMBAT FX (CRESCENT KICK ARC, SHOCKWAVES, HIT COMBOS)
+       ========================================================================== */
+    .kick-crescent-arc {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-right: 5px solid #ff2222;
+      border-top: 5px solid #ff7675;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #ff2222;
+      pointer-events: none;
+      animation: kickArcSweep 0.28s ease-out forwards;
+      z-index: 20;
+    }
+
+    @keyframes kickArcSweep {
+      0% { transform: translate(-50%, -50%) rotate(-45deg) scale(0.4); opacity: 1; }
+      100% { transform: translate(-50%, -50%) rotate(45deg) scale(1.6); opacity: 0; }
+    }
+
+    .dropkick-shockwave-ring {
+      position: absolute;
+      width: 120px;
+      height: 60px;
+      top: 100%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 3px solid var(--gold-accent);
+      border-radius: 50%;
+      box-shadow: 0 0 30px var(--gold-accent);
+      pointer-events: none;
+      animation: shockwaveExpand 0.4s ease-out forwards;
+      z-index: 10;
+    }
+
+    @keyframes shockwaveExpand {
+      0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+    }
+
+    /* Floating Hit Splash ("POW!", "KICK!", "CRITICAL!") */
+    .hit-splash-tag {
+      position: absolute;
+      font-family: var(--font-ui);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fffa65;
+      text-shadow: 0 0 10px #ff3838, 2px 2px 0 #000;
+      pointer-events: none;
+      z-index: 30;
+      animation: splashFloat 0.6s ease-out forwards;
+      letter-spacing: 2px;
+    }
+
+    @keyframes splashFloat {
+      0% { transform: translate(-50%, 0) scale(0.5); opacity: 1; }
+      50% { transform: translate(-50%, -30px) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, -50px) scale(0.9); opacity: 0; }
+    }
+
+    /* Floating Damage Numbers */
+    .combat-number {
+      position: absolute;
+      font-family: var(--font-ui);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ff3838;
+      text-shadow: 0 0 8px #ff0000;
+      pointer-events: none;
+      z-index: 25;
+      animation: floatDamage 0.7s ease-out forwards;
+    }
+
+    @keyframes floatDamage {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-35px) scale(1.3); opacity: 0; }
+    }
+
+    /* ==========================================================================
+       HUD & COMBAT COMBO COUNTER
+       ========================================================================== */
+    #hud-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 24px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.5) 75%, transparent 100%);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .hud-title-cluster {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hud-level-badge {
+      background: linear-gradient(135deg, var(--primary-red), #e74c3c);
+      padding: 4px 12px;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      border-radius: 4px;
+      box-shadow: 0 0 12px rgba(192, 57, 43, 0.6);
+      text-transform: uppercase;
+    }
+
+    .hud-arena-name {
+      font-family: var(--font-horror);
+      font-size: 1.8rem;
+      color: #ff3333;
+      text-shadow: 0 0 15px rgba(255, 51, 51, 0.8), 0 0 30px #8e1a10;
+      letter-spacing: 2px;
+    }
+
+    .hud-score-board {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .hud-card {
+      background: var(--hud-bg);
+      border: 1px solid rgba(255, 60, 60, 0.3);
+      padding: 6px 14px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .hud-card-lbl {
+      font-size: 8px;
+      font-family: var(--font-ui);
+      letter-spacing: 1.5px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .hud-card-val {
+      font-size: 1.2rem;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      color: #ff4747;
+      line-height: 1;
+    }
+
+    /* Combo Banner in Top Center */
+    #combo-meter-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(231, 76, 60, 0.3));
+      border: 1.5px solid var(--gold-accent);
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff275;
+      text-shadow: 0 0 10px #f39c12;
+      letter-spacing: 2px;
+      animation: comboBeat 0.3s ease-out;
+    }
+
+    @keyframes comboBeat {
+      0% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    /* Player Status: Health + Stamina Bar */
+    #player-status-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: min(340px, 82vw);
+      background: rgba(10, 10, 15, 0.92);
+      border: 1px solid rgba(255, 50, 50, 0.4);
+      border-radius: 12px;
+      padding: 8px 16px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .bar-label-row {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 10px;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #ccc;
+      margin-bottom: 3px;
+    }
+
+    .main-health-track {
+      width: 100%;
+      height: 10px;
+      background: #180505;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid #4a0c0c;
+    }
+
+    #main-health-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff3333, #ff7675);
+      box-shadow: 0 0 10px #ff3333;
+      border-radius: 5px;
+      transition: width 0.25s ease;
+    }
+
+    /* Stamina Track for Kicks & Dropkicks */
+    .stamina-track {
+      width: 100%;
+      height: 6px;
+      background: #001f22;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 206, 201, 0.3);
+      margin-top: 5px;
+    }
+
+    #main-stamina-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #00cec9, #81ecec);
+      box-shadow: 0 0 8px #00cec9;
+      border-radius: 3px;
+      transition: width 0.1s linear;
+    }
+
+    /* Desktop Controls Helper Badge */
+    #desktop-controls-legend {
+      position: fixed;
+      top: 65px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      color: #aaa;
+      letter-spacing: 1px;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    #desktop-controls-legend span {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE ARCADE TOUCH CONTROLS
+       ========================================================================== */
+    #mobile-controls {
+      position: fixed;
+      bottom: 24px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 110;
+      pointer-events: none;
+    }
+
+    .dpad-container {
+      display: grid;
+      grid-template-columns: repeat(3, 46px);
+      grid-template-rows: repeat(3, 46px);
+      gap: 3px;
+      pointer-events: auto;
+    }
+
+    .dpad-key {
+      background: rgba(25, 10, 10, 0.65);
+      border: 1.5px solid rgba(255, 70, 70, 0.4);
+      color: #fff;
+      font-size: 16px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+      user-select: none;
+    }
+
+    .dpad-key:active {
+      background: rgba(220, 40, 40, 0.85);
+      box-shadow: 0 0 15px rgba(255, 50, 50, 0.8);
+    }
+
+    #dpad-up { grid-column: 2; grid-row: 1; }
+    #dpad-left { grid-column: 1; grid-row: 2; }
+    #dpad-center { grid-column: 2; grid-row: 2; background: rgba(10, 10, 10, 0.3); border: none; }
+    #dpad-right { grid-column: 3; grid-row: 2; }
+    #dpad-down { grid-column: 2; grid-row: 3; }
+
+    /* Action Buttons Cluster (Punch, Kick, Dropkick, Guard, Dash) */
+    .actions-cluster {
+      display: grid;
+      grid-template-columns: repeat(2, 54px);
+      grid-template-rows: repeat(2, 54px);
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .arcade-btn {
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+      transition: transform 0.08s;
+      user-select: none;
+    }
+
+    .arcade-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* 🥊 Punch Button */
+    #btn-punch {
+      background: linear-gradient(135deg, #c0392b, #e74c3c);
+      color: #fff;
+      border-color: #ff7675;
+    }
+
+    /* 🦶 Kick ("Laat") Button */
+    #btn-kick {
+      background: linear-gradient(135deg, #d35400, #e67e22);
+      color: #fff;
+      border-color: #f39c12;
+      box-shadow: 0 0 15px rgba(230, 126, 34, 0.5);
+    }
+
+    /* 💥 Dropkick Button */
+    #btn-dropkick {
+      background: linear-gradient(135deg, #8e44ad, #9b59b6);
+      color: #fff;
+      border-color: #e056fd;
+    }
+
+    /* 🛡️ Guard Button */
+    #btn-guard {
+      background: linear-gradient(135deg, #16a085, #1abc9c);
+      color: #fff;
+      border-color: var(--stamina-cyan);
+    }
+
+    /* ⚡ Shadow Dash Button */
+    #btn-dash-special {
+      position: absolute;
+      top: -65px;
+      right: 0;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e3799, #0984e3);
+      border: 2px solid var(--shadow-blue);
+      color: #fff;
+      display: none;
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+      pointer-events: auto;
+    }
+
+    #btn-dash-special.ready {
+      animation: dashReadyPulse 1.2s infinite alternate;
+    }
+
+    @keyframes dashReadyPulse {
+      from { box-shadow: 0 0 15px var(--shadow-blue); }
+      to { box-shadow: 0 0 35px var(--shadow-blue), 0 0 50px var(--shadow-purple); }
+    }
+
+    /* ==========================================================================
+       CINEMATIC MODALS & HORROR TWISTS
+       ======================================================================== */
+    .cinematic-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.94);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .cinematic-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #door-lock-banner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: rgba(15, 0, 0, 0.95);
+      border: 3px solid #ff2a2a;
+      box-shadow: 0 0 80px rgba(255, 0, 0, 0.8), inset 0 0 30px rgba(255, 0, 0, 0.5);
+      padding: 28px 48px;
+      border-radius: 12px;
+      text-align: center;
+      z-index: 250;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #door-lock-banner.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .power-card {
+      background: linear-gradient(180deg, #100520, #04010a);
+      border: 2px solid var(--shadow-blue);
+      border-radius: 16px;
+      padding: 32px 28px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 0 50px rgba(0, 229, 255, 0.4);
+    }
+
+    .claim-power-btn {
+      background: linear-gradient(135deg, #0984e3, #6c5ce7);
+      border: none;
+      color: #fff;
+      font-family: var(--font-ui);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      padding: 14px 38px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(9, 132, 227, 0.6);
+    }
+
+    /* Horror Twist Overlay */
+    #horror-twist-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 350;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    #horror-twist-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mirror-frame {
+      width: min(420px, 86vw);
+      height: 300px;
+      background: linear-gradient(135deg, rgba(30, 30, 45, 0.6) 0%, rgba(10, 10, 20, 0.9) 100%);
+      border: 3px solid rgba(160, 180, 220, 0.4);
+      box-shadow: 0 0 40px rgba(100, 150, 255, 0.2), inset 0 0 30px rgba(0, 0, 0, 0.9);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mirror-player-reflection {
+      position: absolute;
+      bottom: 20px;
+      left: 36%;
+      width: 48px;
+      height: 90px;
+      background: linear-gradient(180deg, rgba(231, 76, 60, 0.4), rgba(100, 20, 20, 0.2));
+      border-radius: 12px 12px 4px 4px;
+      filter: blur(1px);
+    }
+
+    .mirror-ghost-figure {
+      position: absolute;
+      bottom: 40px;
+      left: 45%;
+      width: 70px;
+      height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: ghostHover 2s infinite alternate ease-in-out;
+      filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.8));
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .mirror-ghost-figure.visible { opacity: 1; }
+
+    .ghost-hood { width: 38px; height: 44px; background: #110303; border-radius: 50% 50% 20% 20%; position: relative; }
+    .ghost-red-eyes { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
+    .ghost-red-eye { width: 6px; height: 6px; background: #ff0000; border-radius: 50%; box-shadow: 0 0 12px #ff0000; }
+    .ghost-cloak { width: 55px; height: 80px; background: linear-gradient(180deg, #110303, transparent); clip-path: polygon(0 0, 100% 0, 85% 90%, 50% 100%, 15% 90%); }
+
+    #mirror-blood-msg {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-horror);
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      color: #ff1111;
+      text-shadow: 0 0 20px #ff0000, 0 0 40px #8e1a10;
+      letter-spacing: 4px;
+      opacity: 0;
+      transition: all 0.6s ease;
+      z-index: 10;
+    }
+
+    #mirror-blood-msg.show { opacity: 1; }
+
+    /* Damage Flash & Toast */
+    #screen-damage-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 0, 0, 0.35);
+      pointer-events: none;
+      z-index: 120;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    #screen-damage-flash.flash { opacity: 1; }
+
+    #elim-toast {
+      position: fixed;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(10, 0, 0, 0.94);
+      border: 1.5px solid #ff2a2a;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 1rem;
+      letter-spacing: 2px;
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    #elim-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Final Victory Modal */
+    #level-end-modal {
+      background: radial-gradient(circle at center, #1b0202 0%, #060101 100%);
+    }
+
+    .survivors-roster {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      max-width: 480px;
+      margin-bottom: 30px;
+    }
+
+    .survivor-badge {
+      background: rgba(20, 20, 25, 0.85);
+      border: 1px solid #ff3333;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-ui);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    .survivor-badge.chosen {
+      border-color: var(--gold-accent);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(255, 50, 50, 0.2));
+      color: #ffeaa7;
+      font-weight: 700;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
+    }
+
+    .next-level-btn {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 2px solid #ff4757;
+      color: #fff;
+      font-family: var(--font-ui);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      padding: 16px 44px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 35px rgba(192, 57, 43, 0.7);
+      transition: transform 0.2s;
+    }
+
+    .next-level-btn:hover { transform: scale(1.06); }
+  </style>
+</head>
+
+<body>
+
+  <div id="arena-container">
+    <div id="gym-bg"></div>
+    <div id="gym-lights-overlay"></div>
+    <div class="ceiling-cove-light"></div>
+    <div id="gym-clock">00:00:00</div>
+
+    <!-- Interactive Punching Bags (Left Zone) -->
+    <div class="punching-bag-prop" id="bag-1" onclick="hitPunchingBag(1)">
+      <div class="bag-steel-chain"></div>
+      <div class="bag-leather-body"></div>
+    </div>
+    <div class="punching-bag-prop" id="bag-2" onclick="hitPunchingBag(2)">
+      <div class="bag-steel-chain"></div>
+      <div class="bag-leather-body"></div>
+    </div>
+    <div class="punching-bag-prop" id="bag-3" onclick="hitPunchingBag(3)">
+      <div class="bag-steel-chain"></div>
+      <div class="bag-leather-body"></div>
+    </div>
+
+    <!-- Combat Zones -->
+    <div class="zone-marker" id="zone-bags">
+      <span class="zone-title">🥊 BAG STRIKING</span>
+      <span class="zone-multiplier">1.5x DMG</span>
+    </div>
+    <div class="zone-marker" id="zone-center">
+      <span class="zone-title">⚡ OCTAGON MAT</span>
+      <span class="zone-multiplier">2.0x DMG • POWER SPOT</span>
+    </div>
+    <div class="zone-marker" id="zone-cage">
+      <span class="zone-title">⚔ MMA CAGE APRON</span>
+      <span class="zone-multiplier">1.5x DMG</span>
+    </div>
+
+    <!-- Secret Crimson Locker -->
+    <div id="secret-locker" title="Secret Training Locker">
+      <div class="locker-vent"></div>
+      <div class="locker-vent"></div>
+      <div class="locker-vent"></div>
+      <div class="locker-lock-icon" id="locker-icon">🔒</div>
+    </div>
+
+    <!-- Entities Layer -->
+    <div id="entities-layer"></div>
+  </div>
+
+  <!-- HUD Top -->
+  <div id="hud-top">
+    <div class="hud-title-cluster" style="display:flex; align-items:center; gap:10px;">
+      <div class="hud-level-badge">LEVEL 2</div>
+      <div class="hud-arena-name">FIGHT ARENA</div>
+      <div id="l2-survivor-badge" style="background:rgba(243,156,18,0.2); border:1px solid #f39c12; padding:3px 12px; border-radius:15px; font-family:var(--font-ui); font-size:11px; font-weight:700; color:#f1c40f; letter-spacing:1px; display:flex; align-items:center; gap:6px;">
+        👤 FIGHTER: <span id="l2-player-name">AARAV</span>
+      </div>
+    </div>
+
+    <!-- Combo Counter Banner -->
+    <div id="combo-meter-banner">🔥 3x COMBO!</div>
+
+    <div class="hud-score-board">
+      <div class="hud-card">
+        <div class="hud-card-lbl">REMAINING</div>
+        <div class="hud-card-val" id="hud-remain-count">10 / 6</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-card-lbl">ELIMINATED</div>
+        <div class="hud-card-val" id="hud-elim-count" style="color:#2ecc71;">0</div>
+      </div>
+      <div class="hud-card">
+        <div class="hud-card-lbl">SCORE</div>
+        <div class="hud-card-val" id="hud-score-val" style="color:var(--gold-accent);">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Controls Legend -->
+  <div id="desktop-controls-legend">
+    <span>WASD</span> Move | <span>J/Space</span> Punch | <span>K</span> Laat / Kick | <span>L</span> Dropkick | <span>B</span> Block | <span>F</span> Dash
+  </div>
+
+  <!-- Player Status Bar: Health + Stamina -->
+  <div id="player-status-bar">
+    <div class="bar-label-row">
+      <span>♥ HEALTH</span>
+      <span id="player-hp-text">100 / 100</span>
+    </div>
+    <div class="main-health-track">
+      <div id="main-health-fill"></div>
+    </div>
+
+    <div class="bar-label-row" style="margin-top:4px;">
+      <span style="color:var(--stamina-cyan);">⚡ STAMINA (KICKS)</span>
+      <span id="player-stamina-text" style="color:var(--stamina-cyan);">100%</span>
+    </div>
+    <div class="stamina-track">
+      <div id="main-stamina-fill"></div>
+    </div>
+  </div>
+
+  <!-- Mobile Touch Controls -->
+  <div id="mobile-controls">
+    <!-- 4-Way D-Pad -->
+    <div class="dpad-container">
+      <div class="dpad-key" id="dpad-up">▲</div>
+      <div class="dpad-key" id="dpad-left">◀</div>
+      <div class="dpad-key" id="dpad-center"></div>
+      <div class="dpad-key" id="dpad-right">▶</div>
+      <div class="dpad-key" id="dpad-down">▼</div>
+    </div>
+
+    <!-- 4 Action Buttons Cluster -->
+    <div class="actions-cluster">
+      <!-- 🥊 Punch -->
+      <div class="arcade-btn" id="btn-punch" title="Punch / Mukka (J)">
+        <span style="font-size:18px;">🥊</span>
+        <span style="font-size:8px;">PUNCH</span>
+      </div>
+      <!-- 🦶 Kick / Laat -->
+      <div class="arcade-btn" id="btn-kick" title="Kick / Laat (K)">
+        <span style="font-size:18px;">🦶</span>
+        <span style="font-size:8px;">LAAT</span>
+      </div>
+      <!-- 💥 Flying Dropkick -->
+      <div class="arcade-btn" id="btn-dropkick" title="Flying Dropkick (L)">
+        <span style="font-size:18px;">💥</span>
+        <span style="font-size:8px;">DROPKICK</span>
+      </div>
+      <!-- 🛡️ Guard / Block -->
+      <div class="arcade-btn" id="btn-guard" title="Block / Guard (B)">
+        <span style="font-size:18px;">🛡️</span>
+        <span style="font-size:8px;">GUARD</span>
+      </div>
+
+      <!-- ⚡ Shadow Dash -->
+      <div class="arcade-btn" id="btn-dash-special" title="Shadow Dash (F)">
+        <span style="font-size:18px;">⚡</span>
+        <span style="font-size:8px;">DASH</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Damage Screen Flash -->
+  <div id="screen-damage-flash"></div>
+
+  <!-- Elimination Toast -->
+  <div id="elim-toast"></div>
+
+  <!-- Cinematic Modals -->
+  <div id="door-lock-banner">
+    <div style="font-size:3.5rem;">🔒</div>
+    <h1 style="font-family:var(--font-horror); font-size:3rem; color:#ff3333; margin:8px 0;">DOOR LOCKED!</h1>
+    <h2 style="font-family:var(--font-ui); font-size:1.4rem; color:#fff; letter-spacing:3px;">“ONLY 6 WILL LEAVE.”</h2>
+  </div>
+
+  <div class="cinematic-modal" id="power-reveal-modal">
+    <div class="power-card">
+      <div style="font-size:3rem;">🩸</div>
+      <h2 style="font-family:var(--font-horror); font-size:2.4rem; color:#ff4757;">THE FIRST POWER</h2>
+      <h3 style="font-family:var(--font-ui); font-size:1.8rem; color:var(--shadow-blue); margin-bottom:12px;">SHADOW DASH</h3>
+      <p style="font-size:0.95rem; color:#bbb; margin-bottom:24px; line-height:1.5;">
+        You were the first fighter to dominate the arena floor.<br><br>
+        <strong>10 Seconds Duration • 1 Use Per Level</strong><br>
+        Move at supernatural phantom speed. Opponent attacks phase right through you!
+      </p>
+      <button class="claim-power-btn" id="claim-power-btn">ACQUIRE POWER</button>
+    </div>
+  </div>
+
+  <div id="horror-twist-overlay">
+    <div class="mirror-frame">
+      <div class="mirror-player-reflection"></div>
+      <div class="mirror-ghost-figure" id="mirror-ghost">
+        <div class="ghost-hood">
+          <div class="ghost-red-eyes"><div class="ghost-red-eye"></div><div class="ghost-red-eye"></div></div>
+        </div>
+        <div class="ghost-cloak"></div>
+      </div>
+      <div id="mirror-blood-msg">“POWER IS NOT A GIFT.” 😈</div>
+    </div>
+    <div style="font-family:var(--font-ui); font-size:1.1rem; color:#aaa; margin-top:20px;" id="horror-narrative">The lights suddenly cut out...</div>
+  </div>
+
+  <div class="cinematic-modal" id="level-end-modal">
+    <div style="font-size:4rem; margin-bottom:12px;">💀</div>
+    <div style="font-family:var(--font-ui); font-size:5rem; font-weight:700; color:#ff3333; line-height:1;">6</div>
+    <h1 style="font-family:var(--font-horror); font-size:3rem; color:#fff; margin-bottom:12px;">PLAYERS REMAIN</h1>
+    <p style="font-family:var(--font-ui); font-size:1.2rem; color:var(--gold-accent); margin-bottom:28px; letter-spacing:2px;">
+      THE TRIAL OF COMBAT IS SEALED.<br>
+      <span style="color:#ff4747; font-weight:700;">“BUT ONE OF THEM HAS BEEN CHOSEN.”</span>
+    </p>
+    <div class="survivors-roster" id="survivors-roster"></div>
+    <button class="next-level-btn" id="proceed-btn" onclick="window.location.href='level3.html'">PROCEED TO LEVEL 3 →</button>
+  </div>
+
+  <!-- Game Logic -->
+  <script>
+    /* ========================================================================
+       ADVANCED AUDIO SYNTHESIZER (Punches, Kicks, Dropkicks, Bag hits, Blocks)
+       ======================================================================== */
+    const AudioEngine = {
+      ctx: null,
+      noiseBuffer: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) {
+            this.ctx = new AC();
+            this.buildNoiseBuffer();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      buildNoiseBuffer() {
+        if (!this.ctx) return;
+        const size = Math.floor(this.ctx.sampleRate * 0.5);
+        const buf = this.ctx.createBuffer(1, size, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1);
+        this.noiseBuffer = buf;
+      },
+      // Fast Punch Jab ("DISHUM!")
+      playPunch() {
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+
+        // 1. High-speed slap / smack noise ("DI-")
+        if (this.noiseBuffer) {
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const nFilter = this.ctx.createBiquadFilter();
+          nFilter.type = 'bandpass';
+          nFilter.frequency.setValueAtTime(1500, t);
+          nFilter.Q.setValueAtTime(2.0, t);
+
+          const nGain = this.ctx.createGain();
+          nGain.gain.setValueAtTime(0.7, t);
+          nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+          noise.connect(nFilter);
+          nFilter.connect(nGain);
+          nGain.connect(this.ctx.destination);
+          noise.start(t);
+          noise.stop(t + 0.08);
+        }
+
+        // 2. Punch transient crack
+        const snap = this.ctx.createOscillator();
+        const snapG = this.ctx.createGain();
+        snap.type = 'triangle';
+        snap.frequency.setValueAtTime(450, t);
+        snap.frequency.exponentialRampToValueAtTime(75, t + 0.06);
+        snapG.gain.setValueAtTime(0.45, t);
+        snapG.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+        snap.connect(snapG);
+        snapG.connect(this.ctx.destination);
+        snap.start(t);
+        snap.stop(t + 0.06);
+
+        // 3. Low body thud ("-SHUM!")
+        const thud = this.ctx.createOscillator();
+        const thudG = this.ctx.createGain();
+        thud.type = 'sine';
+        thud.frequency.setValueAtTime(155, t);
+        thud.frequency.exponentialRampToValueAtTime(32, t + 0.14);
+        thudG.gain.setValueAtTime(0.85, t);
+        thudG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+        thud.connect(thudG);
+        thudG.connect(this.ctx.destination);
+        thud.start(t);
+        thud.stop(t + 0.15);
+      },
+      // Heavy Laat / Kick Impact (Deep Thud + Heavy Dishum)
+      playKick() {
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+
+        // 1. Slap & whoosh noise
+        if (this.noiseBuffer) {
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const nFilter = this.ctx.createBiquadFilter();
+          nFilter.type = 'bandpass';
+          nFilter.frequency.setValueAtTime(950, t);
+          nFilter.Q.setValueAtTime(1.4, t);
+
+          const nGain = this.ctx.createGain();
+          nGain.gain.setValueAtTime(0.8, t);
+          nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+
+          noise.connect(nFilter);
+          nFilter.connect(nGain);
+          nGain.connect(this.ctx.destination);
+          noise.start(t);
+          noise.stop(t + 0.14);
+        }
+
+        // 2. Mid crunch
+        const mid = this.ctx.createOscillator();
+        const midG = this.ctx.createGain();
+        mid.type = 'triangle';
+        mid.frequency.setValueAtTime(280, t);
+        mid.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+        midG.gain.setValueAtTime(0.55, t);
+        midG.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        mid.connect(midG);
+        midG.connect(this.ctx.destination);
+        mid.start(t);
+        mid.stop(t + 0.12);
+
+        // 3. Sub-bass boom ("DHISH-OOM!")
+        const sub = this.ctx.createOscillator();
+        const subG = this.ctx.createGain();
+        sub.type = 'sine';
+        sub.frequency.setValueAtTime(130, t);
+        sub.frequency.exponentialRampToValueAtTime(24, t + 0.28);
+        subG.gain.setValueAtTime(0.95, t);
+        subG.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        sub.connect(subG);
+        subG.connect(this.ctx.destination);
+        sub.start(t);
+        sub.stop(t + 0.3);
+      },
+      // Flying Dropkick Blast (Mega Knockout Boom)
+      playDropkick() {
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+
+        // 1. Sweeping explosion noise
+        if (this.noiseBuffer) {
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const nFilter = this.ctx.createBiquadFilter();
+          nFilter.type = 'lowpass';
+          nFilter.frequency.setValueAtTime(2600, t);
+          nFilter.frequency.exponentialRampToValueAtTime(250, t + 0.28);
+
+          const nGain = this.ctx.createGain();
+          nGain.gain.setValueAtTime(0.9, t);
+          nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+
+          noise.connect(nFilter);
+          nFilter.connect(nGain);
+          nGain.connect(this.ctx.destination);
+          noise.start(t);
+          noise.stop(t + 0.28);
+        }
+
+        // 2. High snap
+        const snap = this.ctx.createOscillator();
+        const snapG = this.ctx.createGain();
+        snap.type = 'triangle';
+        snap.frequency.setValueAtTime(390, t);
+        snap.frequency.exponentialRampToValueAtTime(60, t + 0.14);
+        snapG.gain.setValueAtTime(0.65, t);
+        snapG.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+        snap.connect(snapG);
+        snapG.connect(this.ctx.destination);
+        snap.start(t);
+        snap.stop(t + 0.14);
+
+        // 3. Heavy sub drop
+        const sub = this.ctx.createOscillator();
+        const subG = this.ctx.createGain();
+        sub.type = 'sine';
+        sub.frequency.setValueAtTime(175, t);
+        sub.frequency.exponentialRampToValueAtTime(20, t + 0.42);
+        subG.gain.setValueAtTime(1.0, t);
+        subG.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+        sub.connect(subG);
+        subG.connect(this.ctx.destination);
+        sub.start(t);
+        sub.stop(t + 0.45);
+      },
+      // Guard / Block Parry Deflection
+      playBlock() {
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(540, t);
+        osc.frequency.exponentialRampToValueAtTime(170, t + 0.12);
+        g.gain.setValueAtTime(0.5, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.12);
+      },
+      // Punching Bag Heavy Leather Impact
+      playBagHit() {
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+        if (this.noiseBuffer) {
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const nFilter = this.ctx.createBiquadFilter();
+          nFilter.type = 'lowpass';
+          nFilter.frequency.setValueAtTime(750, t);
+          const nGain = this.ctx.createGain();
+          nGain.gain.setValueAtTime(0.65, t);
+          nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+          noise.connect(nFilter);
+          nFilter.connect(nGain);
+          nGain.connect(this.ctx.destination);
+          noise.start(t);
+          noise.stop(t + 0.15);
+        }
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(110, t);
+        osc.frequency.exponentialRampToValueAtTime(26, t + 0.2);
+        g.gain.setValueAtTime(0.7, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.2);
+      },
+      // When player takes a hit (dull gut punch thud)
+      playHurt() {
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+        if (this.noiseBuffer) {
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const nFilter = this.ctx.createBiquadFilter();
+          nFilter.type = 'lowpass';
+          nFilter.frequency.setValueAtTime(650, t);
+          const nGain = this.ctx.createGain();
+          nGain.gain.setValueAtTime(0.6, t);
+          nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          noise.connect(nFilter);
+          nFilter.connect(nGain);
+          nGain.connect(this.ctx.destination);
+          noise.start(t);
+          noise.stop(t + 0.12);
+        }
+        const thud = this.ctx.createOscillator();
+        const thudG = this.ctx.createGain();
+        thud.type = 'sine';
+        thud.frequency.setValueAtTime(115, t);
+        thud.frequency.exponentialRampToValueAtTime(28, t + 0.18);
+        thudG.gain.setValueAtTime(0.75, t);
+        thudG.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+        thud.connect(thudG);
+        thudG.connect(this.ctx.destination);
+        thud.start(t);
+        thud.stop(t + 0.18);
+      },
+      // Meaty hit connect sound
+      playImpact(intensity = 'light') {
+        this.init();
+        if (!this.ctx) return;
+        const t = this.ctx.currentTime;
+        const isHeavy = intensity === 'heavy';
+        if (this.noiseBuffer) {
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = this.noiseBuffer;
+          const nFilter = this.ctx.createBiquadFilter();
+          nFilter.type = 'bandpass';
+          nFilter.frequency.setValueAtTime(isHeavy ? 750 : 1200, t);
+          nFilter.Q.setValueAtTime(1.2, t);
+          const nGain = this.ctx.createGain();
+          nGain.gain.setValueAtTime(isHeavy ? 0.75 : 0.5, t);
+          nGain.gain.exponentialRampToValueAtTime(0.001, t + (isHeavy ? 0.15 : 0.08));
+          noise.connect(nFilter);
+          nFilter.connect(nGain);
+          nGain.connect(this.ctx.destination);
+          noise.start(t);
+          noise.stop(t + (isHeavy ? 0.15 : 0.08));
+        }
+        const thud = this.ctx.createOscillator();
+        const thudG = this.ctx.createGain();
+        thud.type = 'sine';
+        thud.frequency.setValueAtTime(isHeavy ? 110 : 140, t);
+        thud.frequency.exponentialRampToValueAtTime(25, t + (isHeavy ? 0.22 : 0.12));
+        thudG.gain.setValueAtTime(isHeavy ? 0.8 : 0.6, t);
+        thudG.gain.exponentialRampToValueAtTime(0.001, t + (isHeavy ? 0.24 : 0.13));
+        thud.connect(thudG);
+        thudG.connect(this.ctx.destination);
+        thud.start(t);
+        thud.stop(t + (isHeavy ? 0.24 : 0.13));
+      },
+      playDoorLock() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(80, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(25, this.ctx.currentTime + 0.8);
+        g.gain.setValueAtTime(0.6, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.8);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.8);
+      },
+      playPowerActivate() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+        osc.frequency.linearRampToValueAtTime(660, this.ctx.currentTime + 0.4);
+        g.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.5);
+      },
+      playHorrorDrone() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const g = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(55, this.ctx.currentTime);
+        g.gain.setValueAtTime(0.35, this.ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 3.0);
+        osc.connect(g);
+        g.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 3.0);
+      }
+    };
+
+    /* ========================================================================
+       GAME STATE
+       ======================================================================== */
+    const CONFIG = {
+      TOTAL_START_PLAYERS: 10,
+      TARGET_SURVIVORS: 6,
+      PLAYER_BASE_SPEED: 4.6,
+      SHADOW_DASH_SPEED: 12.0,
+      SHADOW_DASH_DURATION: 10,
+      PUNCH_REACH: 60,
+      KICK_REACH: 88,
+      DROPKICK_REACH: 110,
+      PUNCH_DAMAGE: 16,
+      KICK_DAMAGE: 34,
+      DROPKICK_DAMAGE: 58
+    };
+
+    let gameState = {
+      active: false,
+      score: 0,
+      eliminatedCount: 0,
+      playerHP: 100,
+      playerStamina: 100,
+      isGuarding: false,
+      comboCount: 0,
+      comboTimer: null,
+      facingDir: 1, // 1 for right, -1 for left
+      isPerformingAction: false,
+      isDoorLocked: false,
+      firstObjectiveAccomplished: false,
+      lockerReadyToOpen: false,
+      hasShadowDash: false,
+      shadowDashUsed: false,
+      isShadowDashing: false,
+      shadowDashSecondsLeft: 10,
+      inHorrorTwist: false,
+      gameOver: false
+    };
+
+    const inputState = { up: false, down: false, left: false, right: false };
+
+    const OPPONENTS_DATA = [
+      { name: 'VIKRAM', color: '#e67e22', x: 22, y: 70 },
+      { name: 'KABIR', color: '#3498db', x: 30, y: 55 },
+      { name: 'ROHIT', color: '#9b59b6', x: 45, y: 75 },
+      { name: 'TANYA', color: '#1abc9c', x: 60, y: 65 },
+      { name: 'DEV', color: '#f39c12', x: 70, y: 52 },
+      { name: 'SIMRAN', color: '#e84393', x: 80, y: 70 },
+      { name: 'SAMEER', color: '#00cec9', x: 28, y: 80 },
+      { name: 'MANOJ', color: '#fdcb6e', x: 50, y: 85 },
+      { name: 'ANANYA', color: '#6c5ce7', x: 75, y: 82 }
+    ];
+
+    let player = {
+      x: window.innerWidth * 0.5,
+      y: window.innerHeight * 0.74,
+      hp: 100,
+      element: null,
+      hpBar: null,
+      shieldEl: null
+    };
+
+    let opponents = [];
+    const entitiesLayer = document.getElementById('entities-layer');
+
+    function createFighterElement(surv, isPlayer = false) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'fighter-entity';
+
+      const color = isPlayer ? '#ff4d4d' : `var(--color-${surv.id}, #f39c12)`;
+
+      wrapper.innerHTML = `
+        <div class="fighter-hud">
+          <span class="fighter-name-tag" style="color: ${color}">${isPlayer ? `YOU (${surv.name.toUpperCase()})` : surv.name.toUpperCase()}</span>
+          <span style="font-size:8px; color:#f1c40f; white-space:nowrap; text-shadow:0 1px 2px #000; letter-spacing:0.5px;">${surv.major.split(' ')[0]}</span>
+          <div class="fighter-hp-track">
+            <div class="fighter-hp-fill" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="fighter-visual-wrapper">
+          <div class="fighter-head survivor-avatar ${surv.avatarClass}" style="width:24px; height:24px; margin:0 auto 1px; border:1.5px solid ${color}; box-shadow:none;"></div>
+          <div class="fighter-torso" style="background: ${isPlayer ? 'linear-gradient(180deg, #c0392b, #7b1212)' : color};">
+            <div class="fighter-arm left-arm"></div>
+            <div class="fighter-arm right-arm"></div>
+          </div>
+          <div class="fighter-legs-container">
+            <div class="fighter-leg left-leg"></div>
+            <div class="fighter-leg right-leg"></div>
+          </div>
+          <div class="fighter-guard-shield"></div>
+        </div>
+      `;
+
+      entitiesLayer.appendChild(wrapper);
+      return wrapper;
+    }
+
+    function initFighters() {
+      entitiesLayer.innerHTML = '';
+      opponents = [];
+
+      const playerSurv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : getSurvivorById('aarav');
+      const nameEl = document.getElementById('l2-player-name');
+      if (nameEl) nameEl.textContent = `${playerSurv.name.toUpperCase()} (${playerSurv.major})`;
+
+      player.element = createFighterElement(playerSurv, true);
+      player.hpBar = player.element.querySelector('.fighter-hp-fill');
+      player.shieldEl = player.element.querySelector('.fighter-guard-shield');
+      player.x = window.innerWidth * 0.5;
+      player.y = window.innerHeight * 0.74;
+      updateFighterPosition(player);
+
+      // Remaining 9 survivors become the 9 arena fighters
+      const otherSurvivors = (typeof SURVIVORS_ROSTER !== 'undefined')
+        ? SURVIVORS_ROSTER.filter(s => s.id !== playerSurv.id)
+        : [
+            { id: 'alex', name: 'Alex', major: 'Mechanical Eng', avatarClass: 'avatar-alex' },
+            { id: 'ben', name: 'Ben', major: 'Electrical Eng', avatarClass: 'avatar-ben' },
+            { id: 'chloe', name: 'Chloe', major: 'Civil Eng', avatarClass: 'avatar-chloe' },
+            { id: 'dev', name: 'Dev', major: 'Computer Science', avatarClass: 'avatar-dev' },
+            { id: 'esha', name: 'Esha', major: 'Biotechnology', avatarClass: 'avatar-esha' },
+            { id: 'felix', name: 'Felix', major: 'Chemical Eng', avatarClass: 'avatar-felix' },
+            { id: 'grace', name: 'Grace', major: 'Software Eng', avatarClass: 'avatar-grace' },
+            { id: 'henry', name: 'Henry', major: 'Information Tech', avatarClass: 'avatar-henry' },
+            { id: 'tara', name: 'Tara', major: 'Aerospace & Telecom', avatarClass: 'avatar-tara' }
+          ];
+
+      const spawnPositions = [
+        { x: 22, y: 70 },
+        { x: 30, y: 55 },
+        { x: 45, y: 75 },
+        { x: 60, y: 65 },
+        { x: 70, y: 52 },
+        { x: 80, y: 70 },
+        { x: 28, y: 80 },
+        { x: 50, y: 85 },
+        { x: 75, y: 82 }
+      ];
+
+      otherSurvivors.forEach((survData, index) => {
+        const pos = spawnPositions[index % spawnPositions.length];
+        const el = createFighterElement(survData, false);
+        const opp = {
+          id: index,
+          name: survData.name,
+          survivorData: survData,
+          color: `var(--color-${survData.id}, #f39c12)`,
+          x: (window.innerWidth * pos.x) / 100,
+          y: (window.innerHeight * pos.y) / 100,
+          hp: 100,
+          alive: true,
+          element: el,
+          hpBar: el.querySelector('.fighter-hp-fill'),
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: (Math.random() - 0.5) * 1.5,
+          attackCooldown: 1400 + Math.random() * 1500,
+          lastAttackTime: 0
+        };
+        opponents.push(opp);
+        updateFighterPosition(opp);
+      });
+    }
+
+    function updateFighterPosition(fighter, flipX = 1) {
+      fighter.element.style.left = `${fighter.x}px`;
+      fighter.element.style.top = `${fighter.y}px`;
+      const vis = fighter.element.querySelector('.fighter-visual-wrapper');
+      if (vis) vis.style.transform = `scaleX(${flipX})`;
+    }
+
+    /* ========================================================================
+       DOOR LOCK SEQUENCE
+       ======================================================================== */
+    function triggerDoorLockSequence() {
+      setTimeout(() => {
+        gameState.isDoorLocked = true;
+        AudioEngine.playDoorLock();
+        document.body.style.transform = 'translateY(5px)';
+        setTimeout(() => document.body.style.transform = '', 120);
+
+        const banner = document.getElementById('door-lock-banner');
+        banner.classList.add('show');
+        setTimeout(() => {
+          banner.classList.remove('show');
+          showElimToast("DOOR LOCKED: ONLY 6 SURVIVORS WILL LEAVE!");
+        }, 3200);
+      }, 1400);
+    }
+
+    /* ========================================================================
+       COMBAT MECHANICS: PUNCH, LAAT (KICK), DROPKICK, GUARD
+       ======================================================================== */
+    function getCombatMultiplier(x, y) {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const cx = W * 0.5;
+      const cy = H * 0.72;
+      if (Math.hypot(x - cx, y - cy) < 140) return { multiplier: 2.0, name: 'OCTAGON MAT' };
+      if (x < W * 0.35 && y > H * 0.45) return { multiplier: 1.5, name: 'BAG ZONE' };
+      if (x > W * 0.65 && y > H * 0.45) return { multiplier: 1.5, name: 'CAGE ZONE' };
+      return { multiplier: 1.0, name: 'NORMAL' };
+    }
+
+    // 1. FAST PUNCH (MUKKA)
+    function playerPunch() {
+      if (!gameState.active || gameState.gameOver || gameState.inHorrorTwist || gameState.isGuarding) return;
+      AudioEngine.playPunch();
+
+      player.element.classList.add('anim-punch');
+      setTimeout(() => player.element.classList.remove('anim-punch'), 150);
+
+      performStrike(CONFIG.PUNCH_REACH, CONFIG.PUNCH_DAMAGE, 20, "POW! 🥊");
+    }
+
+    // 2. HIGH KICK ("LAAT MAARNA")
+    function playerKick() {
+      if (!gameState.active || gameState.gameOver || gameState.inHorrorTwist || gameState.isGuarding) return;
+      if (gameState.playerStamina < 15) {
+        showElimToast("STAMINA LOW! WAIT TO RECHARGE!");
+        return;
+      }
+
+      gameState.playerStamina = Math.max(0, gameState.playerStamina - 15);
+      updateStaminaUI();
+      AudioEngine.playKick();
+
+      // Visual Kick Pose
+      player.element.classList.add('anim-kick');
+      setTimeout(() => player.element.classList.remove('anim-kick'), 220);
+
+      // Crescent Arc Kick Slash FX
+      const arc = document.createElement('div');
+      arc.className = 'kick-crescent-arc';
+      arc.style.transform = `translate(-50%, -50%) scaleX(${gameState.facingDir})`;
+      player.element.appendChild(arc);
+      setTimeout(() => arc.remove(), 280);
+
+      // Perform Heavy Kick Strike with high knockback
+      performStrike(CONFIG.KICK_REACH, CONFIG.KICK_DAMAGE, 55, "LAAT! 🦶💥");
+
+      // Check if near punching bags to kick the bag!
+      checkBagStrike();
+    }
+
+    // 3. FLYING DROPKICK (SUPER MOVE)
+    function playerDropkick() {
+      if (!gameState.active || gameState.gameOver || gameState.inHorrorTwist || gameState.isGuarding) return;
+      if (gameState.playerStamina < 30) {
+        showElimToast("NEED 30% STAMINA FOR DROPKICK!");
+        return;
+      }
+
+      gameState.playerStamina = Math.max(0, gameState.playerStamina - 30);
+      updateStaminaUI();
+      AudioEngine.playDropkick();
+
+      // Fly forward 90px
+      player.x += gameState.facingDir * 80;
+      player.x = Math.max(40, Math.min(window.innerWidth - 40, player.x));
+
+      player.element.classList.add('anim-dropkick');
+      setTimeout(() => player.element.classList.remove('anim-dropkick'), 350);
+
+      // Ground impact shockwave
+      const sw = document.createElement('div');
+      sw.className = 'dropkick-shockwave-ring';
+      player.element.appendChild(sw);
+      setTimeout(() => sw.remove(), 400);
+
+      performStrike(CONFIG.DROPKICK_REACH, CONFIG.DROPKICK_DAMAGE, 90, "DROPKICK! 💥🔥");
+      checkBagStrike();
+    }
+
+    // 4. GUARD / BLOCK
+    function setPlayerGuard(isGuarding) {
+      if (!gameState.active || gameState.gameOver || gameState.inHorrorTwist) return;
+      gameState.isGuarding = isGuarding;
+      if (player.shieldEl) player.shieldEl.style.display = isGuarding ? 'block' : 'none';
+      if (isGuarding) AudioEngine.playBlock();
+    }
+
+    // Interactive Punching Bag Collision
+    function checkBagStrike() {
+      [1, 2, 3].forEach(id => {
+        const bag = document.getElementById(`bag-${id}`);
+        const rect = bag.getBoundingClientRect();
+        const bagCX = rect.left + rect.width / 2;
+        const bagCY = rect.top + rect.height / 2;
+        if (Math.hypot(player.x - bagCX, player.y - bagCY) < 90) {
+          hitPunchingBag(id);
+        }
+      });
+    }
+
+    function hitPunchingBag(id) {
+      const bag = document.getElementById(`bag-${id}`);
+      AudioEngine.playBagHit();
+      const swingClass = gameState.facingDir === 1 ? 'hit-swing-right' : 'hit-swing-left';
+      bag.classList.add(swingClass);
+      setTimeout(() => bag.classList.remove(swingClass), 800);
+
+      gameState.score += 50;
+      document.getElementById('hud-score-val').textContent = gameState.score;
+      showHitSplash(player.x, player.y - 70, "+50 BAG STRIKE! 🥊");
+    }
+
+    // Generic strike logic
+    function performStrike(reach, baseDmg, knockbackDistance, splashText) {
+      const zoneInfo = getCombatMultiplier(player.x, player.y);
+      let hitSomeone = false;
+
+      opponents.forEach(opp => {
+        if (!opp.alive) return;
+        const d = Math.hypot(player.x - opp.x, player.y - opp.y);
+        if (d < reach) {
+          hitSomeone = true;
+          let damage = Math.round(baseDmg * zoneInfo.multiplier);
+          if (gameState.isShadowDashing) damage *= 2;
+
+          // Push opponent back
+          const angle = Math.atan2(opp.y - player.y, opp.x - player.x);
+          opp.x += Math.cos(angle) * knockbackDistance;
+          opp.y += Math.sin(angle) * (knockbackDistance * 0.5);
+
+          damageOpponent(opp, damage);
+          showDamageNumber(opp.x, opp.y - 40, damage, zoneInfo.multiplier > 1);
+          showHitSplash(opp.x, opp.y - 65, splashText);
+        }
+      });
+
+      if (hitSomeone) {
+        AudioEngine.playImpact(baseDmg >= 30 ? 'heavy' : 'light');
+        incrementCombo();
+        if (!gameState.firstObjectiveAccomplished) {
+          gameState.firstObjectiveAccomplished = true;
+          unlockSecretLocker();
+        }
+      }
+    }
+
+    function incrementCombo() {
+      gameState.comboCount++;
+      clearTimeout(gameState.comboTimer);
+
+      const banner = document.getElementById('combo-meter-banner');
+      banner.style.display = 'block';
+      if (gameState.comboCount >= 8) {
+        banner.textContent = `🔥 ${gameState.comboCount}x ULTRA FINISHER!`;
+        banner.style.color = '#ff3838';
+      } else if (gameState.comboCount >= 4) {
+        banner.textContent = `⚡ ${gameState.comboCount}x BRUTAL COMBO!`;
+        banner.style.color = '#f1c40f';
+      } else {
+        banner.textContent = `💥 ${gameState.comboCount}x COMBO!`;
+        banner.style.color = '#fff275';
+      }
+
+      gameState.comboTimer = setTimeout(() => {
+        gameState.comboCount = 0;
+        banner.style.display = 'none';
+      }, 2500);
+    }
+
+    function damageOpponent(opp, dmg) {
+      opp.hp = Math.max(0, opp.hp - dmg);
+      opp.hpBar.style.width = `${opp.hp}%`;
+      if (opp.hp < 35) opp.hpBar.style.background = '#e74c3c';
+
+      gameState.score += dmg * 10;
+      document.getElementById('hud-score-val').textContent = gameState.score;
+
+      if (opp.hp <= 0) eliminateOpponent(opp);
+    }
+
+    function eliminateOpponent(opp) {
+      opp.alive = false;
+      opp.element.style.opacity = '0.25';
+      opp.element.style.filter = 'grayscale(1)';
+      gameState.eliminatedCount++;
+
+      document.getElementById('hud-elim-count').textContent = gameState.eliminatedCount;
+      const remaining = CONFIG.TOTAL_START_PLAYERS - gameState.eliminatedCount;
+      document.getElementById('hud-remain-count').textContent = `${remaining} / 6`;
+
+      showElimToast(`❌ ${opp.name} ELIMINATED! (${remaining} SURVIVORS REMAIN)`);
+
+      if (remaining <= CONFIG.TARGET_SURVIVORS) {
+        finishLevelTwo();
+      }
+    }
+
+    function damagePlayer(dmg) {
+      if (gameState.isShadowDashing || !gameState.active || gameState.gameOver) return;
+
+      // If guarding, absorb 85% damage and play block sound
+      if (gameState.isGuarding) {
+        dmg = Math.round(dmg * 0.15);
+        AudioEngine.playBlock();
+        showHitSplash(player.x, player.y - 40, "BLOCKED! 🛡️");
+      } else {
+        AudioEngine.playHurt();
+      }
+
+      gameState.playerHP = Math.max(0, gameState.playerHP - dmg);
+      document.getElementById('main-health-fill').style.width = `${gameState.playerHP}%`;
+      document.getElementById('player-hp-text').textContent = `${gameState.playerHP} / 100`;
+
+      const flash = document.getElementById('screen-damage-flash');
+      flash.classList.add('flash');
+      setTimeout(() => flash.classList.remove('flash'), 120);
+
+      if (gameState.playerHP <= 0) {
+        showElimToast("YOU WERE ELIMINATED IN THE ARENA!");
+        gameState.gameOver = true;
+        setTimeout(() => location.reload(), 2500);
+      }
+    }
+
+    function showHitSplash(x, y, text) {
+      const splash = document.createElement('div');
+      splash.className = 'hit-splash-tag';
+      splash.textContent = text;
+      splash.style.left = `${x}px`;
+      splash.style.top = `${y}px`;
+      document.body.appendChild(splash);
+      setTimeout(() => splash.remove(), 600);
+    }
+
+    function showDamageNumber(x, y, amount, isCrit = false) {
+      const num = document.createElement('div');
+      num.className = 'combat-number';
+      num.textContent = `-${amount}${isCrit ? '!' : ''}`;
+      if (isCrit) num.style.color = '#ff9f43';
+      num.style.left = `${x}px`;
+      num.style.top = `${y}px`;
+      document.body.appendChild(num);
+      setTimeout(() => num.remove(), 700);
+    }
+
+    function showElimToast(msg) {
+      const toast = document.getElementById('elim-toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2400);
+    }
+
+    function updateStaminaUI() {
+      document.getElementById('main-stamina-fill').style.width = `${gameState.playerStamina}%`;
+      document.getElementById('player-stamina-text').textContent = `${Math.round(gameState.playerStamina)}%`;
+    }
+
+    // Stamina auto-regeneration ticker
+    setInterval(() => {
+      if (gameState.playerStamina < 100 && gameState.active && !gameState.gameOver) {
+        gameState.playerStamina = Math.min(100, gameState.playerStamina + 3.5);
+        updateStaminaUI();
+      }
+    }, 150);
+
+    /* ========================================================================
+       ⚡ SUPERPOWER: SHADOW DASH & FIRST PLAYER REWARD
+       ======================================================================== */
+    function unlockSecretLocker() {
+      const locker = document.getElementById('secret-locker');
+      locker.classList.add('unlocking-ready');
+      document.getElementById('locker-icon').textContent = '🔓';
+      gameState.lockerReadyToOpen = true;
+
+      showElimToast("⚡ OBJECTIVE COMPLETE: CRIMSON LOCKER UNLOCKED!");
+
+      locker.onclick = () => {
+        if (!gameState.lockerReadyToOpen || gameState.hasShadowDash) return;
+        locker.classList.remove('unlocking-ready');
+        gameState.lockerReadyToOpen = false;
+        document.getElementById('power-reveal-modal').classList.add('active');
+        AudioEngine.playPowerActivate();
+      };
+    }
+
+    document.getElementById('claim-power-btn').addEventListener('click', () => {
+      document.getElementById('power-reveal-modal').classList.remove('active');
+      gameState.hasShadowDash = true;
+      triggerHorrorTwistSequence();
+    });
+
+    function activateShadowDash() {
+      if (!gameState.hasShadowDash || gameState.shadowDashUsed || gameState.isShadowDashing) return;
+
+      gameState.shadowDashUsed = true;
+      gameState.isShadowDashing = true;
+      gameState.shadowDashSecondsLeft = CONFIG.SHADOW_DASH_DURATION;
+
+      AudioEngine.playPowerActivate();
+      player.element.classList.add('shadow-dash-active');
+
+      const dashBtn = document.getElementById('btn-dash-special');
+      dashBtn.style.opacity = '0.4';
+      dashBtn.classList.remove('ready');
+
+      showElimToast("⚡ SHADOW DASH ACTIVATED: INVULNERABLE & HYPERSPEED (10s)");
+
+      const dashInterval = setInterval(() => {
+        gameState.shadowDashSecondsLeft -= 0.1;
+        if (gameState.shadowDashSecondsLeft <= 0) {
+          clearInterval(dashInterval);
+          endShadowDash();
+        }
+      }, 100);
+    }
+
+    function endShadowDash() {
+      gameState.isShadowDashing = false;
+      player.element.classList.remove('shadow-dash-active');
+      showElimToast("Shadow Dash power has expired.");
+    }
+
+    /* ========================================================================
+       👁️ HORROR TWIST: MIRROR GHOST & LIGHTS SHUTDOWN
+       ======================================================================== */
+    function triggerHorrorTwistSequence() {
+      gameState.inHorrorTwist = true;
+      const horrorOverlay = document.getElementById('horror-twist-overlay');
+      const narrative = document.getElementById('horror-narrative');
+      const ghost = document.getElementById('mirror-ghost');
+      const bloodMsg = document.getElementById('mirror-blood-msg');
+
+      horrorOverlay.classList.add('active');
+      AudioEngine.playHorrorDrone();
+      narrative.textContent = "Every single gym light cuts out simultaneously...";
+
+      setTimeout(() => {
+        ghost.classList.add('visible');
+        narrative.textContent = "You look in the gym mirror... a shadow stands right behind you!";
+      }, 1400);
+
+      setTimeout(() => {
+        narrative.textContent = "You whip around in terror... but nothing is there.";
+      }, 3400);
+
+      setTimeout(() => {
+        bloodMsg.classList.add('show');
+        narrative.textContent = "You look back at the mirror glass...";
+      }, 4800);
+
+      setTimeout(() => {
+        horrorOverlay.classList.remove('active');
+        ghost.classList.remove('visible');
+        bloodMsg.classList.remove('show');
+        gameState.inHorrorTwist = false;
+
+        const dashBtn = document.getElementById('btn-dash-special');
+        dashBtn.style.display = 'flex';
+        dashBtn.classList.add('ready');
+
+        showElimToast("⚡ SHADOW DASH READY: PRESS 'F' OR DASH BUTTON!");
+      }, 7200);
+    }
+
+    /* ========================================================================
+       🏆 LEVEL 2 END: 6 PLAYERS REMAIN
+       ======================================================================== */
+    function finishLevelTwo() {
+      gameState.active = false;
+      gameState.gameOver = true;
+
+      const roster = document.getElementById('survivors-roster');
+      roster.innerHTML = '';
+
+      const playerSurv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : getSurvivorById('aarav');
+      const playerBadge = document.createElement('div');
+      playerBadge.className = 'survivor-badge chosen';
+      playerBadge.style.display = 'inline-flex';
+      playerBadge.style.alignItems = 'center';
+      playerBadge.style.gap = '8px';
+      playerBadge.style.padding = '6px 14px';
+      playerBadge.innerHTML = `
+        <div class="survivor-avatar ${playerSurv.avatarClass}" style="width:28px; height:28px; box-shadow:none;"></div>
+        <div style="text-align:left;">
+          <div style="font-weight:700;">★ ${playerSurv.name.toUpperCase()} (CHOSEN)</div>
+          <div style="font-size:9px; color:#f1c40f;">${playerSurv.major}</div>
+        </div>
+      `;
+      roster.appendChild(playerBadge);
+
+      opponents.filter(o => o.alive).forEach(opp => {
+        const surv = opp.survivorData || { name: opp.name, major: 'Engineering', avatarClass: 'avatar-alex' };
+        const b = document.createElement('div');
+        b.className = 'survivor-badge';
+        b.style.display = 'inline-flex';
+        b.style.alignItems = 'center';
+        b.style.gap = '8px';
+        b.style.padding = '6px 14px';
+        b.innerHTML = `
+          <div class="survivor-avatar ${surv.avatarClass}" style="width:24px; height:24px; box-shadow:none;"></div>
+          <div style="text-align:left;">
+            <div style="font-weight:700;">${surv.name.toUpperCase()}</div>
+            <div style="font-size:9px; color:#aaa;">${surv.major}</div>
+          </div>
+        `;
+        roster.appendChild(b);
+      });
+
+      setTimeout(() => {
+        document.getElementById('level-end-modal').classList.add('active');
+      }, 1200);
+    }
+
+    /* ========================================================================
+       GAME LOOP & FIGHTER MOVEMENT WITH DIRECTIONAL FACING
+       ======================================================================== */
+    let lastTick = performance.now();
+
+    function gameLoop(now) {
+      lastTick = now;
+
+      if (gameState.active && !gameState.gameOver && !gameState.inHorrorTwist) {
+        const speed = gameState.isShadowDashing ? CONFIG.SHADOW_DASH_SPEED : (gameState.isGuarding ? 1.5 : CONFIG.PLAYER_BASE_SPEED);
+        let dx = 0;
+        let dy = 0;
+
+        if (inputState.up) dy -= 1;
+        if (inputState.down) dy += 1;
+        if (inputState.left) { dx -= 1; gameState.facingDir = -1; }
+        if (inputState.right) { dx += 1; gameState.facingDir = 1; }
+
+        if (dx !== 0 && dy !== 0) {
+          dx *= 0.7071;
+          dy *= 0.7071;
+        }
+
+        player.x += dx * speed;
+        player.y += dy * speed;
+
+        player.x = Math.max(40, Math.min(window.innerWidth - 40, player.x));
+        player.y = Math.max(window.innerHeight * 0.45, Math.min(window.innerHeight - 50, player.y));
+
+        updateFighterPosition(player, gameState.facingDir);
+
+        // AI Opponents Behavior
+        opponents.forEach(opp => {
+          if (!opp.alive) return;
+
+          opp.x += opp.vx;
+          opp.y += opp.vy;
+
+          if (opp.x < 50 || opp.x > window.innerWidth - 50) opp.vx *= -1;
+          if (opp.y < window.innerHeight * 0.45 || opp.y > window.innerHeight - 50) opp.vy *= -1;
+
+          const distToPlayer = Math.hypot(player.x - opp.x, player.y - opp.y);
+          if (distToPlayer < 55 && (now - opp.lastAttackTime > opp.attackCooldown)) {
+            opp.lastAttackTime = now;
+            damagePlayer(6 + Math.floor(Math.random() * 8));
+          }
+
+          opponents.forEach(other => {
+            if (other.id !== opp.id && other.alive) {
+              const d = Math.hypot(opp.x - other.x, opp.y - other.y);
+              if (d < 50 && Math.random() < 0.005) {
+                damageOpponent(other, 6 + Math.floor(Math.random() * 8));
+                AudioEngine.playPunch();
+              }
+            }
+          });
+
+          updateFighterPosition(opp, opp.vx >= 0 ? 1 : -1);
+        });
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    /* ========================================================================
+       KEYBOARD & TOUCH CONTROLS
+       ======================================================================== */
+    window.addEventListener('keydown', e => {
+      AudioEngine.init();
+      switch (e.key.toLowerCase()) {
+        case 'w': case 'arrowup': inputState.up = true; break;
+        case 's': case 'arrowdown': inputState.down = true; break;
+        case 'a': case 'arrowleft': inputState.left = true; break;
+        case 'd': case 'arrowright': inputState.right = true; break;
+        case ' ': case 'j': e.preventDefault(); playerPunch(); break;
+        case 'k': e.preventDefault(); playerKick(); break; // LAAT MAARNA!
+        case 'l': e.preventDefault(); playerDropkick(); break; // FLYING DROPKICK!
+        case 'b': case 'i': setPlayerGuard(true); break; // GUARD / BLOCK
+        case 'f': activateShadowDash(); break;
+      }
+    });
+
+    window.addEventListener('keyup', e => {
+      switch (e.key.toLowerCase()) {
+        case 'w': case 'arrowup': inputState.up = false; break;
+        case 's': case 'arrowdown': inputState.down = false; break;
+        case 'a': case 'arrowleft': inputState.left = false; break;
+        case 'd': case 'arrowright': inputState.right = false; break;
+        case 'b': case 'i': setPlayerGuard(false); break;
+      }
+    });
+
+    // Touch D-Pad Binding
+    function bindDpad(id, dir) {
+      const btn = document.getElementById(id);
+      btn.addEventListener('pointerdown', e => { e.preventDefault(); AudioEngine.init(); inputState[dir] = true; });
+      btn.addEventListener('pointerup', e => { e.preventDefault(); inputState[dir] = false; });
+      btn.addEventListener('pointerleave', e => { e.preventDefault(); inputState[dir] = false; });
+    }
+    bindDpad('dpad-up', 'up');
+    bindDpad('dpad-down', 'down');
+    bindDpad('dpad-left', 'left');
+    bindDpad('dpad-right', 'right');
+
+    // Touch Action Buttons Binding
+    document.getElementById('btn-punch').addEventListener('pointerdown', e => { e.preventDefault(); playerPunch(); });
+    document.getElementById('btn-kick').addEventListener('pointerdown', e => { e.preventDefault(); playerKick(); }); // Laat Maarna
+    document.getElementById('btn-dropkick').addEventListener('pointerdown', e => { e.preventDefault(); playerDropkick(); }); // Flying Dropkick
+    
+    // Guard touch
+    const guardBtn = document.getElementById('btn-guard');
+    guardBtn.addEventListener('pointerdown', e => { e.preventDefault(); setPlayerGuard(true); });
+    guardBtn.addEventListener('pointerup', e => { e.preventDefault(); setPlayerGuard(false); });
+    guardBtn.addEventListener('pointerleave', e => { e.preventDefault(); setPlayerGuard(false); });
+
+    document.getElementById('btn-dash-special').addEventListener('pointerdown', e => { e.preventDefault(); activateShadowDash(); });
+
+    // Digital Gym Clock Ticker
+    setInterval(() => {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('gym-clock').textContent = `${pad(d.getMinutes())}:${pad(d.getSeconds())}:${pad(Math.floor(d.getMilliseconds() / 10))}`;
+    }, 45);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initFighters();
+      gameState.active = true;
+      triggerDoorLockSequence();
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+
+</html>

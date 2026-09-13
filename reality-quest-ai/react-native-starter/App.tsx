@@ -1,0 +1,17 @@
+/**
+ * Reality Quest AI - Main Entry Point (React Native / Expo)
+ */
+
+import React from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AppNavigator from './src/navigation/AppNavigator';
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <StatusBar style="light" backgroundColor="#060911" />
+      <AppNavigator />
+    </SafeAreaProvider>
+  );
+}

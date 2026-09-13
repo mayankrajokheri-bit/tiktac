@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>THE APOCALYPSE — Reality Quest AI</title>
+  <meta name="description" content="THE APOCALYPSE: A survival horror game built at GMN College Ambala. 7 levels, 10 survivors, 1 treasure.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Bebas+Neue&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root { --red:#ff2222; --gold:#f1c40f; --cyan:#00fff5; --dark:#03040a; }
+    html,body { width:100vw; height:100vh; background:#000; overflow:hidden; font-family:'Rajdhani',sans-serif; color:#fff; user-select:none; }
+
+    /* Scanlines */
+    #scanlines { position:fixed; inset:0; z-index:1000; pointer-events:none; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0.18) 4px); }
+
+    /* Particle canvas */
+    #particle-canvas { position:fixed; inset:0; z-index:1; pointer-events:none; }
+
+    /* Noise */
+    #noise { position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0.04;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:200px; }
+
+    /* Vignette */
+    #vignette { position:fixed; inset:0; z-index:3; pointer-events:none; background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.92) 100%); }
+
+    /* BG */
+    #main-bg { position:fixed; inset:0; z-index:-1;
+      background: radial-gradient(ellipse at 20% 50%,rgba(139,0,0,.18) 0%,transparent 60%), radial-gradient(ellipse at 80% 30%,rgba(100,0,160,.15) 0%,transparent 60%), radial-gradient(ellipse at 50% 80%,rgba(241,196,15,.08) 0%,transparent 50%), #03040a;
+      animation:bgBreath 8s infinite alternate ease-in-out; }
+    @keyframes bgBreath { 0%{filter:brightness(0.8)} 100%{filter:brightness(1.1)} }
+
+    /* ── PHASE 1: Badge ── */
+    #phase-hackathon { position:fixed; inset:0; z-index:10; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#000; opacity:1; transition:opacity 1s ease; }
+    #phase-hackathon.out { opacity:0; pointer-events:none; }
+
+    .hackathon-badge { border:2px solid var(--cyan); padding:20px 44px; border-radius:6px; text-align:center;
+      box-shadow:0 0 40px rgba(0,255,245,.3),inset 0 0 20px rgba(0,255,245,.05);
+      opacity:0; animation:badgePulse 2s infinite alternate; }
+    .hackathon-badge.reveal { animation:badgeReveal 0.8s ease forwards, badgePulse 2s 0.8s infinite alternate; }
+    @keyframes badgeReveal { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
+    @keyframes badgePulse { from{box-shadow:0 0 30px rgba(0,255,245,.2);border-color:var(--cyan)} to{box-shadow:0 0 60px rgba(0,255,245,.6);border-color:#fff} }
+
+    .badge-tag  { font-family:'Orbitron',monospace; font-size:.6rem; letter-spacing:6px; color:var(--cyan); margin-bottom:8px; text-transform:uppercase; }
+    .badge-name { font-family:'Bebas Neue',sans-serif; font-size:2.4rem; letter-spacing:6px; color:#fff; text-shadow:0 0 20px var(--cyan); }
+    .badge-sub  { font-size:.8rem; color:#666; margin-top:4px; letter-spacing:3px; }
+
+    /* ── PHASE 2: Main ── */
+    #phase-main { position:fixed; inset:0; z-index:9; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 1.2s ease; }
+    #phase-main.active { opacity:1; pointer-events:auto; }
+
+    /* Logo */
+    #logo-wrap { position:relative; text-align:center; margin-bottom:10px; }
+    #logo-presented-by { font-family:'Orbitron',monospace; font-size:.58rem; letter-spacing:8px; color:#444; text-transform:uppercase; margin-bottom:10px; opacity:0; animation:fadeUp 0.8s 0.2s ease forwards; }
+    #logo-the { font-family:'Orbitron',monospace; font-size:1rem; letter-spacing:12px; color:#666; opacity:0; animation:fadeUp 0.8s 0.4s ease forwards; }
+
+    #logo-main { font-family:'Bebas Neue',sans-serif; font-size:clamp(4rem,12vw,8.5rem); line-height:.85; letter-spacing:4px;
+      background:linear-gradient(180deg,#fff 0%,#ff3838 40%,#8b0000 80%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+      filter:drop-shadow(0 0 30px rgba(255,34,34,.6));
+      opacity:0; animation:logoSlam 0.6s 0.7s cubic-bezier(0.18,0.89,0.32,1.28) forwards; position:relative; }
+    @keyframes logoSlam { 0%{opacity:0;transform:scale(2.5) translateY(-20px);filter:brightness(3) blur(8px)} 70%{opacity:1;transform:scale(0.96);filter:brightness(1.5) blur(0px)} 100%{opacity:1;transform:scale(1);filter:drop-shadow(0 0 30px rgba(255,34,34,.6))} }
+
+    /* Glitch layers */
+    #logo-main::before,#logo-main::after { content:'APOCALYPSE'; position:absolute; top:0; left:0; font-family:'Bebas Neue',sans-serif; font-size:inherit; letter-spacing:4px; width:100%; }
+    #logo-main::before { color:var(--cyan); -webkit-text-fill-color:var(--cyan); opacity:.5; animation:glitchA 5s infinite; }
+    #logo-main::after  { color:var(--red);  -webkit-text-fill-color:var(--red);  opacity:.4; animation:glitchB 5s infinite; }
+    @keyframes glitchA { 0%,88%,100%{clip-path:none;transform:none;opacity:0} 90%{clip-path:inset(10% 0 70% 0);transform:translateX(-4px);opacity:.5} 92%{clip-path:inset(50% 0 20% 0);transform:translateX(4px);opacity:.4} }
+    @keyframes glitchB { 0%,89%,100%{clip-path:none;transform:none;opacity:0} 91%{clip-path:inset(60% 0 10% 0);transform:translateX(6px);opacity:.5} 93%{clip-path:inset(20% 0 60% 0);transform:translateX(-6px);opacity:.3} }
+
+    #logo-subtitle { font-family:'Orbitron',monospace; font-size:clamp(.5rem,1.8vw,.78rem); letter-spacing:8px; color:var(--gold); text-shadow:0 0 12px var(--gold); margin-top:10px; opacity:0; animation:fadeUp 0.8s 1.2s ease forwards; }
+    .divider-line { width:0; height:1px; background:linear-gradient(90deg,transparent,var(--red),var(--gold),var(--red),transparent); margin:14px auto; animation:lineExpand 0.8s 1s ease forwards; }
+    @keyframes lineExpand { to{width:min(600px,80vw)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Tagline */
+    #tagline { font-size:clamp(.8rem,2.5vw,1rem); color:#aaa; letter-spacing:2px; text-align:center; max-width:520px; line-height:1.6; opacity:0; animation:fadeUp 0.8s 1.4s ease forwards; }
+    #tagline span { color:var(--gold); font-weight:700; }
+
+    /* Tech pills */
+    #tech-stack { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px; opacity:0; animation:fadeUp 0.8s 1.6s ease forwards; }
+    .tech-pill { font-family:'Orbitron',monospace; font-size:.5rem; letter-spacing:2px; padding:5px 14px; border-radius:20px; border:1px solid rgba(255,255,255,.2); color:#fff; background:rgba(255,255,255,.05); text-transform:uppercase; }
+    .tp-html  { border-color:#e44d26; color:#e44d26; background:rgba(228,77,38,.1); }
+    .tp-css   { border-color:#264de4; color:#72a1f7; background:rgba(38,77,228,.1); }
+    .tp-js    { border-color:#f1c40f; color:#f1c40f; background:rgba(241,196,15,.1); }
+    .tp-ai    { border-color:#00fff5; color:#00fff5; background:rgba(0,255,245,.08); }
+    .tp-web   { border-color:#2ecc71; color:#2ecc71; background:rgba(46,204,113,.1); }
+    .tp-pwa   { border-color:#9b59b6; color:#d7aefb; background:rgba(155,89,182,.1); }
+
+    /* Team */
+    #team-credits { margin-top:20px; text-align:center; opacity:0; animation:fadeUp 0.8s 1.85s ease forwards; }
+    .team-label   { font-family:'Orbitron',monospace; font-size:.5rem; letter-spacing:5px; color:#444; text-transform:uppercase; margin-bottom:8px; }
+    .team-names   { display:flex; gap:18px; justify-content:center; flex-wrap:wrap; }
+    .team-member  { font-family:'Rajdhani',sans-serif; font-size:.85rem; font-weight:700; letter-spacing:2px; color:#bbb; display:flex; align-items:center; gap:6px; }
+    .team-member::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); flex-shrink:0; }
+
+    /* Enter button */
+    #enter-btn { margin-top:26px; opacity:0; animation:fadeUp 0.8s 2.1s ease forwards; cursor:pointer; }
+    .btn-enter { font-family:'Orbitron',monospace; font-size:.85rem; font-weight:700; letter-spacing:5px; text-transform:uppercase;
+      padding:15px 48px; border:2px solid var(--red); border-radius:4px; background:transparent; color:#fff; cursor:pointer;
+      position:relative; overflow:hidden; transition:all .3s ease;
+      animation:btnPulse 2s infinite alternate ease-in-out; }
+    @keyframes btnPulse { 0%{box-shadow:0 0 20px rgba(255,34,34,.3)} 100%{box-shadow:0 0 50px rgba(255,34,34,.7),0 0 80px rgba(241,196,15,.2);border-color:var(--gold)} }
+    .btn-enter::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,34,34,.15),transparent); transform:translateX(-100%); transition:transform .4s ease; }
+    .btn-enter:hover::before { transform:translateX(100%); }
+    .btn-enter:hover { background:rgba(255,34,34,.12); transform:scale(1.04); letter-spacing:7px; }
+    .btn-enter:active { transform:scale(0.97); }
+    .btn-corner { position:absolute; width:10px; height:10px; border-color:var(--gold); border-style:solid; }
+    .tl{top:-1px;left:-1px;border-width:2px 0 0 2px} .tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+    .bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px} .br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+
+    /* Loading bar */
+    #loading-wrap { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); width:min(440px,80vw); text-align:center; opacity:0; animation:fadeUp 0.8s 2.3s ease forwards; }
+    .load-label { font-family:'Orbitron',monospace; font-size:.48rem; letter-spacing:4px; color:#444; margin-bottom:6px; text-transform:uppercase; }
+    .load-track { width:100%; height:2px; background:rgba(255,255,255,.08); border-radius:1px; overflow:hidden; }
+    #load-fill { height:100%; background:linear-gradient(90deg,var(--red),var(--gold)); width:0; transition:width .15s linear; box-shadow:0 0 8px var(--gold); }
+    #load-pct  { font-family:'Orbitron',monospace; font-size:.5rem; letter-spacing:3px; color:#444; margin-top:5px; }
+
+    /* Side panels */
+    .side-stat { position:fixed; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:12px; opacity:0; animation:fadeUp 0.8s 2s ease forwards; }
+    #stat-left { left:24px; } #stat-right { right:24px; align-items:flex-end; }
+    .stat-chip { font-family:'Orbitron',monospace; font-size:.48rem; letter-spacing:2px; color:#444; text-transform:uppercase; line-height:1.7; }
+    .stat-chip strong { display:block; font-size:.82rem; color:var(--gold); letter-spacing:1px; }
+
+    /* Corners */
+    .corner-deco { position:fixed; width:60px; height:60px; opacity:0; animation:fadeUp 1s 0.5s ease forwards; }
+    #corner-tl{top:16px;left:16px;border-top:2px solid var(--red);border-left:2px solid var(--red)}
+    #corner-tr{top:16px;right:16px;border-top:2px solid var(--red);border-right:2px solid var(--red)}
+    #corner-bl{bottom:16px;left:16px;border-bottom:2px solid var(--red);border-left:2px solid var(--red)}
+    #corner-br{bottom:16px;right:16px;border-bottom:2px solid var(--red);border-right:2px solid var(--red)}
+    .corner-deco::after { content:''; position:absolute; inset:6px; border:1px solid rgba(241,196,15,.2); }
+
+    /* Glitch periodic on logo */
+    .glitch-text { animation:titleGlitch 8s infinite; }
+    @keyframes titleGlitch {
+      0%,85%,100%{transform:none;filter:none}
+      86%{transform:skewX(-8deg) translateX(-4px);filter:hue-rotate(60deg) brightness(1.5)}
+      87%{transform:skewX(6deg)  translateX(4px); filter:hue-rotate(180deg)}
+      88%{transform:none;filter:none}
+      92%{transform:skewX(-3deg) translateX(-2px);filter:hue-rotate(90deg) brightness(2)}
+      93%{transform:none;filter:none}
+    }
+
+    /* Transition out */
+    #transition-out { position:fixed; inset:0; background:#000; z-index:999; opacity:0; pointer-events:none; transition:opacity 1.2s ease; }
+    #transition-out.active { opacity:1; pointer-events:auto; }
+
+    #skip-hint { position:fixed; bottom:10px; right:20px; font-family:'Orbitron',monospace; font-size:.42rem; letter-spacing:3px; color:#2a2a2a; text-transform:uppercase; opacity:0; animation:fadeUp 0.8s 3s ease forwards; }
+
+    @media (max-width:600px) { #stat-left,#stat-right{display:none} #logo-main{font-size:3.5rem} }
+  </style>
+</head>
+<body>
+
+  <div id="scanlines"></div>
+  <div id="noise"></div>
+  <div id="vignette"></div>
+  <div id="main-bg"></div>
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Corner decorations -->
+  <div class="corner-deco" id="corner-tl"></div>
+  <div class="corner-deco" id="corner-tr"></div>
+  <div class="corner-deco" id="corner-bl"></div>
+  <div class="corner-deco" id="corner-br"></div>
+
+  <!-- PHASE 1: Hackathon Badge -->
+  <div id="phase-hackathon">
+    <div class="hackathon-badge" id="hackathon-badge">
+      <div class="badge-tag">&#127942; Hackathon 2026 — Submission</div>
+      <div class="badge-name">GMN COLLEGE AMBALA</div>
+      <div class="badge-sub">Department of Computer Science &amp; Engineering</div>
+    </div>
+  </div>
+
+  <!-- PHASE 2: Main Cinematic Splash -->
+  <div id="phase-main">
+
+    <div class="side-stat" id="stat-left">
+      <div class="stat-chip">Genre<strong>SURVIVAL HORROR</strong></div>
+      <div class="stat-chip">Platform<strong>WEB / PWA</strong></div>
+      <div class="stat-chip">Engine<strong>VANILLA JS</strong></div>
+      <div class="stat-chip">Levels<strong>7 DEADLY TRIALS</strong></div>
+    </div>
+
+    <div class="side-stat" id="stat-right">
+      <div class="stat-chip" style="text-align:right">Players<strong>10 SURVIVORS</strong></div>
+      <div class="stat-chip" style="text-align:right">Mode<strong>PvP + PvE</strong></div>
+      <div class="stat-chip" style="text-align:right">Year<strong>2026</strong></div>
+      <div class="stat-chip" style="text-align:right">Status<strong style="color:#2ecc71">LIVE &#10003;</strong></div>
+    </div>
+
+    <div id="logo-wrap">
+      <div id="logo-presented-by">REALITY QUEST AI PRESENTS</div>
+      <div id="logo-the">THE</div>
+      <div id="logo-main" class="glitch-text">APOCALYPSE</div>
+      <div class="divider-line"></div>
+      <div id="logo-subtitle">A CINEMATIC SURVIVAL HORROR EXPERIENCE</div>
+    </div>
+
+    <div id="tagline">
+      <span>10 survivors.</span> 7 deadly trials. 1 ancient treasure.<br>
+      Trapped inside <span>GMN College, Ambala Cantt</span> &mdash; only one escapes alive.
+    </div>
+
+    <div id="tech-stack">
+      <span class="tech-pill tp-html">HTML5</span>
+      <span class="tech-pill tp-css">CSS3</span>
+      <span class="tech-pill tp-js">Vanilla JS</span>
+      <span class="tech-pill tp-ai">AI Characters</span>
+      <span class="tech-pill tp-web">Web Audio API</span>
+      <span class="tech-pill tp-pwa">PWA Ready</span>
+    </div>
+
+    <div id="team-credits">
+      <div class="team-label">Built by Team</div>
+      <div class="team-names">
+        <div class="team-member">AARAV</div>
+        <div class="team-member">ALEX</div>
+        <div class="team-member">BEN</div>
+        <div class="team-member">ESHA</div>
+        <div class="team-member">CHLOE</div>
+      </div>
+    </div>
+
+    <div id="enter-btn" onclick="enterGame()">
+      <button class="btn-enter">
+        <span class="btn-corner tl"></span>
+        <span class="btn-corner tr"></span>
+        <span class="btn-corner bl"></span>
+        <span class="btn-corner br"></span>
+        &#9654; ENTER THE APOCALYPSE
+      </button>
+    </div>
+
+    <div id="loading-wrap">
+      <div class="load-label" id="load-status">INITIALISING SYSTEMS</div>
+      <div class="load-track"><div id="load-fill"></div></div>
+      <div id="load-pct">0%</div>
+    </div>
+  </div>
+
+  <div id="skip-hint">PRESS SPACE TO SKIP</div>
+  <div id="transition-out"></div>
+
+  <script>
+    /* ── PARTICLE SYSTEM ────────────────────── */
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+
+    const COLORS = ['#ff2222','#f1c40f','#00fff5','#8e44ad','#ff6b6b','#ffffff'];
+    const particles = [];
+    class Particle {
+      constructor() { this.reset(true); }
+      reset(initial = false) {
+        this.x = Math.random() * W;
+        this.y = initial ? Math.random() * H : H + 10;
+        this.vy = -(0.2 + Math.random() * 0.8);
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.r = 1 + Math.random() * 2.5;
+        this.life = 0;
+        this.maxLife = 200 + Math.random() * 300;
+        this.col = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.twinkle = Math.random() * Math.PI * 2;
+      }
+      update() {
+        this.x += this.vx; this.y += this.vy; this.life++;
+        this.twinkle += 0.04;
+        if (this.y < -10 || this.life > this.maxLife) this.reset();
+      }
+      draw() {
+        const a = Math.min(1, this.life/30) * Math.min(1, (this.maxLife - this.life)/30) * (0.5 + 0.5 * Math.sin(this.twinkle));
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.fillStyle = ctx.shadowColor = this.col;
+        ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+      }
+    }
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
+    function drawParticles() { ctx.clearRect(0,0,W,H); particles.forEach(p=>{p.update();p.draw();}); requestAnimationFrame(drawParticles); }
+    drawParticles();
+
+    /* ── AUDIO ────────────────────────────── */
+    let audioCtx = null;
+    function startAmbientDrone() {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        audioCtx = new AC();
+        function makeDrone(f, g, t='sine') {
+          const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+          osc.type = t; osc.frequency.value = f;
+          gain.gain.setValueAtTime(0, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(g, audioCtx.currentTime + 2.5);
+          osc.connect(gain); gain.connect(audioCtx.destination); osc.start();
+        }
+        makeDrone(40, 0.12); makeDrone(55, 0.06, 'triangle'); makeDrone(110, 0.03, 'sawtooth');
+        setTimeout(() => {
+          const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(800, audioCtx.currentTime);
+          o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 1.8);
+          g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+          g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.8);
+          o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 2);
+        }, 3000);
+        setTimeout(() => {
+          const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+          o.type = 'sawtooth';
+          o.frequency.setValueAtTime(120, audioCtx.currentTime);
+          o.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.8);
+          g.gain.setValueAtTime(0.5, audioCtx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+          o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 1);
+        }, 700);
+      } catch(e) {}
+    }
+
+    /* ── LOADING BAR ─────────────────────── */
+    let loadPct = 0, statusIdx = 0;
+    const statuses = ['INITIALISING SYSTEMS','LOADING LEVEL ASSETS','BUILDING AI ENTITIES','CALIBRATING HORROR ENGINE','SPAWNING SURVIVORS','UNLOCKING ANCIENT SEALS','READY — ENTER IF YOU DARE'];
+    function animateLoad() {
+      const fill = document.getElementById('load-fill');
+      const pctEl = document.getElementById('load-pct');
+      const statEl = document.getElementById('load-status');
+      const iv = setInterval(() => {
+        loadPct += Math.random() * 3 + 0.5;
+        if (loadPct >= 100) loadPct = 100;
+        fill.style.width = loadPct + '%';
+        pctEl.textContent = Math.floor(loadPct) + '%';
+        const si = Math.floor((loadPct/100) * (statuses.length-1));
+        if (si !== statusIdx) { statusIdx = si; statEl.textContent = statuses[si]; }
+        if (loadPct >= 100) clearInterval(iv);
+      }, 60);
+    }
+
+    /* ── SEQUENCE ────────────────────────── */
+    function showPhase2() {
+      document.getElementById('phase-hackathon').style.display = 'none';
+      document.getElementById('phase-main').classList.add('active');
+      startAmbientDrone();
+      animateLoad();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => document.getElementById('hackathon-badge').classList.add('reveal'), 300);
+      setTimeout(() => {
+        document.getElementById('phase-hackathon').classList.add('out');
+        setTimeout(showPhase2, 1000);
+      }, 2500);
+    });
+
+    document.getElementById('phase-hackathon').addEventListener('click', () => {
+      document.getElementById('phase-hackathon').classList.add('out');
+      setTimeout(showPhase2, 600);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') enterGame();
+    });
+
+    function enterGame() {
+      if (audioCtx) {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(60, audioCtx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.4);
+        g.gain.setValueAtTime(0.4, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.6);
+      }
+      document.getElementById('transition-out').classList.add('active');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1300);
+    }
+  </script>
+</body>
+</html>

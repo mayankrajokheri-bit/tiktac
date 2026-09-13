@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "Reality Quest AI",
+    "slug": "reality-quest-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#060911"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.realityquest.ai",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Reality Quest AI requires camera access to scan physical objects and transform them into AR game relics.",
+        "NSLocationWhenInUseUsageDescription": "Reality Quest AI requires GPS location to spawn local quests, anomalies, and resource nodes around you."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#060911"
+      },
+      "package": "com.realityquest.ai",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_ANDROID_API_KEY"
+        }
+      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Reality Quest AI to access your camera to scan real-world objects."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Reality Quest AI to use your location for the AR World Map."
+        }
+      ]
+    ]
+  }
+}

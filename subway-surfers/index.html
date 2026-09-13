@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Subway Surfers — 3D Cyber Run</title>
+  <meta name="description" content="Experience high-octane 3D endless running action in Subway Surfers Cyber Run! Dodge trains, jump hurdles, roll under barriers, and surf on hoverboards.">
+  <meta name="theme-color" content="#0d0e15">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <!-- 3D WebGL Canvas Container -->
+  <div id="game-canvas-container"></div>
+
+  <!-- In-Game Heads-Up Display (HUD) -->
+  <div id="game-hud" class="hud-overlay">
+    <!-- Top Bar -->
+    <div class="hud-top">
+      <div class="hud-stats-group">
+        <div class="hud-card score-card">
+          <span class="hud-label">SCORE</span>
+          <div class="hud-val-row">
+            <span id="hud-score" class="hud-value">0</span>
+            <span id="hud-multiplier" class="hud-multiplier-pill">x1</span>
+          </div>
+        </div>
+        <div class="hud-card highscore-card">
+          <span class="hud-label">HIGH</span>
+          <span id="hud-highscore" class="hud-value-sm">0</span>
+        </div>
+      </div>
+
+      <div class="hud-coins-group">
+        <div class="hud-card coin-card">
+          <span class="coin-icon">🪙</span>
+          <span id="hud-coins" class="hud-value coin-val">0</span>
+        </div>
+        <button id="hud-pause-btn" class="hud-icon-btn" aria-label="Pause Game" title="Pause">
+          ⏸️
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Power-up Timers Tray -->
+    <div id="powerup-tray" class="powerup-tray">
+      <!-- Dynamically populated power-up bars: Magnet, Sneakers, 2X, Hoverboard -->
+    </div>
+
+    <!-- Mobile Quick-Hoverboard summon button -->
+    <div class="hud-bottom-actions">
+      <button id="quick-board-btn" class="quick-board-btn" aria-label="Activate Hoverboard" title="Activate Hoverboard (Space / Double Tap)">
+        <span class="board-icon">🛹</span>
+        <span class="board-stock" id="board-stock-count">3</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Start / Menu Screen -->
+  <div id="start-screen" class="menu-overlay">
+    <div class="menu-card start-card">
+      <div class="arcade-badge">ENDLESS 3D RUNNER</div>
+      <h1 class="game-logo">SUBWAY <span class="accent-cyber">SURFERS</span></h1>
+      <p class="game-tagline">CYBER RUN EDITION</p>
+
+      <div class="controls-guide">
+        <div class="guide-item">
+          <div class="key-combo"><span>A</span><span>D</span> or <span>←</span><span>→</span></div>
+          <span class="guide-desc">Switch Lanes</span>
+        </div>
+        <div class="guide-item">
+          <div class="key-combo"><span>W</span> or <span>↑</span></div>
+          <span class="guide-desc">Jump Over Hurdles</span>
+        </div>
+        <div class="guide-item">
+          <div class="key-combo"><span>S</span> or <span>↓</span></div>
+          <span class="guide-desc">Slide / Roll Under</span>
+        </div>
+        <div class="guide-item">
+          <div class="key-combo"><span>SPACE</span></div>
+          <span class="guide-desc">Hoverboard Shield</span>
+        </div>
+      </div>
+
+      <div class="menu-buttons">
+        <button id="start-run-btn" class="action-btn play-btn pulse-glow">
+          TAP TO RUN ➔
+        </button>
+        <button id="open-skins-btn" class="action-btn secondary-btn">
+          👕 Characters & Skins
+        </button>
+        <button id="open-shop-btn" class="action-btn secondary-btn">
+          🛒 Upgrade Shop
+        </button>
+      </div>
+
+      <div class="sound-toggle-row">
+        <button id="sound-toggle-btn" class="text-toggle-btn">
+          <span id="sound-toggle-icon">🔊</span> Sound: <span id="sound-status-text">ON</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="game-over-screen" class="menu-overlay hidden">
+    <div class="menu-card gameover-card">
+      <div class="gameover-header">
+        <span class="crash-emoji">💥</span>
+        <h2 class="gameover-title">RUN BUSTED!</h2>
+      </div>
+
+      <div class="run-summary-grid">
+        <div class="summary-item">
+          <span class="summary-label">RUN SCORE</span>
+          <span id="final-score" class="summary-val accent-cyber">0</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">COINS COLLECTED</span>
+          <span id="final-coins" class="summary-val accent-gold">🪙 0</span>
+        </div>
+        <div class="summary-item full-width">
+          <span class="summary-label">ALL-TIME BEST</span>
+          <span id="final-best" class="summary-val">0</span>
+        </div>
+      </div>
+
+      <div id="new-record-badge" class="new-record-badge hidden">
+        ⭐ NEW HIGH SCORE RECORD! ⭐
+      </div>
+
+      <div class="menu-buttons">
+        <button id="restart-run-btn" class="action-btn play-btn pulse-glow">
+          RUN AGAIN 🔄
+        </button>
+        <button id="gameover-shop-btn" class="action-btn secondary-btn">
+          🛒 Upgrade Shop
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upgrades & Gear Shop Modal -->
+  <div id="shop-screen" class="menu-overlay hidden">
+    <div class="menu-card shop-card">
+      <div class="shop-header">
+        <h2 class="shop-title">CYBER SHOP</h2>
+        <div class="shop-balance">
+          <span>🪙 Total Coins:</span>
+          <strong id="shop-total-coins">0</strong>
+        </div>
+      </div>
+
+      <div class="shop-items-container">
+        <!-- Coin Magnet Upgrade -->
+        <div class="shop-item" data-item="magnet">
+          <div class="item-icon-box magnet-icon">🧲</div>
+          <div class="item-info">
+            <h3 class="item-name">Coin Magnet</h3>
+            <p class="item-desc">Pulls all lane coins directly to you.</p>
+            <div class="level-dots" id="dots-magnet">
+              <span class="dot filled"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button class="buy-btn" id="buy-magnet-btn">
+            <span class="buy-cost">🪙 200</span>
+          </button>
+        </div>
+
+        <!-- Super Sneakers Upgrade -->
+        <div class="shop-item" data-item="sneakers">
+          <div class="item-icon-box sneakers-icon">⚡</div>
+          <div class="item-info">
+            <h3 class="item-name">Super Sneakers</h3>
+            <p class="item-desc">Mega jump height to leap atop trains.</p>
+            <div class="level-dots" id="dots-sneakers">
+              <span class="dot filled"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button class="buy-btn" id="buy-sneakers-btn">
+            <span class="buy-cost">🪙 200</span>
+          </button>
+        </div>
+
+        <!-- 2X Multiplier Upgrade -->
+        <div class="shop-item" data-item="multiplier">
+          <div class="item-icon-box multiplier-icon">✖️2</div>
+          <div class="item-info">
+            <h3 class="item-name">2X Multiplier</h3>
+            <p class="item-desc">Doubles score points accumulation speed.</p>
+            <div class="level-dots" id="dots-multiplier">
+              <span class="dot filled"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
+          <button class="buy-btn" id="buy-multiplier-btn">
+            <span class="buy-cost">🪙 250</span>
+          </button>
+        </div>
+
+        <!-- Hoverboard Stock -->
+        <div class="shop-item" data-item="hoverboard">
+          <div class="item-icon-box board-icon-box">🛹</div>
+          <div class="item-info">
+            <h3 class="item-name">Hoverboard Pack</h3>
+            <p class="item-desc">Buy +3 Hoverboard crash shields.</p>
+            <span class="stock-display">In Stock: <strong id="shop-board-stock">3</strong></span>
+          </div>
+          <button class="buy-btn" id="buy-hoverboard-btn">
+            <span class="buy-cost">🪙 300</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="shop-footer">
+        <button id="close-shop-btn" class="action-btn secondary-btn">
+          Back to Menu ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Characters & Skins Selection Modal -->
+  <div id="skins-screen" class="menu-overlay hidden" role="dialog" aria-modal="true">
+    <div class="menu-card skins-card">
+      <div class="skins-header">
+        <h2 class="skins-title">RUNNER SKINS</h2>
+        <p class="skins-subtitle">Select your character outfit & style</p>
+      </div>
+
+      <div class="skins-grid">
+        <!-- Skin 1: Jake -->
+        <div class="skin-card active" data-skin="jake">
+          <div class="skin-badge">STREET</div>
+          <div class="skin-avatar-box jake-box">🧢</div>
+          <h3 class="skin-name">Jake</h3>
+          <p class="skin-role">Original Runner</p>
+          <button class="skin-select-btn active">ACTIVE</button>
+        </div>
+
+        <!-- Skin 2: Tricky -->
+        <div class="skin-card" data-skin="tricky">
+          <div class="skin-badge">CYBER</div>
+          <div class="skin-avatar-box tricky-box">🎧</div>
+          <h3 class="skin-name">Tricky</h3>
+          <p class="skin-role">Cyber Beat</p>
+          <button class="skin-select-btn">SELECT</button>
+        </div>
+
+        <!-- Skin 3: Cyber Mecha -->
+        <div class="skin-card" data-skin="mecha">
+          <div class="skin-badge">ANDROID</div>
+          <div class="skin-avatar-box mecha-box">🤖</div>
+          <h3 class="skin-name">Mecha Core</h3>
+          <p class="skin-role">Titan Armor</p>
+          <button class="skin-select-btn">SELECT</button>
+        </div>
+
+        <!-- Skin 4: Golden Shinobi -->
+        <div class="skin-card" data-skin="shinobi">
+          <div class="skin-badge gold-badge">LEGENDARY</div>
+          <div class="skin-avatar-box shinobi-box">🥷</div>
+          <h3 class="skin-name">Shinobi</h3>
+          <p class="skin-role">Shadow Katana</p>
+          <button class="skin-select-btn">SELECT</button>
+        </div>
+      </div>
+
+      <div class="skins-footer">
+        <button id="close-skins-btn" class="action-btn secondary-btn">
+          Back to Menu ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Menu Screen -->
+  <div id="pause-screen" class="menu-overlay hidden">
+    <div class="menu-card pause-card">
+      <h2 class="gameover-title">GAME PAUSED</h2>
+      <div class="menu-buttons">
+        <button id="resume-btn" class="action-btn play-btn pulse-glow">
+          RESUME ▶️
+        </button>
+        <button id="pause-restart-btn" class="action-btn secondary-btn">
+          RESTART 🔄
+        </button>
+        <button id="pause-quit-btn" class="action-btn secondary-btn">
+          MAIN MENU 🏠
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

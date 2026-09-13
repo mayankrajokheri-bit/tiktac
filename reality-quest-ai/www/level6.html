@@ -1,0 +1,2672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Level 6 — The Traitor (Nightmare Edition) | Reality Quest AI</title>
+  <meta name="description" content="Level 6: The Traitor (Nightmare Edition). High-stakes psychological horror, dynamic paranoia timer, fatal voting consequences, multi-layered mind games, and a brutal multi-stage boss fight.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@400;600;700&family=Rajdhani:wght@500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/survivors.css">
+  <script src="js/survivors.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --blood-red: #c0392b;
+      --neon-red: #ff2a2a;
+      --dark-crimson: #5c0606;
+      --uv-purple: #9b59b6;
+      --uv-glow: #e056fd;
+      --cyan-shock: #00cec9;
+      --gold-dagger: #f1c40f;
+      --bg-dark: #05070c;
+      --font-horror: 'Creepster', cursive;
+      --font-ui: 'Oswald', sans-serif;
+      --font-title: 'Bebas Neue', sans-serif;
+      --font-body: 'Rajdhani', sans-serif;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: var(--font-body);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+      touch-action: none;
+    }
+
+    /* Boardroom Environment */
+    #boardroom-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background-image: url('assets/level6_traitor_room.png');
+      background-size: cover;
+      background-position: center center;
+      transition: filter 0.3s ease;
+    }
+
+    /* Atmospheric Lighting Overlays */
+    #mist-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 45% 65%, transparent 30%, rgba(4, 7, 12, 0.88) 85%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    #uv-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(155, 89, 182, 0.38) 0%, rgba(30, 5, 45, 0.82) 100%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      z-index: 4;
+      display: none;
+      animation: uvFlicker 2s infinite alternate;
+    }
+
+    @keyframes uvFlicker {
+      0% { opacity: 0.85; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    #red-light-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(192, 57, 43, 0.5);
+      mix-blend-mode: multiply;
+      pointer-events: none;
+      z-index: 4;
+      display: none;
+      animation: emergencyPulse 1.2s infinite alternate;
+    }
+
+    @keyframes emergencyPulse {
+      0% { background: rgba(192, 57, 43, 0.4); }
+      100% { background: rgba(255, 42, 42, 0.65); }
+    }
+
+    #blackout-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 260;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    #blackout-overlay.active {
+      opacity: 0.96;
+      pointer-events: auto;
+    }
+
+    #lightning-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 206, 201, 0.5);
+      z-index: 220;
+      pointer-events: none;
+      display: none;
+      mix-blend-mode: screen;
+    }
+
+    /* Screen Shake & Glitch */
+    .screen-shake {
+      animation: violentShake 0.4s ease-in-out infinite;
+    }
+
+    @keyframes violentShake {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-10px, 8px); }
+      40% { transform: translate(10px, -8px); }
+      60% { transform: translate(-8px, -6px); }
+      80% { transform: translate(8px, 8px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    /* ==========================================================================
+       TOP HUD: PARANOIA TIMER, HP BAR, BATTERY, ALIVE COUNT
+       ========================================================================== */
+    #hud-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: linear-gradient(180deg, rgba(5, 7, 12, 0.98) 0%, rgba(5, 7, 12, 0.7) 75%, transparent 100%);
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .level-badge-l6 {
+      background: linear-gradient(135deg, #c0392b, #2c3e50);
+      padding: 4px 10px;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 4px;
+      letter-spacing: 2px;
+      border: 1px solid rgba(192, 57, 43, 0.6);
+      box-shadow: 0 0 10px rgba(192, 57, 43, 0.5);
+    }
+
+    .level-title-l6 {
+      font-family: var(--font-horror);
+      font-size: 1.8rem;
+      color: #ff4757;
+      text-shadow: 0 0 15px rgba(255, 71, 87, 0.7);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .hud-right-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      pointer-events: auto;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stat-pill {
+      background: rgba(14, 18, 26, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 4px 12px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-pill.danger {
+      border-color: #ff3838;
+      box-shadow: 0 0 14px rgba(255, 56, 56, 0.4);
+    }
+
+    .stat-pill.danger.panic-pulse {
+      animation: panicGlow 0.5s infinite alternate;
+    }
+
+    @keyframes panicGlow {
+      from { border-color: #ff3838; box-shadow: 0 0 15px #ff3838; }
+      to { border-color: #ff0000; box-shadow: 0 0 35px #ff0000, inset 0 0 15px #ff0000; }
+    }
+
+    .stat-pill.uv {
+      border-color: var(--uv-purple);
+      box-shadow: 0 0 14px rgba(155, 89, 182, 0.4);
+    }
+
+    .stat-pill.hp-pill {
+      border-color: #2ed573;
+      box-shadow: 0 0 14px rgba(46, 213, 115, 0.3);
+      min-width: 105px;
+    }
+
+    .stat-lbl {
+      font-size: 8px;
+      font-family: var(--font-ui);
+      color: #8f9ca8;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .stat-val {
+      font-family: var(--font-title);
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    /* Player Health Bar */
+    .hp-bar-track {
+      width: 90px;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .hp-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #2ed573, #2bcbba);
+      box-shadow: 0 0 8px #2ed573;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .hp-bar-fill.danger {
+      background: linear-gradient(90deg, #ff4757, #ff3838);
+      box-shadow: 0 0 10px #ff3838;
+    }
+
+    /* UV Battery Meter */
+    .uv-battery-track {
+      width: 65px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .uv-battery-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #9b59b6, #e056fd);
+      box-shadow: 0 0 8px #e056fd;
+      transition: width 0.1s linear;
+    }
+
+    /* Action Buttons in HUD */
+    .hud-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    .hud-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .hud-btn.uv-active {
+      background: var(--uv-purple);
+      border-color: var(--uv-glow);
+      box-shadow: 0 0 15px var(--uv-glow);
+    }
+
+    .hud-btn.red-active {
+      background: var(--blood-red);
+      border-color: var(--neon-red);
+      box-shadow: 0 0 15px var(--neon-red);
+    }
+
+    .hud-btn.btn-accuse-nav {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border-color: #ff4757;
+      box-shadow: 0 0 12px rgba(255, 71, 87, 0.5);
+    }
+
+    /* ==========================================================================
+       MISSION OBJECTIVE PANEL (TOP LEFT)
+       ========================================================================== */
+    #mission-panel {
+      position: fixed;
+      top: 65px;
+      left: 16px;
+      width: 320px;
+      max-width: calc(100vw - 32px);
+      background: rgba(10, 14, 22, 0.94);
+      border: 1.5px solid rgba(192, 57, 43, 0.6);
+      border-radius: 10px;
+      padding: 12px 14px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(192, 57, 43, 0.3);
+      z-index: 100;
+      pointer-events: auto;
+    }
+
+    .mission-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 4px;
+    }
+
+    .mission-header-title {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #ff4757;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mission-step-badge {
+      font-family: var(--font-title);
+      font-size: 12px;
+      background: #c0392b;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+
+    .mission-main-text {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+
+    .mission-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #cbd5e1;
+      padding: 4px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      transition: all 0.2s;
+    }
+
+    .checklist-item.done {
+      color: #2ed573;
+      text-decoration: line-through;
+      background: rgba(46, 213, 115, 0.12);
+      border-left: 3px solid #2ed573;
+    }
+
+    /* ==========================================================================
+       UV HIDDEN BLOOD TRACKS & CLUES
+       ========================================================================== */
+    .uv-pentagram-track {
+      position: absolute;
+      font-size: 20px;
+      color: #e056fd;
+      text-shadow: 0 0 10px #e056fd, 0 0 25px #9b59b6;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+      transition: opacity 0.3s;
+    }
+
+    .uv-pentagram-track.revealed {
+      opacity: 0.95;
+      animation: uvPulseTrack 1.2s infinite alternate;
+    }
+
+    @keyframes uvPulseTrack {
+      0% { transform: scale(1); filter: brightness(1); }
+      100% { transform: scale(1.15); filter: brightness(1.4); }
+    }
+
+    /* Interactive Stations */
+    .clue-station {
+      position: absolute;
+      z-index: 20;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .clue-station:hover { transform: scale(1.08); }
+
+    .clue-pin {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(20, 10, 15, 0.92);
+      border: 2px solid #ff4757;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 15px rgba(255, 71, 87, 0.6);
+      animation: pinPulse 1.6s infinite alternate;
+    }
+
+    @keyframes pinPulse {
+      from { transform: scale(0.96); box-shadow: 0 0 10px #ff4757; }
+      to { transform: scale(1.08); box-shadow: 0 0 25px #ff2222; }
+    }
+
+    .clue-label {
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #fff;
+      background: rgba(10, 5, 15, 0.9);
+      border: 1px solid rgba(255, 71, 87, 0.6);
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* Station Coordinates */
+    #station-cctv { left: 66%; top: 58%; }
+    #station-uv-trail { left: 36%; top: 74%; }
+    #station-paradox { left: 52%; top: 25%; }
+    #station-red-lever { left: 86%; top: 40%; }
+    #station-breaker { left: 14%; top: 50%; display: flex; }
+    #station-generator { left: 84%; top: 62%; display: flex; }
+
+    /* Scattered Dagger Fragments */
+    .dagger-fragment-prop {
+      position: absolute;
+      z-index: 15;
+      cursor: pointer;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      animation: fragGlow 1s infinite alternate;
+    }
+
+    @keyframes fragGlow {
+      from { filter: drop-shadow(0 0 8px #f1c40f); transform: scale(1); }
+      to { filter: drop-shadow(0 0 20px #f39c12); transform: scale(1.1); }
+    }
+
+    #frag-blade { left: 24%; top: 62%; }
+    #frag-guard { left: 45%; top: 78%; }
+    #frag-hilt { left: 74%; top: 65%; }
+
+    /* High-Voltage Grid Zone */
+    #high-voltage-grid {
+      position: absolute;
+      left: 38%;
+      top: 60%;
+      width: 340px;
+      height: 180px;
+      transform: translate(-50%, -50%);
+      border: 3.5px dashed #00cec9;
+      border-radius: 20px;
+      background: radial-gradient(circle, rgba(0, 206, 201, 0.22) 0%, rgba(0, 0, 0, 0.6) 80%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 6;
+      box-shadow: 0 0 35px rgba(0, 206, 201, 0.4);
+      pointer-events: none;
+      text-align: center;
+      padding: 10px;
+    }
+
+    #high-voltage-grid.active-shock {
+      background: radial-gradient(circle, rgba(0, 206, 201, 0.85) 0%, rgba(255, 255, 255, 0.7) 60%, transparent 100%);
+      border-color: #fff;
+      box-shadow: 0 0 70px #00cec9, 0 0 120px #fff;
+      animation: gridLightning 0.15s infinite alternate;
+    }
+
+    @keyframes gridLightning {
+      0% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1.02); }
+    }
+
+    /* Awakening Countdown Banner */
+    #awakening-banner {
+      position: fixed;
+      top: 68px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8, 12, 20, 0.96);
+      border: 2px solid #f1c40f;
+      border-radius: 12px;
+      padding: 10px 24px;
+      text-align: center;
+      z-index: 220;
+      box-shadow: 0 0 35px rgba(241, 196, 15, 0.6);
+      display: none;
+      animation: bannerPulse 0.8s infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes bannerPulse {
+      from { transform: translateX(-50%) scale(0.98); }
+      to { transform: translateX(-50%) scale(1.02); }
+    }
+
+    /* Stella Dormant Mode (Grace Period) */
+    #stella-sprite.dormant-mode {
+      opacity: 0.55;
+      filter: drop-shadow(0 0 18px #8e44ad) grayscale(0.5);
+      animation: dormantFloat 1.2s infinite alternate;
+    }
+
+    @keyframes dormantFloat {
+      0% { transform: translate(-50%, -100%) translateY(0) scale(0.95); }
+      100% { transform: translate(-50%, -100%) translateY(-12px) scale(1.02); }
+    }
+
+    /* ==========================================================================
+       ENTITIES: PLAYER, SURVIVORS, STELLA REBORN / NIGHTMARE STELLA
+       ========================================================================== */
+    #entities-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .board-fighter {
+      position: absolute;
+      width: 48px;
+      height: 70px;
+      transform: translate(-50%, -100%);
+      will-change: left, top;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform 0.1s;
+    }
+
+    .board-fighter:hover {
+      transform: translate(-50%, -100%) scale(1.06);
+    }
+
+    .board-fighter-tag {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .char-head {
+      width: 18px;
+      height: 18px;
+      background: #f1c27d;
+      border-radius: 50%;
+      margin: 0 auto 2px;
+      border: 1px solid rgba(0, 0, 0, 0.4);
+    }
+
+    .char-torso {
+      width: 24px;
+      height: 28px;
+      border-radius: 5px;
+      margin: 0 auto;
+    }
+
+    .char-legs {
+      display: flex;
+      justify-content: space-around;
+      width: 20px;
+      margin: 0 auto;
+    }
+
+    .char-leg { width: 6px; height: 16px; background: #1e272e; border-radius: 2px; }
+
+    /* STELLA BOSS SPRITE */
+    #stella-sprite {
+      position: absolute;
+      width: 76px;
+      height: 106px;
+      transform: translate(-50%, -100%);
+      z-index: 18;
+      display: none;
+      filter: drop-shadow(0 0 25px #ff0000);
+      pointer-events: none;
+      transition: filter 0.3s;
+    }
+
+    #stella-sprite.nightmare-mode {
+      filter: drop-shadow(0 0 50px #ff0000) drop-shadow(0 0 70px #9b59b6) contrast(1.6);
+      animation: nightmareAura 0.12s infinite alternate;
+    }
+
+    @keyframes nightmareAura {
+      0% { transform: translate(-50%, -100%) scale(1.08) rotate(-2deg); }
+      100% { transform: translate(-50%, -100%) scale(1.18) rotate(2deg); }
+    }
+
+    .stella-head {
+      width: 30px;
+      height: 32px;
+      background: #718093;
+      border-radius: 50%;
+      margin: 0 auto 1px;
+      position: relative;
+    }
+
+    .stella-eyes {
+      position: absolute;
+      top: 11px;
+      left: 5px;
+      right: 5px;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    .stella-eye {
+      width: 6px;
+      height: 6px;
+      background: #ff0000;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ff0000;
+    }
+
+    .stella-gown {
+      width: 48px;
+      height: 60px;
+      background: linear-gradient(180deg, #2d3436, #090a0f);
+      clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
+      margin: 0 auto;
+    }
+
+    .stella-legs { display: flex; justify-content: space-around; width: 22px; margin: 0 auto; }
+    .stella-leg { width: 6px; height: 18px; background: #111; }
+
+    /* Stunned State */
+    .stunned-electric {
+      animation: electroStun 0.1s infinite alternate !important;
+      filter: drop-shadow(0 0 45px #00cec9) brightness(2.6) !important;
+    }
+
+    @keyframes electroStun {
+      0% { transform: translate(-50%, -100%) scale(1) rotate(-3deg); }
+      100% { transform: translate(-50%, -100%) scale(1.05) rotate(3deg); }
+    }
+
+    /* Dead Body Avatar */
+    .dead-body-pile {
+      position: absolute;
+      width: 46px;
+      height: 20px;
+      background: rgba(136, 14, 79, 0.8);
+      border: 1.5px solid #ff1744;
+      border-radius: 10px;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #ffcdd2;
+      z-index: 8;
+      box-shadow: 0 0 15px rgba(255, 23, 68, 0.6);
+    }
+
+    /* ==========================================================================
+       MODALS & PANELS (SUSPICION VOTE, FATAL VOTE, WIRE MINI-GAME, ETC.)
+       ========================================================================== */
+    .overlay-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 5, 8, 0.95);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 250;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 20px;
+    }
+
+    .overlay-modal.active { opacity: 1; pointer-events: auto; }
+
+    .modal-box {
+      background: #0d121c;
+      border: 2px solid #ff4757;
+      border-radius: 14px;
+      padding: 26px;
+      max-width: 560px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 50px rgba(255, 71, 87, 0.5);
+      position: relative;
+    }
+
+    .action-btn-main {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 2px solid #ff7675;
+      padding: 10px 26px;
+      border-radius: 30px;
+      font-family: var(--font-title);
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(192, 57, 43, 0.7);
+      transition: all 0.15s ease;
+    }
+
+    .action-btn-main:hover { transform: scale(1.04); }
+
+    /* CCTV Keypad Modal */
+    .cctv-keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      gap: 10px;
+      margin: 16px auto;
+      justify-content: center;
+    }
+
+    .cctv-key {
+      height: 48px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cctv-key:active { background: #ff4757; }
+
+    .cctv-screen-code {
+      font-family: monospace;
+      font-size: 2rem;
+      color: #00cec9;
+      background: #05080f;
+      border: 1.5px solid #00cec9;
+      border-radius: 8px;
+      padding: 8px;
+      letter-spacing: 12px;
+      margin-bottom: 12px;
+    }
+
+    /* Suspect Cards Grid */
+    .vote-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .vote-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 14px 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .vote-card:hover {
+      border-color: #ff4757;
+      background: rgba(255, 71, 87, 0.18);
+      transform: translateY(-4px);
+    }
+
+    /* Smoke Vortex for Fatal Stella Face */
+    #stella-smoke-vortex {
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(142, 68, 173, 0.8) 0%, rgba(5, 7, 12, 0.95) 75%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #e056fd;
+      animation: smokeSpin 6s infinite linear;
+      box-shadow: 0 0 35px #8e44ad;
+    }
+
+    @keyframes smokeSpin {
+      0% { transform: rotate(0deg) scale(0.96); }
+      50% { transform: rotate(180deg) scale(1.05); }
+      100% { transform: rotate(360deg) scale(0.96); }
+    }
+
+    /* Wire Connect Mini-Game */
+    .wires-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 420px;
+      margin: 16px auto;
+      background: #05070c;
+      padding: 18px;
+      border: 2px solid #00cec9;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 206, 201, 0.3), inset 0 0 15px rgba(0, 0, 0, 0.8);
+    }
+
+    .wire-terminal {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2.5px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .wire-terminal:hover {
+      transform: scale(1.12);
+      filter: brightness(1.2);
+    }
+
+    .wire-terminal.selected {
+      border: 3px solid #f1c40f !important;
+      box-shadow: 0 0 20px #f1c40f, inset 0 0 12px #f1c40f !important;
+      transform: scale(1.18);
+    }
+
+    .wire-terminal.connected {
+      border: 2.5px solid #2ed573 !important;
+      box-shadow: 0 0 20px #2ed573, inset 0 0 10px #2ed573 !important;
+      background: #20bf6b !important;
+      color: #fff !important;
+      cursor: default !important;
+      pointer-events: none;
+      transform: scale(1.02);
+    }
+
+    .wire-red { background: #e74c3c; box-shadow: 0 0 12px rgba(231, 76, 60, 0.7); }
+    .wire-blue { background: #3498db; box-shadow: 0 0 12px rgba(52, 152, 219, 0.7); }
+    .wire-yellow { background: #f1c40f; color: #000; box-shadow: 0 0 12px rgba(241, 196, 15, 0.7); }
+
+    /* Generator Charge Progress Bar */
+    #gen-charge-modal-box {
+      max-width: 450px;
+    }
+
+    .charge-track-bar {
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      border: 1.5px solid #f1c40f;
+      overflow: hidden;
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .charge-fill-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f1c40f, #e67e22, #fff);
+      box-shadow: 0 0 15px #f1c40f;
+      transition: width 0.1s linear;
+    }
+
+    /* QTE Prompt Overlay */
+    #qte-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qte-circle {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 5px solid #f1c40f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, rgba(241, 196, 15, 0.3) 0%, #000 80%);
+      box-shadow: 0 0 50px #f1c40f;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .qte-key-prompt {
+      font-family: var(--font-title);
+      font-size: 3.5rem;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .qte-timer-bar {
+      width: 200px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .qte-timer-fill {
+      height: 100%;
+      width: 100%;
+      background: #ff4757;
+      transition: width 1.8s linear;
+    }
+
+    .qte-tap-btn {
+      background: linear-gradient(135deg, #f1c40f, #e67e22);
+      border: 2px solid #fff;
+      border-radius: 30px;
+      padding: 12px 36px;
+      color: #000;
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 25px #f1c40f;
+    }
+
+    /* Cliffhanger & Glitch Screen */
+    #cliffhanger-screen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 500;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .glitch-flash-text {
+      font-family: monospace;
+      font-size: 2.2rem;
+      color: #ff0000;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px #ff0000;
+      animation: glitchBlink 0.12s infinite;
+    }
+
+    @keyframes glitchBlink {
+      0% { opacity: 1; transform: skew(0deg); }
+      50% { opacity: 0.2; transform: skew(-8deg); }
+      100% { opacity: 1; transform: skew(8deg); }
+    }
+
+    /* Bottom Action Bar */
+    #boss-action-dock {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 120;
+      pointer-events: auto;
+    }
+
+    .action-btn-huge {
+      background: linear-gradient(135deg, #c0392b, #8e1a10);
+      border: 2px solid #ff7675;
+      padding: 12px 30px;
+      border-radius: 35px;
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(192, 57, 43, 0.8);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Mobile Controls */
+    #mobile-dpad {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 120px;
+      height: 120px;
+      z-index: 120;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 4px;
+      pointer-events: auto;
+    }
+
+    .dpad-btn {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .dpad-btn:active {
+      background: rgba(255, 71, 87, 0.5);
+      border-color: #ff4757;
+    }
+
+    /* Toast */
+    #toast-msg {
+      position: fixed;
+      top: 75px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: rgba(10, 14, 22, 0.96);
+      border: 1.5px solid #ff4757;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      letter-spacing: 1.5px;
+      box-shadow: 0 0 30px rgba(255, 71, 87, 0.7);
+      z-index: 360;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    #toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Game Over Modal */
+    #modal-game-over {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 0, 0, 0.96);
+      z-index: 400;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="boardroom-container">
+    <div id="mist-overlay"></div>
+    <div id="uv-overlay"></div>
+    <div id="red-light-overlay"></div>
+    <div id="blackout-overlay"></div>
+    <div id="lightning-overlay"></div>
+
+    <!-- Hidden UV Pentagram Blood Trail (Only visible under UV Light) -->
+    <div class="uv-pentagram-track" style="left:38%; top:72%;">⛧</div>
+    <div class="uv-pentagram-track" style="left:48%; top:69%;">⛧</div>
+    <div class="uv-pentagram-track" style="left:58%; top:67%;">⛧</div>
+    <div class="uv-pentagram-track" style="left:68%; top:66%;">⛧ ➔ PACT SIGNED: DEV ⛧ STELLA</div>
+
+    <!-- Clue Stations -->
+    <div class="clue-station" id="station-cctv" onclick="openCCTVPuzzle()">
+      <div class="clue-pin">📼</div>
+      <div class="clue-label">AUDIO CIPHER CCTV</div>
+    </div>
+
+    <div class="clue-station" id="station-uv-trail" onclick="inspectUVStation()">
+      <div class="clue-pin" style="border-color:#9b59b6; box-shadow:0 0 15px #9b59b6;">🔦</div>
+      <div class="clue-label" style="border-color:#9b59b6; color:#e056fd;">UV BLOOD SEARCH</div>
+    </div>
+
+    <div class="clue-station" id="station-paradox" onclick="inspectParadoxRiddle()">
+      <div class="clue-pin">🩸</div>
+      <div class="clue-label">PARADOX RIDDLE</div>
+    </div>
+
+    <div class="clue-station" id="station-red-lever" onclick="toggleRedLightLever()">
+      <div class="clue-pin" style="border-color:#ff3838;">🚨</div>
+      <div class="clue-label" style="color:#ff3838;">RED LIGHT SWITCH</div>
+    </div>
+
+    <!-- Multi-Stage Boss Elements -->
+    <div class="clue-station" id="station-breaker" onclick="openWirePuzzle()">
+      <div class="clue-pin" style="border-color:#00cec9; box-shadow:0 0 25px #00cec9;">⚡</div>
+      <div class="clue-label" style="color:#00cec9;">BREAKER WIRE PANEL</div>
+    </div>
+
+    <div class="clue-station" id="station-generator" onclick="openGeneratorChargeModal()">
+      <div class="clue-pin" style="border-color:#f1c40f;">🔋</div>
+      <div class="clue-label" style="color:#f1c40f;">VOLTAGE GENERATOR</div>
+    </div>
+
+    <!-- High-Voltage Grid Zone -->
+    <div id="high-voltage-grid">
+      <div style="font-family:var(--font-title); font-size:16px; color:#00cec9; letter-spacing:2px;">
+        ⚡ HIGH-VOLTAGE GRID ⚡
+      </div>
+      <div style="font-size:11px; font-weight:700; color:#81ecec; margin-top:4px;">
+        LURE STELLA INSIDE TO STUN!
+      </div>
+    </div>
+
+    <!-- 3 Scattered Dagger Fragments -->
+    <div class="dagger-fragment-prop" id="frag-blade" onclick="collectDaggerPiece('blade')">
+      <div style="font-size:24px;">🗡️</div>
+      <div style="font-size:9px; background:#000; padding:1px 6px; border-radius:4px; color:#f1c40f;">BLADE TIP</div>
+    </div>
+    <div class="dagger-fragment-prop" id="frag-guard" onclick="collectDaggerPiece('guard')">
+      <div style="font-size:24px;">🛡️</div>
+      <div style="font-size:9px; background:#000; padding:1px 6px; border-radius:4px; color:#f1c40f;">CROSSGUARD</div>
+    </div>
+    <div class="dagger-fragment-prop" id="frag-hilt" onclick="collectDaggerPiece('hilt')">
+      <div style="font-size:24px;">🔮</div>
+      <div style="font-size:9px; background:#000; padding:1px 6px; border-radius:4px; color:#f1c40f;">OCCULT HILT</div>
+    </div>
+
+    <!-- Entities Layer -->
+    <div id="entities-layer">
+      <!-- Player (Selected Hero) -->
+      <div class="board-fighter" id="player-sprite">
+        <div class="board-fighter-tag" id="l6-player-tag" style="color:#74b9ff;">YOU (AARAV)</div>
+        <div class="char-head survivor-avatar avatar-aarav" id="l6-player-avatar" style="width:26px; height:26px; margin:0 auto 2px; box-shadow:none;"></div>
+        <div class="char-torso" style="background:#2e86de;"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
+
+      <!-- Alex (Mech Eng) -->
+      <div class="board-fighter" id="surv-alex" style="left:28%; top:66%;" onclick="interrogateSurvivor('alex')">
+        <div class="board-fighter-tag" style="color:#e67e22;">ALEX (MECH)</div>
+        <div class="char-head survivor-avatar avatar-alex" style="width:26px; height:26px; margin:0 auto 2px; box-shadow:none; border-color:#e67e22;"></div>
+        <div class="char-torso" style="background:#e67e22;"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
+
+      <!-- Chloe (Civil Eng) -->
+      <div class="board-fighter" id="surv-chloe" style="left:46%; top:62%;" onclick="interrogateSurvivor('chloe')">
+        <div class="board-fighter-tag" style="color:#1abc9c;">CHLOE (CIVIL)</div>
+        <div class="char-head survivor-avatar avatar-chloe" style="width:26px; height:26px; margin:0 auto 2px; box-shadow:none; border-color:#1abc9c;"></div>
+        <div class="char-torso" style="background:#1abc9c;"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
+
+      <!-- DEV (Comp Sci - Secret Traitor) -->
+      <div class="board-fighter" id="surv-dev" style="left:72%; top:66%;" onclick="interrogateSurvivor('dev')">
+        <div class="board-fighter-tag" id="dev-tag" style="color:#f39c12;">DEV (COMP SCI)</div>
+        <div class="char-head survivor-avatar avatar-dev" style="width:26px; height:26px; margin:0 auto 2px; box-shadow:none; border-color:#e74c3c;"></div>
+        <div class="char-torso" style="background:#f39c12;"></div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+      </div>
+
+      <!-- Stella Boss -->
+      <div id="stella-sprite">
+        <div id="stella-title-badge" style="font-family:var(--font-horror); font-size:14px; color:#ff3838; text-align:center;">STELLA REBORN</div>
+        <div class="stella-head">
+          <div class="stella-eyes">
+            <div class="stella-eye"></div>
+            <div class="stella-eye"></div>
+          </div>
+        </div>
+        <div class="stella-gown"></div>
+        <div class="stella-legs"><div class="stella-leg"></div><div class="stella-leg"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HUD Top -->
+  <div id="hud-top">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="level-badge-l6">NIGHTMARE</div>
+      <div class="level-title-l6">THE TRAITOR</div>
+    </div>
+
+    <div class="hud-right-group">
+      <!-- Player HP Bar -->
+      <div class="stat-pill hp-pill">
+        <div class="stat-lbl">HEALTH (<span id="hud-hp-num">100</span>%)</div>
+        <div class="hp-bar-track">
+          <div class="hp-bar-fill" id="hud-hp-bar"></div>
+        </div>
+      </div>
+
+      <!-- Paranoia Timer -->
+      <div class="stat-pill danger" id="hud-timer-pill">
+        <div class="stat-lbl">PARANOIA TIMER</div>
+        <div class="stat-val" id="hud-timer">03:00</div>
+      </div>
+
+      <!-- Alive Count -->
+      <div class="stat-pill">
+        <div class="stat-lbl">ALIVE</div>
+        <div class="stat-val" id="hud-alive" style="color:#e056fd;">6</div>
+      </div>
+
+      <!-- UV Battery -->
+      <div class="stat-pill uv">
+        <div class="stat-lbl">UV BATTERY (<span id="uv-sec-left">30</span>s)</div>
+        <div class="uv-battery-track">
+          <div class="uv-battery-fill" id="uv-battery-bar"></div>
+        </div>
+      </div>
+
+      <!-- UV Light Toggle -->
+      <button class="hud-btn" id="btn-toggle-uv" onclick="toggleUVFlashlight()">🔦 UV [F]</button>
+
+      <!-- Red Light Switch -->
+      <button class="hud-btn" id="btn-toggle-red" onclick="toggleRedLightLever()">🚨 RED LIGHT</button>
+
+      <!-- Direct Electric Current Shock Button -->
+      <button class="hud-btn btn-current-strike-hud" id="btn-hud-current" onclick="triggerElectricCurrentFinisher()" style="background:linear-gradient(135deg, #00cec9, #0984e3); border:1.5px solid #81ecec; color:#fff; font-weight:800; box-shadow:0 0 15px #00cec9; letter-spacing:1px;">
+        ⚡ CURRENT SHOCK
+      </button>
+
+      <!-- Mid-Game Suspicion Vote Trigger -->
+      <button class="hud-btn btn-accuse-nav" onclick="openSuspicionVoteModal()">⚠️ ACCUSE VOTE</button>
+    </div>
+  </div>
+
+  <!-- MISSION OBJECTIVES PANEL (TOP-LEFT) -->
+  <div id="mission-panel">
+    <div class="mission-header">
+      <div class="mission-header-title"><span>🎯</span> NIGHTMARE OBJECTIVES</div>
+      <div class="mission-step-badge" id="mission-badge">INVESTIGATION</div>
+    </div>
+    <div class="mission-main-text" id="mission-goal-title">
+      Solve the 3 cryptic puzzles before the Paranoia Timer hits zero!
+    </div>
+    <div class="mission-checklist" id="mission-checklist">
+      <div class="checklist-item" id="chk-uv">
+        <span>🔦 1. UV Blood Trail (Follow Pentagrams)</span>
+      </div>
+      <div class="checklist-item" id="chk-cctv">
+        <span>📼 2. Audio Lullaby Keypad Cipher</span>
+      </div>
+      <div class="checklist-item" id="chk-paradox">
+        <span>🚨 3. Red Light Paradox Confession</span>
+      </div>
+    </div>
+    <div id="penalty-warning-text" style="font-size:10px; color:#ff6b6b; margin-top:6px; border-top:1px solid rgba(255,255,255,0.08); padding-top:4px;">
+      ⚠️ False Accusation: 1st drop ➔ 02:00 | 2nd drop ➔ 01:00!
+    </div>
+  </div>
+
+  <!-- AWAKENING COUNTDOWN BANNER (GRACE PERIOD) -->
+  <div id="awakening-banner">
+    <div style="font-family:var(--font-title); font-size:1.35rem; color:#f1c40f; letter-spacing:1.5px;">
+      ⚠️ STELLA AWAKENING IN: <span id="awakening-countdown" style="font-size:1.8rem; color:#ff3838; font-family:monospace; font-weight:700;">10</span>s
+    </div>
+    <div style="font-size:12px; color:#cbd5e1; margin-top:2px;">
+      🏃 HURRY! SPRINT &amp; COLLECT 3 DAGGER PIECES &amp; WIRE THE CURRENT BEFORE SHE AWAKENS!
+    </div>
+  </div>
+
+  <!-- Mobile D-pad -->
+  <div id="mobile-dpad">
+    <div></div>
+    <div class="dpad-btn" id="btn-dpad-up">▲</div>
+    <div></div>
+    <div class="dpad-btn" id="btn-dpad-left">◀</div>
+    <div></div>
+    <div class="dpad-btn" id="btn-dpad-right">▶</div>
+    <div></div>
+    <div class="dpad-btn" id="btn-dpad-down">▼</div>
+    <div></div>
+  </div>
+
+  <!-- Action Callout Bar (Bottom Dock) -->
+  <div id="boss-action-dock">
+    <button class="action-btn-huge" id="btn-call-vote" onclick="triggerFatalVoteModal()" style="display:none;">
+      ⚖️ CALL FATAL SACRIFICE VOTE!
+    </button>
+    <!-- Instant Electrocution Strike Button (Makes Stella Die Easily from Current) -->
+    <button class="action-btn-huge" id="btn-instant-strike" onclick="triggerElectricCurrentFinisher()" style="display:none; background:linear-gradient(135deg, #00cec9, #0984e3); border-color:#81ecec; box-shadow:0 0 40px #00cec9; animation:pulseWireSelection 0.7s infinite alternate;">
+      ⚡ STELLA IS ELECTROCUTED! TAP TO FINISH HER NOW! ⚡
+    </button>
+  </div>
+
+  <!-- ==========================================================================
+       MODALS
+       ========================================================================== -->
+
+  <!-- MODAL 1: Mid-Game Suspicion Vote -->
+  <div class="overlay-modal" id="modal-suspicion-vote">
+    <div class="modal-box" style="border-color:#ff3838; box-shadow:0 0 50px rgba(255,56,56,0.6);">
+      <div style="font-size:38px;">🚨⚖️</div>
+      <h2 style="font-family:var(--font-horror); font-size:2.2rem; color:#ff3838;">SUSPICION VOTE (HIGH RISK)</h2>
+      <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.5; margin-bottom:14px;">
+        Accuse a suspect of being the Traitor.<br>
+        <span style="color:#ff6b6b; font-weight:700;">PENALTY: Accusing an innocent drops the Paranoia Timer from 3m ➔ 2m, then ➔ 1m!</span>
+      </p>
+      <div class="vote-cards-grid">
+        <div class="vote-card" onclick="castSuspicionVote('alex')">
+          <div class="survivor-avatar avatar-alex" style="width:44px; height:44px;"></div>
+          <div style="font-family:var(--font-ui); font-size:14px; font-weight:700;">ALEX</div>
+          <div style="font-size:9px; color:#f1c40f;">MECHANICAL ENG</div>
+          <div style="font-size:10px; color:#ff7675;">ACCUSE ALEX</div>
+        </div>
+        <div class="vote-card" onclick="castSuspicionVote('chloe')">
+          <div class="survivor-avatar avatar-chloe" style="width:44px; height:44px;"></div>
+          <div style="font-family:var(--font-ui); font-size:14px; font-weight:700;">CHLOE</div>
+          <div style="font-size:9px; color:#f1c40f;">CIVIL ENG</div>
+          <div style="font-size:10px; color:#ff7675;">ACCUSE CHLOE</div>
+        </div>
+        <div class="vote-card" onclick="castSuspicionVote('dev')">
+          <div class="survivor-avatar avatar-dev" style="width:44px; height:44px; border-color:#e74c3c;"></div>
+          <div style="font-family:var(--font-ui); font-size:14px; font-weight:700; color:#f39c12;">DEV</div>
+          <div style="font-size:9px; color:#f1c40f;">COMPUTER SCI</div>
+          <div style="font-size:10px; color:#f1c40f;">ACCUSE DEV</div>
+        </div>
+      </div>
+      <button class="action-btn-main" onclick="closeModal('modal-suspicion-vote')" style="padding:6px 24px; font-size:1rem; background:#2c3e50; border-color:#7f8c8d;">
+        CANCEL
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CCTV Keypad Cipher -->
+  <div class="overlay-modal" id="modal-cctv">
+    <div class="modal-box">
+      <div style="font-size:40px;">📼</div>
+      <h2 style="font-family:var(--font-horror); font-size:2rem; color:#00cec9;">CCTV FOOTAGE CIPHER</h2>
+      <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.5; margin-bottom:12px;">
+        Audio recording from corrupted tape plays an eerie distorted lullaby:<br>
+        <em style="color:#00cec9; font-weight:600;">“TWO blind mice... FOUR broken chairs... NINE silent shadows in the dark.”</em><br>
+        Key in the 3-digit cipher to decrypt the visual feed!
+      </p>
+      <div class="cctv-screen-code" id="keypad-input-display">_ _ _</div>
+      <div class="cctv-keypad-grid">
+        <button class="cctv-key" onclick="pressKeypad('1')">1</button>
+        <button class="cctv-key" onclick="pressKeypad('2')">2</button>
+        <button class="cctv-key" onclick="pressKeypad('3')">3</button>
+        <button class="cctv-key" onclick="pressKeypad('4')">4</button>
+        <button class="cctv-key" onclick="pressKeypad('5')">5</button>
+        <button class="cctv-key" onclick="pressKeypad('6')">6</button>
+        <button class="cctv-key" onclick="pressKeypad('7')">7</button>
+        <button class="cctv-key" onclick="pressKeypad('8')">8</button>
+        <button class="cctv-key" onclick="pressKeypad('9')">9</button>
+        <button class="cctv-key" style="color:#ff4757;" onclick="clearKeypad()">C</button>
+        <button class="cctv-key" onclick="pressKeypad('0')">0</button>
+        <button class="cctv-key" style="color:#2ed573;" onclick="submitKeypadCode()">↵</button>
+      </div>
+      <button class="action-btn-main" onclick="closeModal('modal-cctv')" style="padding:6px 24px; font-size:1rem;">CANCEL</button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CCTV Decrypted Visual Feed Reveal -->
+  <div class="overlay-modal" id="modal-cctv-feed">
+    <div class="modal-box" style="border-color:#00cec9; max-width:480px;">
+      <div style="font-size:36px;">📼🟢</div>
+      <h2 style="font-family:var(--font-horror); font-size:1.8rem; color:#00cec9; margin-bottom:10px;">DECRYPTED FOOTAGE REVEAL</h2>
+      <div style="background:#000; border:2px solid #00cec9; border-radius:8px; padding:18px; text-align:left; font-family:monospace; color:#2ed573; line-height:1.5; font-size:13px; margin-bottom:16px;">
+        [SECURITY CAM #04 - 00:14 AM BLACKOUT]<br>
+        &gt;&gt; SCANNING MOVEMENT...<br>
+        &gt;&gt; <span style="color:#f1c40f; font-weight:700;">A SILHOUETTE IN A YELLOW JACKET (DEV)</span> WAS SEEN UNBOLTING THE HIGH-VOLTAGE BREAKER BOX WITH A RITUAL SYMBOL!<br>
+        &gt;&gt; SUSPECT ITEM DETECTED: OCCULT TALISMAN &amp; WIRE CUTTERS.
+      </div>
+      <button class="action-btn-main" onclick="closeModal('modal-cctv-feed')" style="padding:8px 30px; font-size:1.1rem;">CLOSE MONITOR</button>
+    </div>
+  </div>
+
+  <!-- MODAL 4: Paradox Riddle -->
+  <div class="overlay-modal" id="modal-paradox">
+    <div class="modal-box">
+      <div style="font-size:40px;">🩸</div>
+      <h2 style="font-family:var(--font-horror); font-size:2.2rem; color:#ff4757;">THE PARADOX RIDDLE</h2>
+      <p style="font-size:1.1rem; color:#fff; line-height:1.6; margin-bottom:16px;">
+        Written in fresh blood across the conference board:<br>
+        <strong style="color:#f1c40f;">“The traitor never lies when the lights are RED,<br>but ALWAYS lies in the dark.”</strong>
+      </p>
+      <p style="font-size:0.95rem; color:#aaa; margin-bottom:20px;">
+        Use the <strong>Emergency Red Light Switch</strong> to force the suspects to speak the absolute truth!
+      </p>
+      <button class="action-btn-main" onclick="closeModal('modal-paradox')" style="padding:8px 28px; font-size:1.1rem;">UNDERSTOOD</button>
+    </div>
+  </div>
+
+  <!-- MODAL 5: Interrogation Dialogue -->
+  <div class="overlay-modal" id="modal-dialogue">
+    <div class="modal-box">
+      <div style="font-size:40px;" id="dialogue-avatar">🗣️</div>
+      <h2 style="font-family:var(--font-horror); font-size:2rem; color:#74b9ff;" id="dialogue-name">SUSPECT</h2>
+      <p style="font-size:1.05rem; color:#cbd5e1; line-height:1.6; margin-bottom:24px;" id="dialogue-text">Statement...</p>
+      <div style="display:flex; gap:12px; justify-content:center;">
+        <button class="action-btn-main" onclick="closeModal('modal-dialogue')" style="padding:8px 24px; font-size:1rem;">CONTINUE</button>
+        <button class="action-btn-main" id="btn-accuse-dialogue" onclick="accuseSurvivorDirect()" style="background:#c0392b; border-color:#ff4757; padding:8px 24px; font-size:1rem;">ACCUSE AS TRAITOR!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: The Fatal Vote (Stella Reborn Face & Twist) -->
+  <div class="overlay-modal" id="modal-fatal-vote">
+    <div class="modal-box" style="max-width:580px; border-color:#8e44ad; box-shadow:0 0 65px #8e44ad;">
+      <div id="stella-smoke-vortex">
+        <div style="font-size:55px;">👵💀</div>
+      </div>
+      <h2 style="font-family:var(--font-horror); font-size:2.3rem; color:#e056fd; line-height:1.1; margin-bottom:8px;">
+        “ONE OF YOU BELONGS TO ME...”
+      </h2>
+      <p style="font-size:1.1rem; color:#fff; font-weight:700; margin-bottom:6px;">
+        <em>“Feed them to the dark, or the dark will feed on you.”</em>
+      </p>
+      <p style="font-size:0.95rem; color:#ff6b6b; margin-bottom:16px;">
+        ⚠️ <strong>THE FATAL RISK:</strong><br>
+        <strong>Correct Vote:</strong> Traitor Dev transforms into Stella (Normal Boss Fight).<br>
+        <strong>Wrong Vote:</strong> Stella instantly executes the innocent! Traitor awakens into <strong>🔥 NIGHTMARE STELLA</strong> (2x speed &amp; lethal damage in a 1v1 battle)!
+      </p>
+      <div class="vote-cards-grid">
+        <div class="vote-card" onclick="castFatalVote('alex')">
+          <div class="survivor-avatar avatar-alex" style="width:46px; height:46px;"></div>
+          <div style="font-family:var(--font-ui); font-size:14px; font-weight:700;">ALEX</div>
+          <div style="font-size:9px; color:#f1c40f;">MECH ENG</div>
+          <div style="font-size:10px; color:#aaa;">SACRIFICE</div>
+        </div>
+        <div class="vote-card" onclick="castFatalVote('chloe')">
+          <div class="survivor-avatar avatar-chloe" style="width:46px; height:46px;"></div>
+          <div style="font-family:var(--font-ui); font-size:14px; font-weight:700;">CHLOE</div>
+          <div style="font-size:9px; color:#f1c40f;">CIVIL ENG</div>
+          <div style="font-size:10px; color:#aaa;">SACRIFICE</div>
+        </div>
+        <div class="vote-card" onclick="castFatalVote('dev')">
+          <div class="survivor-avatar avatar-dev" style="width:46px; height:46px; border-color:#e74c3c;"></div>
+          <div style="font-family:var(--font-ui); font-size:14px; font-weight:700; color:#f39c12;">DEV</div>
+          <div style="font-size:9px; color:#f1c40f;">COMP SCI (TRAITOR)</div>
+          <div style="font-size:10px; color:#f1c40f;">SACRIFICE</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: Wire Connect Mini-Game (Shock Penalty) -->
+  <div class="overlay-modal" id="modal-wires">
+    <div class="modal-box" style="max-width:490px; border-color:#00cec9; box-shadow:0 0 50px rgba(0,206,201,0.5);">
+      <div style="font-size:38px;">⚡</div>
+      <h2 style="font-family:var(--font-horror); font-size:2.2rem; color:#00cec9; margin-bottom:4px;">BREAKER WIRE PUZZLE</h2>
+      
+      <!-- Timer Display (Increased to 60s) -->
+      <div style="font-size:1.05rem; color:#cbd5e1; margin-bottom:10px;">
+        TIME REMAINING: <strong><span id="wire-timer-left" style="color:#2ed573; font-size:1.4rem; font-family:monospace; background:rgba(0,0,0,0.6); padding:2px 10px; border-radius:6px; border:1px solid #2ed573;">60</span>s</strong>
+      </div>
+
+      <!-- Instructions & Caution -->
+      <div style="background:rgba(0, 206, 201, 0.12); border:1.5px solid #00cec9; border-radius:8px; padding:6px 12px; margin-bottom:10px; font-size:11px; color:#e0f2fe;">
+        ⚡ <strong>GENEROUS 60s TIMER:</strong> Match Red to Red, Blue to Blue, Yellow to Yellow. Wrong wire causes a minor -20% HP shock.
+      </div>
+
+      <div class="wires-container">
+        <!-- Source Wires (Left Column) -->
+        <div style="display:flex; flex-direction:column; gap:16px; align-items:center;">
+          <div style="font-size:11px; font-weight:700; color:#cbd5e1; letter-spacing:1px;">SOURCE</div>
+          <div class="wire-terminal wire-red" id="wire-src-red" onclick="pickWireSource('red')" title="Red Wire 1">🔴 1</div>
+          <div class="wire-terminal wire-blue" id="wire-src-blue" onclick="pickWireSource('blue')" title="Blue Wire 2">🔵 2</div>
+          <div class="wire-terminal wire-yellow" id="wire-src-yellow" onclick="pickWireSource('yellow')" title="Yellow Wire 3">🟡 3</div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+          <div style="font-family:var(--font-ui); color:#00cec9; font-size:12px; font-weight:700; letter-spacing:1px;">⚡ CURRENT ⚡</div>
+          <div style="font-size:24px; color:#00cec9; animation:pulseWireSelection 0.8s infinite alternate;">➔</div>
+        </div>
+
+        <!-- Target Terminals (Right Column) -->
+        <div style="display:flex; flex-direction:column; gap:16px; align-items:center;">
+          <div style="font-size:11px; font-weight:700; color:#cbd5e1; letter-spacing:1px;">TERMINAL</div>
+          <div class="wire-terminal wire-blue" id="wire-tgt-blue" onclick="pickWireTarget('blue')" title="Blue Terminal B">🔵 B</div>
+          <div class="wire-terminal wire-yellow" id="wire-tgt-yellow" onclick="pickWireTarget('yellow')" title="Yellow Terminal Y">🟡 Y</div>
+          <div class="wire-terminal wire-red" id="wire-tgt-red" onclick="pickWireTarget('red')" title="Red Terminal R">🔴 R</div>
+        </div>
+      </div>
+
+      <div id="wire-status-text" style="font-size:13px; color:#f1c40f; margin-bottom:14px; min-height:20px; font-weight:600;">
+        👉 Pehle Left side ka koi ek color wire select karein!
+      </div>
+
+      <button class="action-btn-main" onclick="closeModal('modal-wires')" style="padding:6px 24px; font-size:0.95rem; background:#2c3e50; border-color:#7f8c8d;">ABORT</button>
+    </div>
+  </div>
+
+  <!-- MODAL 8: Generator Charge Hold -->
+  <div class="overlay-modal" id="modal-gen-charge">
+    <div class="modal-box" id="gen-charge-modal-box" style="border-color:#f1c40f; box-shadow:0 0 50px rgba(241,196,15,0.4);">
+      <div style="font-size:38px;">🔋⚡</div>
+      <h2 style="font-family:var(--font-horror); font-size:2.2rem; color:#f1c40f; margin-bottom:4px;">OVERCHARGE DAGGER</h2>
+      <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.5;">
+        Stella is trapped in the high-voltage grid! Press &amp; HOLD the charge button to channel Holy Voltage into the Ancient Dagger!
+      </p>
+      
+      <div class="charge-track-bar">
+        <div class="charge-fill-bar" id="gen-charge-fill"></div>
+      </div>
+
+      <div style="font-family:monospace; font-size:1.2rem; color:#f1c40f; margin-bottom:14px;" id="gen-charge-pct">0% CHARGED</div>
+
+      <button class="action-btn-main" id="btn-hold-charge" onmousedown="startGeneratorHolding()" onmouseup="stopGeneratorHolding()" ontouchstart="startGeneratorHolding()" ontouchend="stopGeneratorHolding()" style="background:linear-gradient(135deg, #f1c40f, #d35400); color:#000; font-weight:700; border-color:#fff; padding:12px 34px;">
+        ⚡ HOLD TO CHARGE ⚡
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 9: QTE Quick-Time Event Overlay -->
+  <div id="qte-overlay">
+    <div class="qte-circle">
+      <div style="font-size:11px; font-family:var(--font-ui); color:#f1c40f; letter-spacing:1px; margin-bottom:2px;">PRESS RAPIDLY!</div>
+      <div class="qte-key-prompt" id="qte-key-text">SPACE</div>
+      <div style="font-size:11px; color:#aaa; margin-top:2px;" id="qte-step-text">STEP 1/4</div>
+    </div>
+
+    <!-- On-screen Click / Tap Button for Mobile & Touchpads -->
+    <button class="qte-tap-btn" id="btn-qte-tap" onclick="handleQTEClick()">
+      ⚡ TAP TO STRIKE ⚡
+    </button>
+
+    <div style="font-size:12px; color:#cbd5e1; margin-top:14px;">
+      Press key on keyboard or tap button before the timer runs out!
+    </div>
+  </div>
+
+  <!-- MODAL 10: Game Over Modal -->
+  <div id="modal-game-over">
+    <div style="font-size:60px; margin-bottom:10px;">💀</div>
+    <h1 style="font-family:var(--font-horror); font-size:3.5rem; color:#ff3838; text-shadow:0 0 25px #ff0000; margin-bottom:8px;">
+      YOU DIED
+    </h1>
+    <p style="font-size:1.1rem; color:#cbd5e1; max-width:450px; line-height:1.5; margin-bottom:24px;" id="game-over-desc">
+      Your life was snuffed out in the darkness of Level 6.
+    </p>
+    <button class="action-btn-main" onclick="restartLevel6()" style="padding:12px 36px; font-size:1.3rem;">
+      🔄 RETRY LEVEL 6
+    </button>
+  </div>
+
+  <!-- MODAL 11: Cliffhanger Glitch Screen (Micro-second Glitch into Level 7) -->
+  <div id="cliffhanger-screen">
+    <div class="glitch-flash-text" id="glitch-label">⚠️ INFECTION GLITCH ⚠️</div>
+    <h1 style="font-family:var(--font-horror); font-size:3.2rem; color:#fff; margin:16px 0; line-height:1.2;">
+      “THE INFECTION HAS BEEN PASSED ON.”
+    </h1>
+    <p style="font-size:1.05rem; color:#bbb; max-width:520px; line-height:1.6; margin-bottom:30px;">
+      Stella's black smoke did not vanish. It split through the air and entered one of the remaining survivors...<br>
+      <span style="color:#2ed573; font-weight:700;">The exit doors groan open. The Final Stand awaits in Level 7!</span>
+    </p>
+    <button class="action-btn-main" onclick="window.location.href='level7.html'" style="padding:14px 42px; font-size:1.4rem; background:linear-gradient(135deg, #c0392b, #8e44ad); border-color:#e056fd; box-shadow:0 0 40px #8e44ad;">
+      ENTER LEVEL 7: THE FINAL STAND →
+    </button>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast-msg"></div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT GAME ENGINE
+       ========================================================================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. SYNTHESIZED SOUND EFFECTS (Zero External Dependencies)
+       -------------------------------------------------------------------------- */
+    const Sfx = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      },
+      playTone(freq, type, dur, gainVal = 0.25) {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const g = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          g.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + dur);
+          osc.connect(g);
+          g.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + dur);
+        } catch (e) {}
+      },
+      siren() {
+        this.playTone(900, 'sawtooth', 0.4, 0.4);
+        setTimeout(() => this.playTone(450, 'sawtooth', 0.5, 0.4), 220);
+      },
+      shock() {
+        this.playTone(150, 'sawtooth', 0.5, 0.45);
+        this.playTone(320, 'square', 0.4, 0.35);
+      },
+      click() {
+        this.playTone(600, 'sine', 0.08, 0.2);
+      },
+      boneSnap() {
+        this.playTone(120, 'sawtooth', 0.25, 0.5);
+        setTimeout(() => this.playTone(80, 'square', 0.4, 0.5), 80);
+      },
+      roar() {
+        this.playTone(75, 'sawtooth', 2.0, 0.5);
+      },
+      qteBeep() {
+        this.playTone(540, 'triangle', 0.12, 0.35);
+      },
+      qteSuccess() {
+        this.playTone(784, 'sine', 0.22, 0.4);
+      },
+      stab() {
+        this.playTone(420, 'triangle', 0.15, 0.5);
+        setTimeout(() => this.playTone(90, 'sawtooth', 1.2, 0.6), 90);
+      },
+      playLullabyCipher() {
+        // Eerie minor nursery melody
+        const notes = [330, 294, 262, 330, 294, 262];
+        notes.forEach((f, i) => {
+          setTimeout(() => this.playTone(f, 'sine', 0.4, 0.25), i * 350);
+        });
+      }
+    };
+
+    /* --------------------------------------------------------------------------
+       2. GAME STATE
+       -------------------------------------------------------------------------- */
+    const state = {
+      phase: 1, // 1: Investigation, 2: Fatal Vote, 3: Boss Fight, 4: Done
+      playerHP: 100,
+      timerSeconds: 180, // 3:00 initial
+      timerInterval: null,
+      aliveCount: 6,
+      uvActive: false,
+      uvBattery: 30, // 30s limit
+      redLightActive: false,
+
+      // Investigation Puzzles
+      puzzles: {
+        uvTrail: false,
+        cctvCipher: false,
+        paradox: false
+      },
+      puzzleCount: 0,
+      falseAccusations: 0,
+      interrogateTarget: null,
+
+      // Boss Fight State
+      isNightmareStella: false,
+      stellaSpawned: false,
+      stellaAwake: false,
+      resurrectSeconds: 10,
+      stellaTrapped: false,
+      stellaElectrocuted: false,
+      daggerPieces: { blade: false, guard: false, hilt: false },
+      daggerAssembled: false,
+      wiresSolved: false,
+      generatorCharged: false,
+      chargeHoldPct: 0,
+      chargeHolding: false,
+      chargeInterval: null,
+      gameOver: false
+    };
+
+    const player = {
+      x: window.innerWidth * 0.24,
+      y: window.innerHeight * 0.72,
+      speed: 4.8
+    };
+
+    const stella = {
+      x: window.innerWidth * 0.72,
+      y: window.innerHeight * 0.66,
+      speed: 2.3
+    };
+
+    const keys = {};
+
+    function showToast(msg, dur = 3200) {
+      const t = document.getElementById('toast-msg');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), dur);
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+      if (id === 'modal-wires' && typeof wireInterval !== 'undefined' && wireInterval) {
+        clearInterval(wireInterval);
+      }
+    }
+
+    function takePlayerDamage(amount, reason = "You took damage!") {
+      state.playerHP = Math.max(0, state.playerHP - amount);
+      updateHPDisplay();
+      Sfx.shock();
+      document.body.classList.add('screen-shake');
+      setTimeout(() => document.body.classList.remove('screen-shake'), 400);
+
+      if (state.playerHP <= 0) {
+        triggerGameOver(reason);
+      }
+    }
+
+    function updateHPDisplay() {
+      const numEl = document.getElementById('hud-hp-num');
+      const barEl = document.getElementById('hud-hp-bar');
+      if (numEl) numEl.textContent = state.playerHP;
+      if (barEl) {
+        barEl.style.width = `${state.playerHP}%`;
+        if (state.playerHP <= 40) {
+          barEl.classList.add('danger');
+        } else {
+          barEl.classList.remove('danger');
+        }
+      }
+    }
+
+    function triggerGameOver(reason) {
+      state.gameOver = true;
+      clearInterval(state.timerInterval);
+      const m = document.getElementById('modal-game-over');
+      const d = document.getElementById('game-over-desc');
+      if (d) d.textContent = reason;
+      if (m) m.style.display = 'flex';
+    }
+
+    function restartLevel6() {
+      window.location.reload();
+    }
+
+    /* --------------------------------------------------------------------------
+       3. ⏱️ THE PARANOIA TIMER & FALSE ACCUSATION PENALTY
+       -------------------------------------------------------------------------- */
+    function startParanoiaTimer() {
+      state.timerInterval = setInterval(() => {
+        if (state.timerSeconds > 0 && !state.gameOver) {
+          state.timerSeconds--;
+          updateTimerDisplay();
+
+          if (state.timerSeconds <= 30) {
+            document.getElementById('hud-timer-pill').classList.add('panic-pulse');
+          } else {
+            document.getElementById('hud-timer-pill').classList.remove('panic-pulse');
+          }
+
+          if (state.timerSeconds === 0) {
+            handleTimerExpiry();
+          }
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(state.timerSeconds / 60);
+      const s = state.timerSeconds % 60;
+      document.getElementById('hud-timer').textContent =
+        `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function openSuspicionVoteModal() {
+      if (state.phase > 1) {
+        showToast("Investigation phase is over!");
+        return;
+      }
+      document.getElementById('modal-suspicion-vote').classList.add('active');
+    }
+
+    function castSuspicionVote(suspect) {
+      closeModal('modal-suspicion-vote');
+
+      if (suspect !== 'dev') {
+        applyFalseAccusationPenalty(suspect);
+      } else {
+        // Accused Dev correctly
+        showToast("🎯 DIRECT ACCUSATION ON DEV! YOU CONFRONTED THE VESSEL!", 3500);
+        triggerFatalVoteModal();
+      }
+    }
+
+    function applyFalseAccusationPenalty(targetName) {
+      state.falseAccusations++;
+      Sfx.siren();
+      document.body.classList.add('screen-shake');
+      setTimeout(() => document.body.classList.remove('screen-shake'), 700);
+
+      if (state.falseAccusations === 1) {
+        // 1st False Vote: Timer drops to 2 minutes (120s)
+        state.timerSeconds = Math.min(state.timerSeconds, 120);
+        showToast(`⚠️ FALSE ACCUSATION! ${targetName.toUpperCase()} IS INNOCENT! TIMER DROPPED TO 02:00!`, 4500);
+      } else if (state.falseAccusations === 2) {
+        // 2nd False Vote: Timer drops to 1 minute (60s)
+        state.timerSeconds = Math.min(state.timerSeconds, 60);
+        showToast(`⚠️ CATASTROPHIC BLUNDER! 2ND WRONG ACCUSATION! TIMER REDUCED TO 60 SECONDS!`, 4500);
+      } else {
+        // 3rd False Vote: Drops to 15s Panic
+        state.timerSeconds = Math.min(state.timerSeconds, 15);
+        showToast(`🚨 CRITICAL PANIC! TIMER COLLAPSED TO 15 SECONDS!`, 4500);
+      }
+
+      updateTimerDisplay();
+    }
+
+    function handleTimerExpiry() {
+      Sfx.roar();
+      // Blackout flickers
+      const bo = document.getElementById('blackout-overlay');
+      bo.classList.add('active');
+
+      setTimeout(() => {
+        Sfx.boneSnap();
+        state.aliveCount--;
+        document.getElementById('hud-alive').textContent = state.aliveCount;
+        bo.classList.remove('active');
+
+        showToast("💀 TIME EXPIRED! A HORRIFYING SCREAM ECHOES... ANOTHER SURVIVOR WAS SLAIN IN THE DARK!", 4500);
+        state.timerSeconds = 120; // reset to 2 min
+        updateTimerDisplay();
+
+        if (state.aliveCount <= 3 && state.phase === 1) {
+          triggerFatalVoteModal();
+        }
+      }, 1400);
+    }
+
+    /* --------------------------------------------------------------------------
+       4. 🕵️ CRYPTIC PUZZLES & MIND GAMES
+       -------------------------------------------------------------------------- */
+
+    /* A. UV Flashlight (30s Battery) */
+    function toggleUVFlashlight() {
+      if (state.uvBattery <= 0) {
+        showToast("⚠️ UV Flashlight battery is completely depleted!");
+        return;
+      }
+
+      state.uvActive = !state.uvActive;
+      const overlay = document.getElementById('uv-overlay');
+      const btn = document.getElementById('btn-toggle-uv');
+
+      if (state.uvActive) {
+        overlay.style.display = 'block';
+        btn.classList.add('uv-active');
+        document.querySelectorAll('.uv-pentagram-track').forEach(el => el.classList.add('revealed'));
+        Sfx.click();
+      } else {
+        overlay.style.display = 'none';
+        btn.classList.remove('uv-active');
+        document.querySelectorAll('.uv-pentagram-track').forEach(el => el.classList.remove('revealed'));
+      }
+    }
+
+    // Battery Drain Loop
+    setInterval(() => {
+      if (state.uvActive && state.uvBattery > 0) {
+        state.uvBattery -= 0.5;
+        document.getElementById('uv-sec-left').textContent = Math.ceil(state.uvBattery);
+        document.getElementById('uv-battery-bar').style.width = `${(state.uvBattery / 30) * 100}%`;
+
+        if (state.uvBattery <= 0) {
+          state.uvActive = false;
+          document.getElementById('uv-overlay').style.display = 'none';
+          document.getElementById('btn-toggle-uv').classList.remove('uv-active');
+          document.querySelectorAll('.uv-pentagram-track').forEach(el => el.classList.remove('revealed'));
+          showToast("⚡ UV Flashlight battery depleted!");
+        }
+      }
+    }, 500);
+
+    function inspectUVStation() {
+      if (!state.uvActive) {
+        showToast("Turn ON the UV Flashlight [F] to inspect the floor stains!");
+        return;
+      }
+
+      if (!state.puzzles.uvTrail) {
+        state.puzzles.uvTrail = true;
+        state.puzzleCount++;
+        const el = document.getElementById('chk-uv');
+        if (el) el.classList.add('done');
+        Sfx.click();
+        showToast("🔍 UV EVIDENCE DECRYPTED: Pentagram footprints lead directly to DEV's chair!", 4000);
+        checkPuzzleCompletion();
+      } else {
+        showToast("UV blood trail points directly to DEV.");
+      }
+    }
+
+    /* B. CCTV Audio Cipher (Code: 249) */
+    let keypadCode = '';
+
+    function openCCTVPuzzle() {
+      keypadCode = '';
+      document.getElementById('keypad-input-display').textContent = '_ _ _';
+      document.getElementById('modal-cctv').classList.add('active');
+      Sfx.playLullabyCipher();
+    }
+
+    function pressKeypad(num) {
+      if (keypadCode.length < 3) {
+        keypadCode += num;
+        document.getElementById('keypad-input-display').textContent = keypadCode.padEnd(3, '_');
+        Sfx.click();
+      }
+    }
+
+    function clearKeypad() {
+      keypadCode = '';
+      document.getElementById('keypad-input-display').textContent = '_ _ _';
+    }
+
+    function submitKeypadCode() {
+      // 2 blind mice, 4 broken chairs, 9 silent shadows = 249
+      if (keypadCode === '249') {
+        closeModal('modal-cctv');
+        state.puzzles.cctvCipher = true;
+        state.puzzleCount++;
+        const el = document.getElementById('chk-cctv');
+        if (el) el.classList.add('done');
+        Sfx.qteSuccess();
+        
+        // Show Decrypted Visual Feed Modal
+        setTimeout(() => {
+          document.getElementById('modal-cctv-feed').classList.add('active');
+        }, 300);
+
+        checkPuzzleCompletion();
+      } else {
+        Sfx.playTone(100, 'sawtooth', 0.4, 0.4);
+        showToast("⚠️ INCORRECT CIPHER! Listen to the lullaby: 2 blind mice, 4 chairs, 9 shadows!");
+        clearKeypad();
+      }
+    }
+
+    /* C. Paradox Riddle & Red Light Interrogation */
+    function inspectParadoxRiddle() {
+      document.getElementById('modal-paradox').classList.add('active');
+    }
+
+    function toggleRedLightLever() {
+      state.redLightActive = !state.redLightActive;
+      const overlay = document.getElementById('red-light-overlay');
+      const btn = document.getElementById('btn-toggle-red');
+
+      if (state.redLightActive) {
+        overlay.style.display = 'block';
+        btn.classList.add('red-active');
+        showToast("🚨 EMERGENCY RED LIGHTS ENGAGED: Suspects are compelled to speak truth!");
+        Sfx.playTone(180, 'square', 0.4, 0.3);
+      } else {
+        overlay.style.display = 'none';
+        btn.classList.remove('red-active');
+        showToast("Room returned to shadow lighting.");
+      }
+    }
+
+    function interrogateSurvivor(who) {
+      state.interrogateTarget = who;
+      const modal = document.getElementById('modal-dialogue');
+      const nameEl = document.getElementById('dialogue-name');
+      const textEl = document.getElementById('dialogue-text');
+      const avatarEl = document.getElementById('dialogue-avatar');
+
+      if (who === 'alex' || who === 'vikram') {
+        avatarEl.innerHTML = '<div class="survivor-avatar avatar-alex" style="width:48px; height:48px; margin:0 auto;"></div>';
+        nameEl.textContent = 'ALEX (MECHANICAL ENG)';
+        textEl.textContent = state.redLightActive ?
+          '“I am telling the absolute truth! I saw Dev sneaking away during the midnight blackout towards the high-voltage breaker box with a strange occult talisman!”' :
+          '“Hey, I was calibrating my heavy gear polearm by the door! Look at Dev’s trembling hands, he’s terrified of being found out!”';
+      } else if (who === 'chloe' || who === 'kabir') {
+        avatarEl.innerHTML = '<div class="survivor-avatar avatar-chloe" style="width:48px; height:48px; margin:0 auto;"></div>';
+        nameEl.textContent = 'CHLOE (CIVIL ENG)';
+        textEl.textContent = state.redLightActive ?
+          '“Under the red light I have nothing to hide! Dev was chanting forbidden occult incantations behind the boardroom partition!”' :
+          '“I was inspecting the building blueprints and structural safety pillars. Don’t point fingers at me!”';
+      } else if (who === 'dev') {
+        avatarEl.innerHTML = '<div class="survivor-avatar avatar-dev" style="width:48px; height:48px; margin:0 auto; border-color:#e74c3c;"></div>';
+        nameEl.textContent = 'DEV (COMPUTER SCIENCE)';
+        if (state.redLightActive) {
+          textEl.innerHTML = '<span style="color:#ff4757; font-weight:700;">“NO! THE RED LIGHT... I CANNOT HOLD IT IN! Yes, I entered the pact with Stella! She promised me unlimited power in the subterranean college catacombs! Forgive me!”</span>';
+          if (!state.puzzles.paradox) {
+            state.puzzles.paradox = true;
+            state.puzzleCount++;
+            const el = document.getElementById('chk-paradox');
+            if (el) el.classList.add('done');
+            showToast("🚨 CONFESSION RECORDED! DEV ADMITTED TO THE DEMONIC PACT UNDER RED LIGHT!");
+            checkPuzzleCompletion();
+          }
+        } else {
+          textEl.textContent = '“Why are you questioning me? I was just trying to bypass the campus electronic security! Stop wasting time before the paranoia timer expires!”';
+        }
+      }
+
+      modal.classList.add('active');
+    }
+
+    function accuseSurvivorDirect() {
+      closeModal('modal-dialogue');
+      if (state.interrogateTarget !== 'dev') {
+        applyFalseAccusationPenalty(state.interrogateTarget);
+      } else {
+        triggerFatalVoteModal();
+      }
+    }
+
+    function checkPuzzleCompletion() {
+      if (state.puzzleCount >= 3) {
+        const badge = document.getElementById('mission-badge');
+        if (badge) {
+          badge.textContent = "READY FOR VOTE";
+          badge.style.background = "#e056fd";
+        }
+        const btn = document.getElementById('btn-call-vote');
+        if (btn) btn.style.display = 'flex';
+        showToast("⚖️ ALL EVIDENCE ASSEMBLED! CALL THE FATAL VOTE TO CONFRONT DEV!", 4500);
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       5. ⚖️ THE FATAL VOTE SEQUENCE (STELLA REBORN TWIST)
+       -------------------------------------------------------------------------- */
+    function triggerFatalVoteModal() {
+      // Room lights cut off
+      const bo = document.getElementById('blackout-overlay');
+      bo.classList.add('active');
+
+      setTimeout(() => {
+        bo.classList.remove('active');
+        document.getElementById('modal-fatal-vote').classList.add('active');
+        Sfx.roar();
+      }, 700);
+    }
+
+    function castFatalVote(votedWho) {
+      closeModal('modal-fatal-vote');
+      document.getElementById('btn-call-vote').style.display = 'none';
+
+      if (votedWho !== 'dev') {
+        // WRONG VOTE: INNOCENT DIES + REAL TRAITOR DEV AWAKENS NIGHTMARE STELLA!
+        state.isNightmareStella = true;
+        stella.speed = 4.8; // 2x speed!
+        Sfx.boneSnap();
+        showToast(`💀 WRONG VOTE! STELLA SNAPS ${votedWho.toUpperCase()}'S NECK INSTANTLY!`, 4500);
+        
+        const deadSurv = document.getElementById(`surv-${votedWho}`);
+        if (deadSurv) deadSurv.style.display = 'none';
+
+        setTimeout(() => {
+          triggerStellaTransformation(true);
+        }, 2200);
+      } else {
+        // CORRECT VOTE: DEV SACRIFICED -> NORMAL STELLA REBORN
+        state.isNightmareStella = false;
+        stella.speed = 2.4;
+        showToast("🎯 CORRECT VOTE! DEV IS SACRIFICED AS THE UNMASKED TRAITOR!", 3500);
+
+        setTimeout(() => {
+          triggerStellaTransformation(false);
+        }, 1500);
+      }
+    }
+
+    function triggerStellaTransformation(isNightmare) {
+      state.phase = 3;
+      state.stellaSpawned = true;
+      state.stellaAwake = false; // Dormant grace period
+      state.resurrectSeconds = 10;
+
+      // Hide Dev
+      const devEl = document.getElementById('surv-dev');
+      if (devEl) devEl.style.display = 'none';
+
+      // Reveal Stella Boss Sprite in Dormant Mode
+      const gEl = document.getElementById('stella-sprite');
+      gEl.style.display = 'block';
+      gEl.classList.add('dormant-mode');
+      gEl.style.left = `${stella.x}px`;
+      gEl.style.top = `${stella.y}px`;
+
+      if (isNightmare) {
+        gEl.classList.add('nightmare-mode');
+        document.getElementById('stella-title-badge').textContent = "🔥 NIGHTMARE STELLA (AWAKENING...) 🔥";
+        document.getElementById('stella-title-badge').style.color = "#ff0000";
+      } else {
+        document.getElementById('stella-title-badge').textContent = "👵 STELLA (MANIFESTING...)";
+      }
+
+      setupMultiStageBoss();
+
+      // Show Awakening Banner & Start 10-Second Grace Period
+      const banner = document.getElementById('awakening-banner');
+      const countEl = document.getElementById('awakening-countdown');
+      if (banner) banner.style.display = 'block';
+      if (countEl) countEl.textContent = state.resurrectSeconds;
+      showToast("⏳ STELLA IS AWAKENING IN 10 SECONDS! QUICKLY ASSEMBLE THE DAGGER & WIRE THE CURRENT!", 4500);
+
+      const awakenInterval = setInterval(() => {
+        state.resurrectSeconds--;
+        if (countEl) countEl.textContent = state.resurrectSeconds;
+        Sfx.playTone(85, 'sine', 0.15, 0.35); // Heartbeat pulse
+
+        if (state.resurrectSeconds <= 0) {
+          clearInterval(awakenInterval);
+          if (banner) banner.style.display = 'none';
+          state.stellaAwake = true;
+          gEl.classList.remove('dormant-mode');
+
+          if (state.isNightmareStella) {
+            document.getElementById('stella-title-badge').textContent = "🔥 NIGHTMARE STELLA 🔥";
+          } else {
+            document.getElementById('stella-title-badge').textContent = "STELLA REBORN";
+          }
+
+          Sfx.roar();
+          document.body.classList.add('screen-shake');
+          setTimeout(() => document.body.classList.remove('screen-shake'), 500);
+          showToast("👵 STELLA HAS AWAKENED! LURE HER INTO THE HIGH-VOLTAGE CURRENT TO DESTROY HER!", 5000);
+        }
+      }, 1000);
+    }
+
+    /* --------------------------------------------------------------------------
+       6. ⚔️ MULTI-STAGE FINAL FIGHT
+       -------------------------------------------------------------------------- */
+    function setupMultiStageBoss() {
+      // Reveal 3 Dagger Pieces
+      document.getElementById('frag-blade').style.display = 'flex';
+      document.getElementById('frag-guard').style.display = 'flex';
+      document.getElementById('frag-hilt').style.display = 'flex';
+
+      // Reveal Breaker & Generator
+      document.getElementById('station-breaker').style.display = 'flex';
+      document.getElementById('station-generator').style.display = 'flex';
+      document.getElementById('high-voltage-grid').style.display = 'block';
+
+      // Update Mission Panel
+      document.getElementById('mission-badge').textContent = "STAGE 1: ASSEMBLE";
+      document.getElementById('mission-goal-title').textContent = "Collect 3 Dagger Pieces, wire breaker & charge generator!";
+      document.getElementById('mission-checklist').innerHTML = `
+        <div class="checklist-item" id="chk-dagger">🗡️ 1. Ancient Dagger Pieces (0/3)</div>
+        <div class="checklist-item" id="chk-wire">⚡ 2. Breaker Wire Puzzle (60s Timer)</div>
+        <div class="checklist-item" id="chk-charge">🔋 3. High-Voltage Current Trap</div>
+        <div class="checklist-item" id="chk-qte">💥 4. QTE Finisher Strike</div>
+      `;
+    }
+
+    function collectDaggerPiece(piece) {
+      if (state.daggerPieces[piece]) return;
+      state.daggerPieces[piece] = true;
+      document.getElementById(`frag-${piece}`).style.display = 'none';
+      Sfx.click();
+
+      const count = Object.values(state.daggerPieces).filter(Boolean).length;
+      document.getElementById('chk-dagger').textContent = `🗡️ 1. Ancient Dagger Pieces (${count}/3)`;
+
+      if (count === 3) {
+        state.daggerAssembled = true;
+        document.getElementById('chk-dagger').classList.add('done');
+        showToast("🗡️ ANCIENT DAGGER ASSEMBLED! Now connect the Breaker Wires (60s)!");
+      }
+    }
+
+    /* Breaker Wire Connect Mini-Game (Increased to 60s Generous Timer) */
+    let wireSelectedSource = null;
+    let wireConnections = { red: false, blue: false, yellow: false };
+    let wireCountdown = 60;
+    let wireInterval = null;
+
+    function openWirePuzzle() {
+      if (state.wiresSolved) {
+        showToast("Breaker wires already energized! High voltage grid is armed!");
+        return;
+      }
+
+      wireConnections = { red: false, blue: false, yellow: false };
+      wireSelectedSource = null;
+      wireCountdown = 90; // Generous 90s Timer
+
+      const timerEl = document.getElementById('wire-timer-left');
+      if (timerEl) {
+        timerEl.textContent = wireCountdown;
+        timerEl.style.color = '#2ed573';
+      }
+
+      const colors = ['red', 'blue', 'yellow'];
+      colors.forEach(c => {
+        const src = document.getElementById(`wire-src-${c}`);
+        if (src) {
+          src.className = `wire-terminal wire-${c}`;
+          src.innerHTML = c === 'red' ? '🔴 1' : (c === 'blue' ? '🔵 2' : '🟡 3');
+        }
+        const tgt = document.getElementById(`wire-tgt-${c}`);
+        if (tgt) {
+          tgt.className = `wire-terminal wire-${c}`;
+          tgt.innerHTML = c === 'red' ? '🔴 R' : (c === 'blue' ? '🔵 B' : '🟡 Y');
+        }
+      });
+
+      const statusEl = document.getElementById('wire-status-text');
+      if (statusEl) statusEl.textContent = "👉 Pehle Left side ka koi ek color wire select karein!";
+
+      document.getElementById('modal-wires').classList.add('active');
+
+      if (wireInterval) clearInterval(wireInterval);
+      wireInterval = setInterval(() => {
+        wireCountdown--;
+        if (timerEl) {
+          timerEl.textContent = wireCountdown;
+          if (wireCountdown <= 10) timerEl.style.color = '#ff3838';
+          else if (wireCountdown <= 25) timerEl.style.color = '#f1c40f';
+          else timerEl.style.color = '#2ed573';
+        }
+
+        if (wireCountdown <= 0) {
+          clearInterval(wireInterval);
+          closeModal('modal-wires');
+          takePlayerDamage(20, "Breaker timer expired!");
+          showToast("⚡ TIME EXPIRED! -20% HP Minor Shock!");
+        }
+      }, 1000);
+    }
+
+    function pickWireSource(color) {
+      if (wireConnections[color]) return;
+      wireSelectedSource = color;
+
+      ['red', 'blue', 'yellow'].forEach(c => {
+        const el = document.getElementById(`wire-src-${c}`);
+        if (el && !wireConnections[c]) el.classList.remove('selected');
+      });
+
+      const currentSrc = document.getElementById(`wire-src-${color}`);
+      if (currentSrc) currentSrc.classList.add('selected');
+
+      const statusEl = document.getElementById('wire-status-text');
+      if (statusEl) statusEl.textContent = `Selected ${color.toUpperCase()} wire! Ab Right side ke ${color.toUpperCase()} terminal par click karein.`;
+      Sfx.click();
+    }
+
+    function pickWireTarget(color) {
+      const statusEl = document.getElementById('wire-status-text');
+
+      if (!wireSelectedSource) {
+        if (statusEl) statusEl.textContent = "⚠️ Pehle Left side se ek wire select karein!";
+        return;
+      }
+
+      if (wireConnections[color]) return;
+
+      const srcEl = document.getElementById(`wire-src-${wireSelectedSource}`);
+      const tgtEl = document.getElementById(`wire-tgt-${color}`);
+
+      if (wireSelectedSource === color) {
+        // Correct Connection
+        wireConnections[color] = true;
+        Sfx.qteSuccess();
+
+        if (srcEl) {
+          srcEl.classList.remove('selected');
+          srcEl.classList.add('connected');
+          srcEl.innerHTML = '✔';
+        }
+        if (tgtEl) {
+          tgtEl.classList.add('connected');
+          tgtEl.innerHTML = '✔';
+        }
+
+        if (statusEl) statusEl.textContent = `✔ ${color.toUpperCase()} WIRE CONNECTED! Agla wire select karein.`;
+
+        if (wireConnections.red && wireConnections.blue && wireConnections.yellow) {
+          clearInterval(wireInterval);
+          setTimeout(() => {
+            closeModal('modal-wires');
+            state.wiresSolved = true;
+            document.getElementById('chk-wire').classList.add('done');
+            document.getElementById('high-voltage-grid').classList.add('active-shock');
+            Sfx.shock();
+            showToast("⚡ HIGH-VOLTAGE CURRENT ENERGIZED! Lure Stella into the Cyan Grid to destroy her!", 5000);
+          }, 400);
+        }
+      } else {
+        // Minor Shock Penalty (-20% HP)
+        Sfx.shock();
+        takePlayerDamage(20, "You cut the wrong breaker wire and suffered a minor shock!");
+        if (srcEl) srcEl.classList.remove('selected');
+        if (statusEl) statusEl.textContent = `❌ WRONG WIRE! Match ${wireSelectedSource.toUpperCase()} with ${wireSelectedSource.toUpperCase()}!`;
+      }
+
+      wireSelectedSource = null;
+    }
+
+    /* Generator Charge Modal & Instant Electrocution Finish */
+    function openGeneratorChargeModal() {
+      if (!state.wiresSolved) {
+        showToast("Solve the Breaker Wire Puzzle first!");
+        return;
+      }
+
+      const inGrid = checkStellaInGrid();
+      if (!inGrid) {
+        showToast("Stella is not in the trap! Lead her inside the cyan grid first!");
+        return;
+      }
+
+      electrocuteStellaInGrid();
+    }
+
+    /* Electrocute Stella In High-Voltage Current (Easily Defeated) */
+    function electrocuteStellaInGrid() {
+      if (state.stellaTrapped) return;
+      state.stellaTrapped = true;
+      state.stellaElectrocuted = true;
+
+      const gEl = document.getElementById('stella-sprite');
+      if (gEl) gEl.classList.add('stunned-electric');
+
+      // Lightning screen flash
+      const lo = document.getElementById('lightning-overlay');
+      if (lo) {
+        lo.style.display = 'block';
+        setTimeout(() => lo.style.display = 'none', 600);
+      }
+
+      Sfx.shock();
+      Sfx.roar();
+
+      showToast("⚡ CURRENT OVERLOAD! STELLA IS TRAPPED IN HIGH VOLTAGE & DYING! EXECUTE NOW!", 4500);
+
+      // Auto-charge Dagger with Holy Voltage
+      state.generatorCharged = true;
+      const chk = document.getElementById('chk-charge');
+      if (chk) chk.classList.add('done');
+
+      // Reveal Instant Strike Action Button on Bottom Dock
+      const btn = document.getElementById('btn-instant-strike');
+      if (btn) btn.style.display = 'flex';
+    }
+
+    function triggerElectricCurrentFinisher() {
+      // Energize high voltage grid immediately!
+      state.wiresSolved = true;
+      const grid = document.getElementById('high-voltage-grid');
+      if (grid) grid.classList.add('active-shock');
+
+      // Lightning screen flash & shock SFX
+      const lo = document.getElementById('lightning-overlay');
+      if (lo) {
+        lo.style.display = 'block';
+        setTimeout(() => lo.style.display = 'none', 650);
+      }
+      Sfx.shock();
+
+      const btn = document.getElementById('btn-instant-strike');
+      if (btn) btn.style.display = 'none';
+
+      // Check if Stella is active
+      const stellaEl = document.getElementById('stella-sprite');
+      if (stellaEl && stellaEl.style.display !== 'none') {
+        electrocuteStellaInGrid();
+        showToast("⚡ 50,000 VOLTS UNLEASHED! STELLA IS ELECTROCUTED & STUNNED!", 4500);
+        setTimeout(() => startQTEFinisher(), 1000);
+      } else {
+        showToast("⚡ HIGH-VOLTAGE CURRENT ARMED! STEP ON GRID TO ELECTROCUTE ENEMIES!", 3500);
+      }
+    }
+
+    function startGeneratorHolding() {
+      // Direct Quick Charge
+      state.generatorCharged = true;
+      const chk = document.getElementById('chk-charge');
+      if (chk) chk.classList.add('done');
+      closeModal('modal-gen-charge');
+      showToast("🔥 ANCIENT DAGGER OVERCHARGED WITH HOLY VOLTAGE! LAUNCH FINISHER!");
+      startQTEFinisher();
+    }
+
+    function stopGeneratorHolding() {}
+
+    function updateChargeBar() {}
+
+    function checkStellaInGrid() {
+      const grid = document.getElementById('high-voltage-grid').getBoundingClientRect();
+      const gEl = document.getElementById('stella-sprite').getBoundingClientRect();
+
+      const gx = gEl.left + gEl.width / 2;
+      const gy = gEl.top + gEl.height * 0.75;
+      const buffer = 55; // Generous collision buffer so Stella easily gets trapped
+
+      return (
+        gx >= grid.left - buffer &&
+        gx <= grid.right + buffer &&
+        gy >= grid.top - buffer &&
+        gy <= grid.bottom + buffer
+      );
+    }
+
+    /* --------------------------------------------------------------------------
+       7. 💥 FINAL EXECUTION & TWIST ENDING (SIMPLIFIED EASY QTE FINISHER)
+       -------------------------------------------------------------------------- */
+    let qteStep = 0;
+    const qteSequence = ['SPACE', 'E']; // 2 Easy Steps to defeat Stella effortlessly!
+    let qteTimeout = null;
+
+    function startQTEFinisher() {
+      qteStep = 0;
+      document.getElementById('qte-overlay').style.display = 'flex';
+      const tapBtn = document.getElementById('btn-qte-tap');
+      if (tapBtn) tapBtn.textContent = "⚡ TAP TO KILL STELLA NOW ⚡";
+      nextQTEStep();
+    }
+
+    function nextQTEStep() {
+      if (qteStep >= qteSequence.length) {
+        // QTE SUCCESSFUL!
+        document.getElementById('qte-overlay').style.display = 'none';
+        executeCinematicKill();
+        return;
+      }
+
+      const targetKey = qteSequence[qteStep];
+      document.getElementById('qte-key-text').textContent = targetKey;
+      document.getElementById('qte-step-text').textContent = `STEP ${qteStep + 1}/2`;
+      Sfx.qteBeep();
+
+      clearTimeout(qteTimeout);
+      qteTimeout = setTimeout(() => {
+        // Generous 4-second timeout per step
+        document.getElementById('qte-overlay').style.display = 'none';
+        Sfx.roar();
+        takePlayerDamage(20, "Stella struggled before the final blow!");
+        showToast("⚠️ Finisher delayed! Tap the strike button again to destroy Stella!");
+        const btn = document.getElementById('btn-instant-strike');
+        if (btn) btn.style.display = 'flex';
+      }, 4000);
+    }
+
+    function handleQTEClick() {
+      qteStep++;
+      Sfx.qteSuccess();
+      nextQTEStep();
+    }
+
+    function handleQTEInput(keyName) {
+      if (document.getElementById('qte-overlay').style.display !== 'flex') return;
+
+      const targetKey = qteSequence[qteStep];
+      if (
+        (targetKey === 'SPACE' && keyName === ' ') ||
+        (targetKey === 'E' && (keyName === 'e' || keyName === 'E'))
+      ) {
+        qteStep++;
+        Sfx.qteSuccess();
+        nextQTEStep();
+      }
+    }
+
+    function executeCinematicKill() {
+      state.gameOver = true;
+      document.getElementById('chk-qte').classList.add('done');
+      Sfx.stab();
+
+      const gEl = document.getElementById('stella-sprite');
+      gEl.classList.remove('stunned-electric');
+      gEl.style.transition = 'all 1.6s cubic-bezier(0.25, 1, 0.5, 1)';
+      gEl.style.transform = 'translate(-50%, -100%) scale(0.05) rotate(360deg)';
+      gEl.style.filter = 'drop-shadow(0 0 70px #00cec9) brightness(4)';
+      gEl.style.opacity = '0';
+
+      const sName = localStorage.getItem('survivorName') ? localStorage.getItem('survivorName').toUpperCase() : 'AARAV';
+      showToast(`🗡️ ${sName} DELIVERS THE FATAL ELECTRIC STRIKE! STELLA IS DESTROYED!`, 3500);
+
+      setTimeout(() => {
+        // Stella Final Scream
+        showToast("👵 STELLA: “YOU CANNOT KILL WHAT CREATED THIS PLACE!”", 3000);
+        Sfx.roar();
+
+        // Reveal Dev's dead body on the floor
+        const deadPile = document.createElement('div');
+        deadPile.className = 'dead-body-pile';
+        deadPile.style.left = `${stella.x}px`;
+        deadPile.style.top = `${stella.y}px`;
+        deadPile.textContent = 'DEV 💀';
+        document.getElementById('entities-layer').appendChild(deadPile);
+
+        // 0.8s Glitch Cliffhanger into Level 7
+        setTimeout(() => {
+          document.body.classList.add('screen-shake');
+          document.getElementById('cliffhanger-screen').style.display = 'flex';
+          Sfx.playTone(80, 'sawtooth', 3.0, 0.7);
+        }, 2200);
+      }, 1500);
+    }
+
+    /* --------------------------------------------------------------------------
+       8. GAME LOOP & PLAYER MOVEMENT
+       -------------------------------------------------------------------------- */
+    function gameLoop() {
+      if (!state.gameOver) {
+        if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= player.speed;
+        if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += player.speed;
+        if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= player.speed * 0.7;
+        if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y += player.speed * 0.7;
+
+        player.x = Math.max(70, Math.min(window.innerWidth - 70, player.x));
+        player.y = Math.max(window.innerHeight * 0.48, Math.min(window.innerHeight - 50, player.y));
+
+        const pEl = document.getElementById('player-sprite');
+        pEl.style.left = `${player.x}px`;
+        pEl.style.top = `${player.y}px`;
+
+        // Check if Stella steps into the High-Voltage Current (Easily electrocuted)
+        if (state.wiresSolved && state.stellaSpawned && state.stellaAwake && !state.stellaTrapped) {
+          if (checkStellaInGrid()) {
+            electrocuteStellaInGrid();
+          }
+        }
+
+        // Stella Pursue AI (Only pursues when fully awake and not trapped)
+        if (state.stellaSpawned && state.stellaAwake && !state.stellaTrapped) {
+          const dx = player.x - stella.x;
+          const dy = player.y - stella.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist > 25) {
+            stella.x += (dx / dist) * stella.speed;
+            stella.y += (dy / dist) * (stella.speed * 0.65);
+          } else {
+            // Stella contacts Player!
+            if (state.isNightmareStella) {
+              takePlayerDamage(60, "🔥 Nightmare Stella struck you in combat!");
+            } else {
+              takePlayerDamage(25, "Stella slashed you in combat!");
+              // Knockback
+              player.x -= (dx / dist) * 60;
+              player.y -= (dy / dist) * 60;
+            }
+          }
+
+          const gEl = document.getElementById('stella-sprite');
+          gEl.style.left = `${stella.x}px`;
+          gEl.style.top = `${stella.y}px`;
+        }
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    /* Keyboard & Mobile Listeners */
+    window.addEventListener('keydown', e => {
+      keys[e.key] = true;
+      handleQTEInput(e.key);
+
+      if (e.key === 'f' || e.key === 'F') {
+        toggleUVFlashlight();
+      }
+    });
+
+    window.addEventListener('keyup', e => keys[e.key] = false);
+
+    // Mobile D-pad
+    function bindDpad(id, keyName) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[keyName] = true; });
+      el.addEventListener('touchend', (e) => { e.preventDefault(); keys[keyName] = false; });
+      el.addEventListener('mousedown', () => { keys[keyName] = true; });
+      el.addEventListener('mouseup', () => { keys[keyName] = false; });
+    }
+
+    bindDpad('btn-dpad-up', 'ArrowUp');
+    bindDpad('btn-dpad-down', 'ArrowDown');
+    bindDpad('btn-dpad-left', 'ArrowLeft');
+    bindDpad('btn-dpad-right', 'ArrowRight');
+
+    // Initial Load
+    window.addEventListener('DOMContentLoaded', () => {
+      const surv = (typeof getCurrentPlayerSurvivor === 'function') ? getCurrentPlayerSurvivor() : { name: 'AARAV', avatarClass: 'avatar-aarav', spriteClass: 'char-aarav', major: 'Robotics Eng' };
+      const sName = surv.name.toUpperCase();
+
+      // Render authentic in-game illustrated survivor model
+      if (typeof renderInGameSurvivorSprite === 'function') {
+        renderInGameSurvivorSprite('player-sprite');
+      }
+
+      updateHPDisplay();
+      startParanoiaTimer();
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+
+</html>

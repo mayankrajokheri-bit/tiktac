@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe — Modern Neon Edition</title>
+  <meta name="description" content="Play the ultimate Neon Tic-Tac-Toe game! Challenge a friend in 2-player mode or test your skills against the unbeatable Minimax AI with immersive visual effects and sound.">
+  <meta name="theme-color" content="#0a0b10">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-cyan" aria-hidden="true"></div>
+  <div class="ambient-glow glow-magenta" aria-hidden="true"></div>
+  <div class="ambient-glow glow-purple" aria-hidden="true"></div>
+
+  <!-- Main Game Container -->
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="badge">NEON ARCADE</span>
+        <h1 class="title">TIC <span class="accent-x">TAC</span> <span class="accent-o">TOE</span></h1>
+      </div>
+
+      <div class="header-actions">
+        <button id="sound-btn" class="icon-btn" aria-label="Toggle Sound" title="Toggle Sound">
+          <span class="btn-icon" id="sound-icon">🔊</span>
+        </button>
+        <button id="reset-scores-btn" class="icon-btn" aria-label="Reset All Scores" title="Reset Scores">
+          <span class="btn-icon">🗑️</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Player Level & XP Progression HUD -->
+    <section class="level-hud" aria-label="Player Level & Progression">
+      <div class="level-badge-container">
+        <span id="level-badge" class="level-badge">LVL 1</span>
+        <div class="level-meta">
+          <span id="rank-title" class="rank-title">Neon Novice</span>
+          <span id="xp-text" class="xp-text">0 / 100 XP</span>
+        </div>
+        <div id="streak-badge" class="streak-badge" title="Win Streak">
+          <span class="streak-icon">🔥</span>
+          <span id="streak-count" class="streak-count">0</span>
+          <span class="streak-label">STREAK</span>
+        </div>
+      </div>
+      <div class="xp-bar-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div id="xp-bar-fill" class="xp-bar-fill" style="width: 0%"></div>
+      </div>
+    </section>
+
+    <!-- Controls & Mode Selector -->
+    <section class="controls-panel">
+      <div class="mode-selector" role="radiogroup" aria-label="Game Mode">
+        <button id="mode-pvp" class="mode-tab active" data-mode="pvp" role="radio" aria-checked="true">
+          <span class="tab-icon">👥</span> Pass & Play
+        </button>
+        <button id="mode-ai" class="mode-tab" data-mode="ai" role="radio" aria-checked="false">
+          <span class="tab-icon">🤖</span> vs AI
+        </button>
+      </div>
+
+      <!-- AI Difficulty Bar (shown when vs AI is active) -->
+      <div id="ai-difficulty-container" class="difficulty-container hidden">
+        <span class="difficulty-label">AI Level:</span>
+        <div class="difficulty-chips" role="radiogroup" aria-label="AI Difficulty">
+          <button class="diff-chip" data-diff="easy" role="radio" aria-checked="false">Easy</button>
+          <button class="diff-chip" data-diff="medium" role="radio" aria-checked="false">Medium</button>
+          <button class="diff-chip active" data-diff="hard" role="radio" aria-checked="true">Unbeatable</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Turn Indicator -->
+    <section class="status-section">
+      <div id="turn-badge" class="turn-badge turn-x" aria-live="polite">
+        <span class="turn-avatar x-avatar">✕</span>
+        <span id="turn-text" class="turn-text">Player X's Turn</span>
+      </div>
+    </section>
+
+    <!-- Game Board Arena -->
+    <main class="board-arena">
+      <div class="board-wrapper">
+        <div id="board" class="board" role="grid" aria-label="Tic Tac Toe Board">
+          <button class="cell" id="cell-0" data-index="0" role="gridcell" aria-label="Cell 1"></button>
+          <button class="cell" id="cell-1" data-index="1" role="gridcell" aria-label="Cell 2"></button>
+          <button class="cell" id="cell-2" data-index="2" role="gridcell" aria-label="Cell 3"></button>
+          <button class="cell" id="cell-3" data-index="3" role="gridcell" aria-label="Cell 4"></button>
+          <button class="cell" id="cell-4" data-index="4" role="gridcell" aria-label="Cell 5"></button>
+          <button class="cell" id="cell-5" data-index="5" role="gridcell" aria-label="Cell 6"></button>
+          <button class="cell" id="cell-6" data-index="6" role="gridcell" aria-label="Cell 7"></button>
+          <button class="cell" id="cell-7" data-index="7" role="gridcell" aria-label="Cell 8"></button>
+          <button class="cell" id="cell-8" data-index="8" role="gridcell" aria-label="Cell 9"></button>
+        </div>
+
+        <!-- Winning Strike Line Canvas/SVG Overlay -->
+        <svg id="strike-svg" class="strike-svg" aria-hidden="true">
+          <line id="strike-line" class="strike-line" x1="0" y1="0" x2="0" y2="0" />
+        </svg>
+      </div>
+    </main>
+
+    <!-- Scoreboard -->
+    <section class="scoreboard" aria-label="Scoreboard">
+      <div class="score-card card-x">
+        <span class="player-tag">PLAYER X</span>
+        <span class="score-val" id="score-x">0</span>
+      </div>
+      <div class="score-card card-ties">
+        <span class="player-tag">TIES</span>
+        <span class="score-val" id="score-ties">0</span>
+      </div>
+      <div class="score-card card-o">
+        <span class="player-tag" id="label-player-o">PLAYER O</span>
+        <span class="score-val" id="score-o">0</span>
+      </div>
+    </section>
+
+    <!-- Bottom Actions -->
+    <footer class="app-footer">
+      <button id="restart-round-btn" class="action-btn primary-btn">
+        <span class="btn-icon">🔄</span> Restart Round
+      </button>
+    </footer>
+  </div>
+
+  <!-- Victory & Draw Overlay Modal -->
+  <div id="result-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div id="modal-badge" class="modal-badge">🎉 WINNER</div>
+      <div id="modal-symbol" class="modal-symbol">✕</div>
+      <h2 id="modal-title" class="modal-title">PLAYER X WINS!</h2>
+      <p id="modal-subtitle" class="modal-subtitle">Outstanding move! Ready for the next round?</p>
+      <div class="modal-actions">
+        <button id="modal-next-round-btn" class="action-btn primary-btn pulse-glow">
+          Next Round ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level Up Celebration Modal -->
+  <div id="levelup-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="levelup-title">
+    <div class="modal-card levelup-card">
+      <div class="modal-badge">⚡ RANK UNLOCKED</div>
+      <div class="levelup-icon-wrapper">
+        <span class="levelup-icon">🏆</span>
+        <span id="levelup-number" class="levelup-number">LVL 2</span>
+      </div>
+      <h2 id="levelup-title" class="modal-title levelup-title">GRID RUNNER</h2>
+      <p id="levelup-desc" class="modal-subtitle">Incredible skill! You have ascended to a new cyber tier.</p>
+      <div class="modal-actions">
+        <button id="levelup-continue-btn" class="action-btn primary-btn pulse-glow">
+          Continue Battles ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <script src="script.js"></script>
+</body>
+</html>

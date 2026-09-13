@@ -1,0 +1,802 @@
+/* ==========================================================================
+   10 SURVIVORS OF GMN COLLEGE (ENGINEERING SQUAD)
+   Sprite Sheet Offsets, Portraits, & Character Cards
+   ========================================================================== */
+
+:root {
+  --color-aarav: #3498db;
+  --color-alex: #e67e22;
+  --color-ben: #f1c40f;
+  --color-chloe: #1abc9c;
+  --color-dev: #e74c3c;
+  --color-esha: #2ecc71;
+  --color-felix: #00cec9;
+  --color-grace: #9b59b6;
+  --color-henry: #d35400;
+  --color-tara: #fd79a8;
+}
+
+/* ==========================================================================
+   1. CIRCULAR PORTRAIT AVATARS (Headshots)
+   ========================================================================== */
+.survivor-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 2px solid #f1c40f;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 14px rgba(241, 196, 15, 0.4);
+  display: inline-block;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.survivor-avatar:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 20px #f1c40f;
+}
+
+/* Row 1 of 8: Alex, Ben, Chloe, Dev */
+.avatar-alex {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 1% 6%;
+  background-size: 750% 380%;
+  border-color: var(--color-alex);
+}
+
+.avatar-ben {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 34% 7%;
+  background-size: 750% 380%;
+  border-color: var(--color-ben);
+}
+
+.avatar-chloe {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 67% 6%;
+  background-size: 750% 380%;
+  border-color: var(--color-chloe);
+}
+
+.avatar-dev {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 99% 7%;
+  background-size: 750% 380%;
+  border-color: var(--color-dev);
+}
+
+/* Row 2 of 8: Esha, Felix, Grace, Henry */
+.avatar-esha {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 1% 57%;
+  background-size: 750% 380%;
+  border-color: var(--color-esha);
+}
+
+.avatar-felix {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 34% 57%;
+  background-size: 750% 380%;
+  border-color: var(--color-felix);
+}
+
+.avatar-grace {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 67% 57%;
+  background-size: 750% 380%;
+  border-color: var(--color-grace);
+}
+
+.avatar-henry {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 99% 57%;
+  background-size: 750% 380%;
+  border-color: var(--color-henry);
+}
+
+/* 2 New: Aarav, Tara */
+.avatar-aarav {
+  background-image: url('../assets/survivors_2.png');
+  background-position: 12% 10%;
+  background-size: 450% 220%;
+  border-color: var(--color-aarav);
+}
+
+.avatar-tara {
+  background-image: url('../assets/survivors_2.png');
+  background-position: 88% 10%;
+  background-size: 450% 220%;
+  border-color: var(--color-tara);
+}
+
+/* ==========================================================================
+   2. FULL-BODY STANDING SPRITE CARDS
+   ========================================================================== */
+.survivor-fullbody-sprite {
+  width: 100px;
+  height: 155px;
+  background-repeat: no-repeat;
+  margin: 0 auto;
+  border-radius: 8px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.8));
+  transition: transform 0.2s ease;
+}
+
+.char-alex {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 0% 12%;
+  background-size: 400% 200%;
+}
+
+.char-ben {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 33.33% 12%;
+  background-size: 400% 200%;
+}
+
+.char-chloe {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 66.66% 12%;
+  background-size: 400% 200%;
+}
+
+.char-dev {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 100% 12%;
+  background-size: 400% 200%;
+}
+
+.char-esha {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 0% 90%;
+  background-size: 400% 200%;
+}
+
+.char-felix {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 33.33% 90%;
+  background-size: 400% 200%;
+}
+
+.char-grace {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 66.66% 90%;
+  background-size: 400% 200%;
+}
+
+.char-henry {
+  background-image: url('../assets/survivors_8.png');
+  background-position: 100% 90%;
+  background-size: 400% 200%;
+}
+
+.char-aarav {
+  background-image: url('../assets/survivors_2.png');
+  background-position: 10% 20%;
+  background-size: 220% 115%;
+}
+
+.char-tara {
+  background-image: url('../assets/survivors_2.png');
+  background-position: 90% 20%;
+  background-size: 220% 115%;
+}
+
+/* ==========================================================================
+   3. SURVIVOR SELECTION GRID & CARDS UI
+   ========================================================================== */
+.survivors-selection-container {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.survivors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 8px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #f39c12 #0d121c;
+}
+
+.survivor-card {
+  background: rgba(15, 20, 30, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.survivor-card:hover {
+  transform: translateY(-3px);
+  border-color: #f1c40f;
+  background: rgba(241, 196, 15, 0.08);
+  box-shadow: 0 6px 20px rgba(241, 196, 15, 0.3);
+}
+
+.survivor-card.selected {
+  border-color: #00ff9d;
+  background: rgba(0, 255, 157, 0.12);
+  box-shadow: 0 0 25px rgba(0, 255, 157, 0.5);
+  transform: scale(1.03);
+}
+
+.survivor-card.selected::after {
+  content: '✔ SELECTED';
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background: #00ff9d;
+  color: #000;
+  font-size: 8px;
+  font-weight: 800;
+  font-family: var(--font-ui, sans-serif);
+  padding: 2px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.5px;
+}
+
+.card-name {
+  font-family: var(--font-title, 'Bebas Neue', sans-serif);
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  color: #fff;
+  margin-top: 6px;
+  line-height: 1;
+}
+
+.card-major {
+  font-family: var(--font-ui, sans-serif);
+  font-size: 9px;
+  font-weight: 700;
+  color: #f1c40f;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+.card-perk {
+  font-size: 9px;
+  color: #a4b0be;
+  margin-top: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   4. SQUAD ROSTER MODAL (LEVELS HUB)
+   ========================================================================== */
+.squad-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 4, 8, 0.94);
+  backdrop-filter: blur(12px);
+  z-index: 3000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.squad-modal-overlay.active {
+  display: flex;
+}
+
+.squad-modal-box {
+  background: #0b0f19;
+  border: 2px solid #00ff9d;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 820px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 50px rgba(0, 255, 157, 0.35);
+}
+
+.squad-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.squad-member-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 8px 12px;
+  transition: all 0.2s;
+}
+
+.squad-member-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(241, 196, 15, 0.5);
+}
+
+/* ==========================================================================
+   5. CHARACTER SELECTION SPOTLIGHT & CONFIRMATION
+   ========================================================================== */
+.survivor-spotlight-confirm {
+  background: linear-gradient(135deg, rgba(20, 25, 38, 0.95), rgba(10, 14, 22, 0.98));
+  border: 2px solid #00ff9d;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 0 25px rgba(0, 255, 157, 0.25), inset 0 0 15px rgba(0, 255, 157, 0.08);
+  animation: spotlightGlow 2.5s infinite alternate ease-in-out;
+  flex-wrap: wrap;
+}
+
+@keyframes spotlightGlow {
+  0% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); border-color: #00ff9d; }
+  100% { box-shadow: 0 0 35px rgba(0, 255, 157, 0.5), 0 0 15px rgba(241, 196, 15, 0.4); border-color: #f1c40f; }
+}
+
+.spotlight-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spotlight-left .survivor-avatar {
+  width: 62px;
+  height: 62px;
+  border-width: 3px;
+  box-shadow: 0 0 20px rgba(0, 255, 157, 0.6);
+}
+
+.spotlight-details {
+  flex: 1;
+  min-width: 180px;
+  text-align: left;
+}
+
+.spotlight-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spotlight-name {
+  font-family: var(--font-title, 'Bebas Neue', sans-serif);
+  font-size: 1.5rem;
+  color: #fff;
+  letter-spacing: 1.5px;
+  line-height: 1;
+}
+
+.spotlight-major {
+  font-family: var(--font-ui, sans-serif);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #f1c40f;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.spotlight-role-tag {
+  font-size: 9px;
+  background: rgba(0, 255, 157, 0.15);
+  border: 1px solid #00ff9d;
+  color: #00ff9d;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.spotlight-perk {
+  font-size: 11px;
+  color: #00cec9;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.spotlight-bio {
+  font-size: 9.5px;
+  color: #94a3b8;
+  line-height: 1.3;
+  margin-top: 3px;
+}
+
+.btn-spotlight-confirm {
+  background: linear-gradient(135deg, #00b894, #00cec9, #0984e3);
+  border: 2px solid #55efc4;
+  color: #fff;
+  font-family: var(--font-ui, sans-serif);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 206, 201, 0.45);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.btn-spotlight-confirm:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 30px rgba(0, 255, 157, 0.7);
+  border-color: #fff;
+}
+
+/* ==========================================================================
+   6. DEDICATED CHARACTER CONFIRMATION MODAL
+   ========================================================================== */
+.confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 4, 8, 0.95);
+  backdrop-filter: blur(14px);
+  z-index: 3500;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.confirm-modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.confirm-modal-box {
+  background: linear-gradient(160deg, #101726 0%, #080c14 100%);
+  border: 2px solid #00ff9d;
+  border-radius: 20px;
+  padding: 28px 24px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 0 60px rgba(0, 255, 157, 0.4), inset 0 0 30px rgba(0, 255, 157, 0.1);
+  transform: scale(0.92);
+  transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  position: relative;
+}
+
+.confirm-modal-overlay.active .confirm-modal-box {
+  transform: scale(1);
+}
+
+.confirm-badge-top {
+  display: inline-block;
+  font-family: var(--font-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  color: #00ff9d;
+  background: rgba(0, 255, 157, 0.12);
+  border: 1px solid rgba(0, 255, 157, 0.4);
+  padding: 4px 14px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.confirm-char-avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 3.5px solid #00ff9d;
+  box-shadow: 0 0 35px rgba(0, 255, 157, 0.6), 0 0 15px rgba(241, 196, 15, 0.5);
+  margin: 8px auto 14px auto;
+  display: block;
+  animation: avatarPulse 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes avatarPulse {
+  0% { transform: scale(1); box-shadow: 0 0 25px rgba(0, 255, 157, 0.5); }
+  100% { transform: scale(1.06); box-shadow: 0 0 45px rgba(0, 255, 157, 0.8), 0 0 25px rgba(241, 196, 15, 0.6); }
+}
+
+.confirm-char-name {
+  font-family: var(--font-horror, 'Creepster', cursive);
+  font-size: 2.8rem;
+  color: #ff3838;
+  letter-spacing: 3px;
+  line-height: 1;
+  text-shadow: 0 0 25px rgba(255, 56, 56, 0.7);
+  margin-bottom: 4px;
+}
+
+.confirm-char-branch {
+  font-family: var(--font-cinematic, 'Cinzel', serif);
+  font-size: 1.1rem;
+  color: #f1c40f;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.confirm-char-stats {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 14px 0;
+  text-align: left;
+}
+
+.confirm-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.confirm-stat-row:last-child {
+  border-bottom: none;
+}
+
+.confirm-stat-label {
+  color: #94a3b8;
+  font-weight: 600;
+  font-family: var(--font-ui, sans-serif);
+  letter-spacing: 1px;
+}
+
+.confirm-stat-value {
+  color: #fff;
+  font-weight: 700;
+}
+
+.confirm-actions-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn-confirm-final {
+  flex: 2;
+  background: linear-gradient(135deg, #00b894, #00cec9, #0984e3);
+  border: 2px solid #55efc4;
+  color: #fff;
+  font-family: var(--font-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 25px rgba(0, 255, 157, 0.5);
+  transition: all 0.25s ease;
+  text-transform: uppercase;
+}
+
+.btn-confirm-final:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 35px rgba(0, 255, 157, 0.8);
+  border-color: #fff;
+}
+
+.btn-confirm-cancel {
+  flex: 1;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #cbd5e1;
+  font-family: var(--font-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 12px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-confirm-cancel:hover {
+  border-color: #ff4757;
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.1);
+}
+
+/* ==========================================================================
+   7. IN-GAME AUTHENTIC SURVIVOR SPRITE & MODEL (FOR LEVELS 1 TO 7)
+   ========================================================================== */
+.in-game-survivor-model {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.95));
+}
+
+.in-game-survivor-model .survivor-sprite-body {
+  width: 50px;
+  height: 76px;
+  border-radius: 10px;
+  border: 2px solid #00ff9d;
+  box-shadow: 0 0 18px rgba(0, 255, 157, 0.6), inset 0 0 10px rgba(0, 255, 157, 0.2);
+  background-repeat: no-repeat;
+  transition: transform 0.12s ease;
+  background-color: rgba(10, 15, 25, 0.85);
+}
+
+.in-game-survivor-model.moving .survivor-sprite-body {
+  animation: inGameWalkBob 0.28s infinite alternate ease-in-out;
+}
+
+@keyframes inGameWalkBob {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-5px) rotate(2deg); }
+}
+
+.in-game-survivor-model .player-aura-ring {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 14px;
+  background: radial-gradient(ellipse, rgba(0, 255, 157, 0.6) 0%, transparent 75%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: auraPulse 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes auraPulse {
+  0% { opacity: 0.5; transform: translateX(-50%) scale(0.9); }
+  100% { opacity: 0.9; transform: translateX(-50%) scale(1.15); }
+}
+
+/* ==========================================================================
+   8. LEVEL 3: TWO CORRIDORS DUAL NAVIGATION & ARCHWAYS
+   ========================================================================== */
+.corridor-nav-tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(10, 8, 16, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.corridor-tab {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  font-family: var(--font-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 4px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.corridor-tab:hover {
+  border-color: #f1c40f;
+  color: #f1c40f;
+  background: rgba(241, 196, 15, 0.1);
+}
+
+.corridor-tab.active {
+  background: linear-gradient(135deg, #c0392b, #8e1a10);
+  border-color: #ff4757;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255, 71, 87, 0.6);
+}
+
+/* Doorway Archways inside Corridors */
+.corridor-archway-portal {
+  position: absolute;
+  width: 74px;
+  height: 115px;
+  border-radius: 36px 36px 0 0;
+  border: 2.5px solid #f1c40f;
+  background: radial-gradient(ellipse at center, rgba(241, 196, 15, 0.25) 0%, rgba(0, 0, 0, 0.85) 90%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 8px;
+  cursor: pointer;
+  z-index: 9;
+  box-shadow: 0 0 30px rgba(241, 196, 15, 0.5), inset 0 0 20px rgba(241, 196, 15, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: portalPulse 2s infinite alternate;
+}
+
+.corridor-archway-portal:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 45px rgba(241, 196, 15, 0.8), inset 0 0 25px rgba(241, 196, 15, 0.5);
+  border-color: #fff;
+}
+
+@keyframes portalPulse {
+  0% { box-shadow: 0 0 20px rgba(241, 196, 15, 0.4); }
+  100% { box-shadow: 0 0 40px rgba(241, 196, 15, 0.8), 0 0 20px rgba(231, 76, 60, 0.6); }
+}
+
+.archway-label {
+  font-family: var(--font-ui, sans-serif);
+  font-size: 10px;
+  font-weight: 800;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid #f1c40f;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   9. LEVEL 6: HIGH VOLTAGE CURRENT TRAP & SHOCK ARCS
+   ========================================================================== */
+.btn-current-strike-hud {
+  background: linear-gradient(135deg, #00cec9, #0984e3);
+  border: 2px solid #81ecec;
+  color: #fff;
+  font-family: var(--font-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 6px 16px;
+  border-radius: 18px;
+  cursor: pointer;
+  box-shadow: 0 0 20px #00cec9;
+  animation: shockBtnGlow 1.2s infinite alternate ease-in-out;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@keyframes shockBtnGlow {
+  0% { box-shadow: 0 0 15px #00cec9; }
+  100% { box-shadow: 0 0 35px #00cec9, 0 0 15px #fff; border-color: #fff; }
+}
+
+.electric-arc-burst {
+  position: absolute;
+  pointer-events: none;
+  font-size: 44px;
+  color: #00cec9;
+  text-shadow: 0 0 30px #00cec9, 0 0 60px #fff;
+  animation: arcBurstAnim 0.6s ease-out forwards;
+  z-index: 50;
+}
+
+@keyframes arcBurstAnim {
+  0% { transform: scale(0.6) rotate(0deg); opacity: 1; }
+  50% { transform: scale(1.4) rotate(15deg); opacity: 0.9; }
+  100% { transform: scale(1.8) rotate(-10deg); opacity: 0; }
+}
+
