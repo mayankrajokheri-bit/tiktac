@@ -1,0 +1,8 @@
+{
+  "name": "arcade-workspace",
+  "version": "1.0.0",
+  "description": "Local Arcade Games - The Apocalypse, Neon Tic Tac Toe, Subway Surfers",
+  "scripts": {
+    "start": "node reality-quest-ai/server.js"
+  }
+}
