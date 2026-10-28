@@ -1,173 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic Tac Toe — Modern Neon Edition</title>
-  <meta name="description" content="Play the ultimate Neon Tic-Tac-Toe game! Challenge a friend in 2-player mode or test your skills against the unbeatable Minimax AI with immersive visual effects and sound.">
-  <meta name="theme-color" content="#0a0b10">
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Apocalypse: GMN College — Level 1: The Locked Gate</title>
+  <meta name="description" content="Level 1: The Locked Gate at GMN College Ambala Cantt. 3 clues, 1 gate. Realistic 3D horror survival." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Creepster&family=Outfit:wght@400;500;600;700;800&family=Special+Elite&family=VT323&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <!-- Ambient background glow elements -->
-  <div class="ambient-glow glow-cyan" aria-hidden="true"></div>
-  <div class="ambient-glow glow-magenta" aria-hidden="true"></div>
-  <div class="ambient-glow glow-purple" aria-hidden="true"></div>
+  <!-- 3D Canvas Container -->
+  <div id="canvas-container"></div>
 
-  <!-- Main Game Container -->
-  <div class="app-container">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="brand">
-        <span class="badge">NEON ARCADE</span>
-        <h1 class="title">TIC <span class="accent-x">TAC</span> <span class="accent-o">TOE</span></h1>
+  <!-- Retro VHS / Camera HUD Overlay -->
+  <div id="vhs-overlay">
+    <div class="vhs-scanlines"></div>
+    <div class="vhs-vignette"></div>
+    <div class="vhs-header">
+      <div class="rec-badge"><span class="rec-dot"></span> REC</div>
+      <div class="vhs-time" id="vhs-clock">07:13:00 PM</div>
+      <div class="vhs-cam">CAM-01 [GMN MAIN GATE]</div>
+    </div>
+    <div class="vhs-footer">
+      <div class="battery-status">
+        <span class="battery-icon">⚡</span> BATTERY: <span id="battery-level">100%</span>
       </div>
+      <div class="vhs-tag">PLAY ▷ SP 0:00:23</div>
+    </div>
+  </div>
 
-      <div class="header-actions">
-        <button id="sound-btn" class="icon-btn" aria-label="Toggle Sound" title="Toggle Sound">
-          <span class="btn-icon" id="sound-icon">🔊</span>
-        </button>
-        <button id="reset-scores-btn" class="icon-btn" aria-label="Reset All Scores" title="Reset Scores">
-          <span class="btn-icon">🗑️</span>
-        </button>
+  <!-- Horror In-Game HUD -->
+  <div id="hud">
+    <!-- Active Player Identity Badge (Top Left) -->
+    <div id="player-hud-card">
+      <div class="player-hud-avatar" id="hud-avatar-frame">
+        <img id="hud-avatar-img" src="" alt="Player Avatar" class="hidden" />
+        <div id="hud-avatar-placeholder">★</div>
       </div>
-    </header>
+      <div class="player-hud-meta">
+        <div class="player-hud-name" id="hud-player-name">ALEX</div>
+        <div class="player-hud-role" id="hud-player-role">MECH ENG • SQUAD LEAD</div>
+      </div>
+    </div>
 
-    <!-- Player Level & XP Progression HUD -->
-    <section class="level-hud" aria-label="Player Level & Progression">
-      <div class="level-badge-container">
-        <span id="level-badge" class="level-badge">LVL 1</span>
-        <div class="level-meta">
-          <span id="rank-title" class="rank-title">Neon Novice</span>
-          <span id="xp-text" class="xp-text">0 / 100 XP</span>
+    <!-- Center Crosshair & Interaction Prompt -->
+    <div id="crosshair-wrapper">
+      <div id="crosshair" class="crosshair-dot"></div>
+      <div id="prompt-box" class="hidden">
+        <span class="key-hint">[E]</span>
+        <span id="prompt-text">Interact</span>
+      </div>
+    </div>
+
+    <!-- Objective Tracker -->
+    <div id="objective-panel">
+      <div class="objective-header">MISSION OBJECTIVE</div>
+      <div class="objective-title">Unlock GMN College Main Gate</div>
+      <div class="clue-list">
+        <div class="clue-item" id="clue-tracker-1">
+          <span class="clue-status">[ ? ]</span>
+          <span class="clue-name">Notice Board <em>(Left Wall)</em>: <strong class="clue-val">Not Found</strong></span>
         </div>
-        <div id="streak-badge" class="streak-badge" title="Win Streak">
-          <span class="streak-icon">🔥</span>
-          <span id="streak-count" class="streak-count">0</span>
-          <span class="streak-label">STREAK</span>
+        <div class="clue-item" id="clue-tracker-2">
+          <span class="clue-status">[ ? ]</span>
+          <span class="clue-name">Stopped Clock <em>(Right Pillar)</em>: <strong class="clue-val">Not Found</strong></span>
+        </div>
+        <div class="clue-item" id="clue-tracker-3">
+          <span class="clue-status">[ ? ]</span>
+          <span class="clue-name">Shed Locker <em>(Dark Alley)</em>: <strong class="clue-val">Not Found</strong></span>
+        </div>
+        <div class="clue-item gate-hint-item" id="clue-tracker-gate">
+          <span class="clue-status">🔒</span>
+          <span class="clue-name">Main Gate Padlock: <strong class="clue-val">Dial 13 — 7 — 3</strong></span>
         </div>
       </div>
-      <div class="xp-bar-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-        <div id="xp-bar-fill" class="xp-bar-fill" style="width: 0%"></div>
-      </div>
-    </section>
+    </div>
 
-    <!-- Controls & Mode Selector -->
-    <section class="controls-panel">
-      <div class="mode-selector" role="radiogroup" aria-label="Game Mode">
-        <button id="mode-pvp" class="mode-tab active" data-mode="pvp" role="radio" aria-checked="true">
-          <span class="tab-icon">👥</span> Pass & Play
-        </button>
-        <button id="mode-ai" class="mode-tab" data-mode="ai" role="radio" aria-checked="false">
-          <span class="tab-icon">🤖</span> vs AI
-        </button>
+    <!-- Flashlight, Camera & Danger Indicators -->
+    <div id="status-bar">
+      <div class="status-chip" id="camera-mode-chip">
+        🎥 [V] Camera: 3RD PERSON
+      </div>
+      <div class="status-chip" id="flashlight-chip">
+        <span class="chip-icon">🔦</span> [F] Flashlight: <span id="flashlight-state">ON</span>
+      </div>
+      <div class="status-chip danger hidden" id="danger-chip">
+        <span class="heartbeat-pulse">❤️</span> <span id="danger-text">DANGER: IT SEES YOU</span>
+      </div>
+    </div>
+
+    <!-- Weapon Unlocked Notification Banner -->
+    <div id="weapon-unlocked-banner" class="weapon-banner hidden">
+      <div class="weapon-banner-icon">🔫</div>
+      <div class="weapon-banner-body">
+        <div class="weapon-banner-title">ARSENAL UNLOCKED: COMBAT ASSAULT RIFLES!</div>
+        <div class="weapon-banner-sub">Tactical firearms equipped to squad. [RMB] Aim Down Sights • [LMB] Fire</div>
+      </div>
+    </div>
+
+    <!-- AI Companion Dialogue Feed -->
+    <div id="companion-dialog-feed" class="hidden"></div>
+  </div>
+
+  <!-- Character Select Screen -->
+  <div id="start-screen" class="overlay-screen">
+    <div class="character-select-container">
+      <div class="roster-header">
+        <div class="college-crest-icon">🎓</div>
+        <h1 class="main-title">GMN COLLEGE</h1>
+        <div class="motto-tag">ENGINEERING • SURVIVAL • MYSTERY</div>
+        <h2 class="select-hero-title">SELECT YOUR 3D REALISTIC SURVIVOR</h2>
+        <p class="select-hero-sub">Choose your operative. You control them with full 3D skeletal locomotion physics in 3rd person.</p>
       </div>
 
-      <!-- AI Difficulty Bar (shown when vs AI is active) -->
-      <div id="ai-difficulty-container" class="difficulty-container hidden">
-        <span class="difficulty-label">AI Level:</span>
-        <div class="difficulty-chips" role="radiogroup" aria-label="AI Difficulty">
-          <button class="diff-chip" data-diff="easy" role="radio" aria-checked="false">Easy</button>
-          <button class="diff-chip" data-diff="medium" role="radio" aria-checked="false">Medium</button>
-          <button class="diff-chip active" data-diff="hard" role="radio" aria-checked="true">Unbeatable</button>
+      <!-- Player Custom Callsign Input -->
+      <div class="hero-callsign-bar">
+        <label for="player-callsign-input" class="callsign-label">PLAYER CALLSIGN / CODENAME:</label>
+        <div class="callsign-input-wrapper">
+          <span class="callsign-icon">🎖️</span>
+          <input 
+            type="text" 
+            id="player-callsign-input" 
+            class="callsign-input" 
+            placeholder="TYPE CUSTOM NAME (OR KEEP DEFAULT)..." 
+            maxlength="16" 
+            value="LUCAS"
+            autocomplete="off"
+          />
         </div>
       </div>
-    </section>
 
-    <!-- Turn Indicator -->
-    <section class="status-section">
-      <div id="turn-badge" class="turn-badge turn-x" aria-live="polite">
-        <span class="turn-avatar x-avatar">✕</span>
-        <span id="turn-text" class="turn-text">Player X's Turn</span>
+      <!-- 10 Realistic Character Selection Grid -->
+      <div class="character-grid" id="character-grid">
+        <!-- Populated dynamically with high-res portraits and gear details -->
       </div>
-    </section>
 
-    <!-- Game Board Arena -->
-    <main class="board-arena">
-      <div class="board-wrapper">
-        <div id="board" class="board" role="grid" aria-label="Tic Tac Toe Board">
-          <button class="cell" id="cell-0" data-index="0" role="gridcell" aria-label="Cell 1"></button>
-          <button class="cell" id="cell-1" data-index="1" role="gridcell" aria-label="Cell 2"></button>
-          <button class="cell" id="cell-2" data-index="2" role="gridcell" aria-label="Cell 3"></button>
-          <button class="cell" id="cell-3" data-index="3" role="gridcell" aria-label="Cell 4"></button>
-          <button class="cell" id="cell-4" data-index="4" role="gridcell" aria-label="Cell 5"></button>
-          <button class="cell" id="cell-5" data-index="5" role="gridcell" aria-label="Cell 6"></button>
-          <button class="cell" id="cell-6" data-index="6" role="gridcell" aria-label="Cell 7"></button>
-          <button class="cell" id="cell-7" data-index="7" role="gridcell" aria-label="Cell 8"></button>
-          <button class="cell" id="cell-8" data-index="8" role="gridcell" aria-label="Cell 9"></button>
-        </div>
+      <!-- Controls Guide Bar -->
+      <div class="controls-guide">
+        <div class="control-key"><span>W A S D</span> Walk</div>
+        <div class="control-key"><span>MOUSE</span> Orbit Camera</div>
+        <div class="control-key"><span>RIGHT CLICK</span> Aim Weapon</div>
+        <div class="control-key"><span>LEFT CLICK</span> Fire / Interact</div>
+        <div class="control-key"><span>SHIFT</span> Sprint</div>
+        <div class="control-key"><span>SPACE</span> Jump</div>
+        <div class="control-key"><span>V</span> 3rd / 1st Person</div>
+        <div class="control-key"><span>E</span> Interact</div>
+        <div class="control-key"><span>F</span> Flashlight</div>
+      </div>
 
-        <!-- Winning Strike Line Canvas/SVG Overlay -->
-        <svg id="strike-svg" class="strike-svg" aria-hidden="true">
-          <line id="strike-line" class="strike-line" x1="0" y1="0" x2="0" y2="0" />
-        </svg>
-      </div>
-    </main>
-
-    <!-- Scoreboard -->
-    <section class="scoreboard" aria-label="Scoreboard">
-      <div class="score-card card-x">
-        <span class="player-tag">PLAYER X</span>
-        <span class="score-val" id="score-x">0</span>
-      </div>
-      <div class="score-card card-ties">
-        <span class="player-tag">TIES</span>
-        <span class="score-val" id="score-ties">0</span>
-      </div>
-      <div class="score-card card-o">
-        <span class="player-tag" id="label-player-o">PLAYER O</span>
-        <span class="score-val" id="score-o">0</span>
-      </div>
-    </section>
-
-    <!-- Bottom Actions -->
-    <footer class="app-footer">
-      <button id="restart-round-btn" class="action-btn primary-btn">
-        <span class="btn-icon">🔄</span> Restart Round
+      <!-- Deploy Button -->
+      <button id="start-btn" class="horror-btn deploy-btn">
+        <span class="btn-glow"></span>
+        <span class="btn-text">DEPLOY AS <span id="chosen-char-name">LUCAS</span> & ENTER CAMPUS</span>
       </button>
-    </footer>
+    </div>
   </div>
 
-  <!-- Victory & Draw Overlay Modal -->
-  <div id="result-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-card">
-      <div id="modal-badge" class="modal-badge">🎉 WINNER</div>
-      <div id="modal-symbol" class="modal-symbol">✕</div>
-      <h2 id="modal-title" class="modal-title">PLAYER X WINS!</h2>
-      <p id="modal-subtitle" class="modal-subtitle">Outstanding move! Ready for the next round?</p>
-      <div class="modal-actions">
-        <button id="modal-next-round-btn" class="action-btn primary-btn pulse-glow">
-          Next Round ➔
-        </button>
+  <!-- Clue 1: Notice Board Inspection Modal -->
+  <div id="notice-modal" class="modal-backdrop hidden">
+    <div class="modal-card board-card">
+      <div class="modal-header">
+        <h3>OLD COLLEGE NOTICE BOARD</h3>
+        <button class="close-modal-btn" data-close="notice-modal">✕</button>
+      </div>
+      <div class="notice-board-surface">
+        <div class="notice-paper memo-old">
+          <div class="stamp-urgent">URGENT</div>
+          <h4>OFFICIAL NOTICE — EMERGENCY PROTOCOL</h4>
+          <p class="college-dept">GMN COLLEGE AMBALA CANTT • SECURITY WING</p>
+          <hr class="paper-divider" />
+          <p>
+            All staff, professors, and students are ordered to evacuate the premises immediately due to unforeseen catastrophic breach in the inner sector.
+          </p>
+          <div class="memo-highlight">
+            “The campus power failed instantly. The last bell rang at 
+            <span class="blood-circled">7:13 PM</span> before the silence fell.”
+          </div>
+          <p class="warning-handwritten">
+            The gate cannot be forced open. Keep track of the minutes.
+          </p>
+          <div class="memo-footer">
+            <span class="memo-seal">SECRETARY OF SAFETY</span>
+            <span class="memo-date">OCTOBER 31</span>
+          </div>
+        </div>
+        <div class="notice-paper torn-newspaper">
+          <h5>AMBALA HERALD</h5>
+          <p>“Unnatural dark shadows reported near GMN College perimeter. Officials deny occult rumors...”</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="clue-found-banner" id="clue-1-banner">
+          🔎 <strong>CLUE 1 DISCOVERED:</strong> “13” (The Last Bell Minutes)
+        </div>
+        <button class="action-btn" data-close="notice-modal">Close & Remember [ESC]</button>
       </div>
     </div>
   </div>
 
-  <!-- Level Up Celebration Modal -->
-  <div id="levelup-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="levelup-title">
-    <div class="modal-card levelup-card">
-      <div class="modal-badge">⚡ RANK UNLOCKED</div>
-      <div class="levelup-icon-wrapper">
-        <span class="levelup-icon">🏆</span>
-        <span id="levelup-number" class="levelup-number">LVL 2</span>
+  <!-- Clue 2: Blood-Stained Clock Inspection Modal -->
+  <div id="clock-modal" class="modal-backdrop hidden">
+    <div class="modal-card clock-card">
+      <div class="modal-header">
+        <h3>BLOOD-STAINED WALL CLOCK</h3>
+        <button class="close-modal-btn" data-close="clock-modal">✕</button>
       </div>
-      <h2 id="levelup-title" class="modal-title levelup-title">GRID RUNNER</h2>
-      <p id="levelup-desc" class="modal-subtitle">Incredible skill! You have ascended to a new cyber tier.</p>
-      <div class="modal-actions">
-        <button id="levelup-continue-btn" class="action-btn primary-btn pulse-glow">
-          Continue Battles ➔
-        </button>
+      <div class="clock-display-area">
+        <div class="clock-face-wrapper">
+          <div class="vintage-clock">
+            <div class="clock-blood-stain"></div>
+            <div class="clock-center-pin"></div>
+            <div class="clock-hand hour-hand" style="transform: rotate(216.5deg);"></div>
+            <div class="clock-hand minute-hand" style="transform: rotate(78deg);"></div>
+            <div class="clock-number num-12">XII</div>
+            <div class="clock-number num-3">III</div>
+            <div class="clock-number num-6">VI</div>
+            <div class="clock-number num-7 blood-digit">VII</div>
+            <div class="clock-number num-9">IX</div>
+            <div class="glass-crack"></div>
+          </div>
+        </div>
+        <div class="clock-riddle">
+          <div class="riddle-title">SCRIBED IN DRIED BLOOD ON CASING:</div>
+          <div class="riddle-quote">“What stopped here must be remembered. Time froze when the entity struck.”</div>
+          <p class="riddle-hint">
+            The clock hands are permanently stopped at <strong>7:13</strong>. The scratched arrow points towards the hour position.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="clue-found-banner" id="clue-2-banner">
+          🕯️ <strong>CLUE 2 DISCOVERED:</strong> “7” (The Frozen Hour)
+        </div>
+        <button class="action-btn" data-close="clock-modal">Close & Remember [ESC]</button>
       </div>
     </div>
   </div>
 
-  <!-- Confetti Canvas -->
-  <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+  <!-- Clue 3: The Shadow & Locker Inspection Modal -->
+  <div id="shadow-modal" class="modal-backdrop hidden">
+    <div class="modal-card locker-card">
+      <div class="modal-header">
+        <h3>THE INNER CORRIDOR LOCKER</h3>
+        <button class="close-modal-btn" data-close="shadow-modal">✕</button>
+      </div>
+      <div class="locker-display-area">
+        <div class="shadow-figure-glimpse">
+          <div class="creepy-eyes-glow"></div>
+        </div>
+        <div class="locker-door">
+          <div class="locker-vents">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="locker-scratch-text">
+            “Only those who remember the beginning may enter.”
+          </div>
+          <div class="locker-carving">
+            <div class="gmn-initials">G • M • N</div>
+            <div class="carved-number">3</div>
+            <div class="carving-subtitle">“3 sacred initials. 3 souls claimed in the beginning.”</div>
+          </div>
+          <div class="blood-runes">॥ भय ॥ अंत ॥ मृत्यु ॥</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="clue-found-banner" id="clue-3-banner">
+          👻 <strong>CLUE 3 DISCOVERED:</strong> “3” (The Beginning / The Triad)
+        </div>
+        <button class="action-btn" data-close="shadow-modal">Close & Remember [ESC]</button>
+      </div>
+    </div>
+  </div>
 
-  <script src="script.js"></script>
+  <!-- Final Gate Puzzle Padlock Modal -->
+  <div id="padlock-modal" class="modal-backdrop hidden">
+    <div class="modal-card lock-card">
+      <div class="modal-header">
+        <h3>GMN COLLEGE ENTRANCE GATE PADLOCK</h3>
+        <button class="close-modal-btn" data-close="padlock-modal">✕</button>
+      </div>
+      <div class="padlock-assembly">
+        <div class="shackle"></div>
+        <div class="lock-body">
+          <div class="lock-brand">GMN SECURITY LOCK</div>
+          <div class="lock-instruction">ENTER 3-PART COMBINATION CODE</div>
+
+          <div class="tumbler-container">
+            <!-- Tumbler 1 -->
+            <div class="tumbler-col">
+              <span class="tumbler-label">CLUE 1</span>
+              <button class="dial-btn up" data-tumbler="1" data-dir="1">▲</button>
+              <div class="dial-display" id="dial-1">00</div>
+              <button class="dial-btn down" data-tumbler="1" data-dir="-1">▼</button>
+            </div>
+
+            <div class="dial-separator">—</div>
+
+            <!-- Tumbler 2 -->
+            <div class="tumbler-col">
+              <span class="tumbler-label">CLUE 2</span>
+              <button class="dial-btn up" data-tumbler="2" data-dir="1">▲</button>
+              <div class="dial-display" id="dial-2">0</div>
+              <button class="dial-btn down" data-tumbler="2" data-dir="-1">▼</button>
+            </div>
+
+            <div class="dial-separator">—</div>
+
+            <!-- Tumbler 3 -->
+            <div class="tumbler-col">
+              <span class="tumbler-label">CLUE 3</span>
+              <button class="dial-btn up" data-tumbler="3" data-dir="1">▲</button>
+              <div class="dial-display" id="dial-3">0</div>
+              <button class="dial-btn down" data-tumbler="3" data-dir="-1">▼</button>
+            </div>
+          </div>
+
+          <div class="lock-clue-notes">
+            <div id="note-1">Notice: [ ? ]</div>
+            <div id="note-2">Clock: [ ? ]</div>
+            <div id="note-3">Entity: [ ? ]</div>
+          </div>
+
+          <div class="lock-actions">
+            <button id="try-unlock-btn" class="horror-btn unlock-btn">
+              <span class="btn-text">PULL SHACKLE [UNLOCK]</span>
+            </button>
+          </div>
+          <div id="lock-feedback" class="lock-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Jumpscare Screamer Overlay -->
+  <div id="jumpscare-overlay" class="hidden">
+    <div class="strobe-flash"></div>
+    <div class="screamer-image"></div>
+    <div class="blood-screen-splatter"></div>
+  </div>
+
+  <!-- Cinematic Ending Screen -->
+  <div id="ending-screen" class="hidden">
+    <div class="cinema-container">
+      <div class="fade-quote-line" id="quote-line-1">“Welcome to GMN College.”</div>
+      <div class="fade-quote-line" id="quote-line-2">“You came looking for answers…”</div>
+      <div class="fade-quote-line" id="quote-line-3">“…but the college remembers everyone who enters.”</div>
+
+      <div class="lore-summary hidden" id="lore-summary">
+        <div class="level-complete-badge">GATE UNLOCKED • LEVEL 1 COMPLETED</div>
+        <h2 class="apocalypse-heading">THE APOCALYPSE HAS BEGUN</h2>
+        <p class="lore-paragraph">
+          The heavy rusted iron chains slide off with a hollow clatter. As the mist surges out from the quadrangle,
+          you step into the desolate courtyard of <strong>GMN College Ambala Cantt</strong>.
+          The shadows shift along the classroom windows. The screams from October 31st still echo in the empty corridors.
+        </p>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-num">3 / 3</div>
+            <div class="stat-lbl">Clues Discovered</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">13 — 7 — 3</div>
+            <div class="stat-lbl">Gate Combination</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">SURVIVED</div>
+            <div class="stat-lbl">Gate Breach</div>
+          </div>
+        </div>
+        <div class="next-level-teaser">
+          <h3>CHAPTER 2: THE DESERTED CORRIDORS</h3>
+          <p>“Locate the Principal's emergency locker before the shadows converge.”</p>
+        </div>
+        <div class="end-buttons">
+          <button id="replay-btn" class="horror-btn">
+            <span class="btn-text">REPLAY LEVEL 1</span>
+          </button>
+          <button id="explore-btn" class="action-btn">
+            <span>EXPLORE OPEN GROUNDS IN 3D</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
 </body>
 </html>
